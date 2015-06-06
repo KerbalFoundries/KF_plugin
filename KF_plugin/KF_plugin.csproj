@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C97D02EA-B1D2-4563-A821-4B88F50A19F9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>KF_plugin</RootNamespace>
+    <AssemblyName>KF_plugin</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\..\..\..\KSP_win\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\..\..\..\KSP_win\KSP_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\..\..\..\KSP_win\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="APUController.cs" />
+    <Compile Include="ArmMagnet.cs" />
+    <Compile Include="DozerBlade.cs" />
+    <Compile Include="DustFX\BiomeDustColorInfo.cs" />
+    <Compile Include="DustFX\DustColorDefinitions.cs" />
+    <Compile Include="DustFX\DustColorFileWriter.cs" />
+    <Compile Include="DustFX\DustFX.cs" />
+    <Compile Include="DustFX\DustFXController.cs" />
+    <Compile Include="DustFX\RepulsorDustFX.cs" />
+    <Compile Include="GoldenShower.cs" />
+    <Compile Include="HeavyCrawler.cs" />
+    <Compile Include="KEMeccanumWheel.cs" />
+    <Compile Include="KFCouplingEye.cs" />
+    <Compile Include="KFCouplingHitch.cs" />
+    <Compile Include="KFLogUtils.cs" />
+    <Compile Include="KFLookAt.cs" />
+    <Compile Include="KFModuleMirror.cs" />
+    <Compile Include="KFModuleWheel.cs" />
+    <Compile Include="KFRepulsor.cs" />
+    <Compile Include="KFRepulsorLook.cs" />
+    <Compile Include="KFSteering.cs" />
+    <Compile Include="KFTrackSurface.cs" />
+    <Compile Include="KFWheel.cs" />
+    <Compile Include="ModulePropeller.cs" />
+    <Compile Include="ObjectDestroy.cs" />
+    <Compile Include="OrientationMarker.cs" />
+    <Compile Include="OverrideWheelCollider.cs" />
+    <Compile Include="PartMirror.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repulsor.cs" />
+    <Compile Include="RepulsorTest.cs" />
+    <Compile Include="RepulsorWheel.cs" />
+    <Compile Include="RockSpawner.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="Version.cs" />
+    <Compile Include="VesselTools.cs" />
+    <Compile Include="WheelUtils.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
