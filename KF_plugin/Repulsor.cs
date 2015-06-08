@@ -66,7 +66,7 @@ namespace KerbalFoundries
         public override void OnStart(PartModule.StartState start)  //when started
         {
             // degub only: print("onstart");
-			base.OnStart(state);
+			base.OnStart(start); 
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
 
             //this.part.AddModule("ModuleWaterSlider");
@@ -98,13 +98,13 @@ namespace KerbalFoundries
                 {
                     _MWS = mws;
                 }
-<<<<<<< HEAD
+
                 //print("water slider height is" + _MWS.colliderHeight);
 
                 _grid = transform.Search(gridName);
-=======
+
 				//print(string.Format("Water slider height is{0}", _MWS.colliderHeight));
->>>>>>> origin/master
+
             }
             DestroyBounds();
             effectPowerMax = 1 * repulsorCount * chargeConsumptionRate * Time.deltaTime;
