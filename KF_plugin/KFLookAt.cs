@@ -98,10 +98,6 @@ namespace KerbalFoundries
             }
         }
 
-        public void Update()
-        {
-            base.OnUpdate();
-        }
     }
 }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 
@@ -82,14 +83,28 @@ namespace KerbalFoundries
 		/// <summary>How fast to consume ElectricCharge.</summary>
         [KSPField]
 		public float chargeConsumptionRate = 1f;
+
+        /// <summary>Enables retraction of the suspension</summary>
         [KSPField]
         public bool hasRetract = false;
+
+        /// <summary>DOes the part has an animation to be triggered when retracting</summary>
         [KSPField]
         public bool hasRetractAnimation = false;
+
+        /// <summary>Name of the Bounds object</summary>
         [KSPField]
         public string boundsName = "Bounds";
+
+        /// <summary>Name of the Bounds object</summary>
+        [KSPField]
+        public string orientationObjectName = "Default";
+
+        /// <summary>I'm not sure</summary>
         [KSPField]
         public bool passivePart = false;
+
+        /// <summary>Used for parts which use the module for passive functions</summary>
         [KSPField]
         public bool disableTweakables = false;
 
@@ -119,20 +134,31 @@ namespace KerbalFoundries
         int groundedWheels = 0; 
         float effectPower;
         float trackRPM = 0;
+        float lastPartCount;
 
 		// Stuff deliberately made available to other modules:
         public float steeringAngle;
         public float steeringAngleSmoothed;
         public float appliedRideHeight;
         public int wheelCount;
-        [KSPField(isPersistant = false, guiActive = true, guiName = "RPM", guiFormat = "F1")]
-        public float averageTrackRPM;
+        
         public int directionCorrector = 1;
         public int steeringCorrector = 1;
         public float steeringRatio;
         public float degreesPerTick;
         public float currentRideHeight;
         public float smoothedRideHeight;
+
+        //Visible fields
+        [KSPField(isPersistant = false, guiActive = true, guiName = "Vessel Mass", guiFormat = "F1")]
+        public float vesselMass;
+        [KSPField(isPersistant = false, guiActive = true, guiName = "RPM", guiFormat = "F1")]
+        public float averageTrackRPM;
+        [KSPField(isPersistant = false, guiActive = true, guiName = "Colliders", guiFormat = "F0")]
+        public int _colliderCount = 0;
+        [KSPField(isPersistant = false, guiActive = true, guiName = "Collider Mass", guiFormat = "F2")]
+        public float _colliderMass = 0;
+
 
         public List<WheelCollider> wcList = new List<WheelCollider>();
         public ModuleAnimateGeneric retractionAnimation;
@@ -146,9 +172,32 @@ namespace KerbalFoundries
 			return strInfo;
 		}
 		
-		public override void OnStart(PartModule.StartState state)  //when started
+		public override void OnStart(PartModule.StartState state)  //when started 
         {
 			base.OnStart(state);
+
+            _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
+            StartCoroutine(StartupStuff());
+
+            Vector3 partOrientationForward = new Vector3(0,0,0);
+            Vector3 partOrientationRight = new Vector3(0, 0, 0);
+            Vector3 partOrientationUp = new Vector3(0, 0, 0);
+
+            if (!string.Equals(orientationObjectName, "Default"))
+            {
+                Debug.LogWarning("Default part orientation");
+                partOrientationUp = transform.Search(orientationObjectName).up;
+                partOrientationForward = transform.Search(orientationObjectName).forward;
+                partOrientationRight = transform.Search(orientationObjectName).right;
+            }
+            else
+            {
+                Debug.LogWarning("Transformed part orientation");
+                partOrientationUp = this.part.transform.up;
+                partOrientationForward = this.part.transform.forward;
+                partOrientationRight = this.part.transform.right;
+            }
+
             if (hasRetractAnimation)
             {
                 foreach (ModuleAnimateGeneric ma in this.part.FindModulesImplementing<ModuleAnimateGeneric>())
@@ -211,15 +260,16 @@ namespace KerbalFoundries
 
             if (HighLogic.LoadedSceneIsFlight)
             {
+                
                 maxRPM /= tweakScaleCorrector;
                 startRetracted = false;
                 if (!hasRetract)
                     Extensions.DisableAnimateButton(this.part);
 
 				// Wheel steering ratio setup
-                rootIndexLong = WheelUtils.GetRefAxis(this.part.transform.forward, this.vessel.rootPart.transform); //Find the root part axis which matches each wheel axis.
-                rootIndexLat = WheelUtils.GetRefAxis(this.part.transform.right, this.vessel.rootPart.transform);
-                rootIndexUp = WheelUtils.GetRefAxis(this.part.transform.up, this.vessel.rootPart.transform);
+                rootIndexLong = WheelUtils.GetRefAxis(partOrientationForward, this.vessel.rootPart.transform); //Find the root part axis which matches each wheel axis.
+                rootIndexLat = WheelUtils.GetRefAxis(partOrientationRight, this.vessel.rootPart.transform);
+                rootIndexUp = WheelUtils.GetRefAxis(partOrientationUp, this.vessel.rootPart.transform);
 
                 steeringRatio = WheelUtils.SetupRatios(rootIndexLong, this.part, this.vessel, groupNumber); //use the axis which corresponds to the forward axis of the wheel.
 				GetControlAxis();
@@ -258,8 +308,21 @@ namespace KerbalFoundries
             part.Effect("WheelEffect", effectPower);
         }
 
+        /// <summary>Stuff that needs to wait for the first physics frame. Maybe because this ensure the vessel is totally spawnedor physics is active</summary>
+        IEnumerator StartupStuff()
+        {
+            yield return new WaitForFixedUpdate();
+            lastPartCount = this.vessel.Parts.Count();
+            print("Part Count " + lastPartCount);
+
+            print("Checking vessel mass");
+            _colliderMass = ChangeColliderMass();
+        }
+
+
         public override void OnFixedUpdate()
         {
+            vesselMass = this.vessel.GetTotalMass();
 			// User input
             float electricCharge;
             float unitLoad = 0;
@@ -287,29 +350,39 @@ namespace KerbalFoundries
     
             if (!isRetracted)
             {
+                
+
+                if (this.vessel.Parts.Count() != lastPartCount)
+                {
+                    print("vessel mass changed");
+                    _colliderMass = ChangeColliderMass();
+                    lastPartCount = this.vessel.Parts.Count();
+                    ApplySteeringSettings();
+                }
+
                 motorTorque = (forwardTorque * directionCorrector * this.vessel.ctrlState.wheelThrottle) - (steeringTorque * this.vessel.ctrlState.wheelSteer); //forward and low speed steering torque. Direction controlled by precalulated directioncorrector
                 brakeSteeringTorque = Mathf.Clamp(brakeSteering * this.vessel.ctrlState.wheelSteer, 0, 1000); //if the calculated value is negative, disregard: Only brake on inside track. no need to direction correct as we are using the velocity or the part not the vessel.
-                //chargeRequest = Math.Abs(motorTorque * 0.0005f); //calculate the requested charge
-                
+
                 float chargeConsumption = Time.deltaTime * chargeConsumptionRate * (Math.Abs(motorTorque) / 100);
-                //print(chargeConsumption);
                 electricCharge = part.RequestResource("ElectricCharge", chargeConsumption);
                 float freeWheelRPM = 0;
+
+                if (!Equals(electricCharge, chargeConsumption))
+                {
+                    motorTorque = 0;
+                    status = "Low Charge";
+                }
+                else if (Math.Abs(averageTrackRPM) >= maxRPM)
+                {
+                    motorTorque = 0;
+                    status = "Rev Limit";
+                }
+                else
+                    status = "Nominal";
+
 				for (int i = 0; i < wcList.Count(); i++)
                 {
-					if (!Equals(electricCharge, chargeConsumption))
-                    { 
-                        motorTorque = 0;
-                        status = "Low Charge";
-                    }
-                    else if (Math.Abs(averageTrackRPM) >= maxRPM)
-                    {
-                        motorTorque = 0;
-                        status = "Rev Limit";
-                    }
-                    else
-                        status = "Nominal";
-
+				
                     WheelHit hit;
                     bool grounded = wcList[i].GetGroundHit(out hit); //set up to pass out wheelhit coordinates 
                     unitLoad += hit.force;
@@ -321,6 +394,7 @@ namespace KerbalFoundries
 
                     wcList[i].motorTorque = motorTorque;
                     wcList[i].brakeTorque = brakeTorque + brakeSteeringTorque + rollingFriction;
+                    wcList[i].mass = _colliderMass;
 
                     if (wcList[i].isGrounded) //only count wheels in contact with the floor. Others will be freewheeling and will wreck the calculation. 
                     {
@@ -359,7 +433,7 @@ namespace KerbalFoundries
             smoothedRideHeight = Mathf.Lerp(smoothedRideHeight, currentRideHeight, Time.deltaTime * 2);
             appliedRideHeight = smoothedRideHeight / 100;
             steeringAngleSmoothed = Mathf.Lerp(steeringAngleSmoothed, steeringAngle, Time.deltaTime * smoothSpeed);
-            //print(smoothedRideHeight); //debugging
+            
 		}
 		//End OnFixedUpdate
 
@@ -377,6 +451,44 @@ namespace KerbalFoundries
             WheelSound();
 		}
 		//end OnUpdate
+
+        [KSPEvent(guiActive = true, guiName = "Find Modules", active = true)]
+        public void ChangeColliderMassAction()
+        {
+            ChangeColliderMass();
+        }
+
+        public float ChangeColliderMass()
+        {
+            int colliderCount = 0;
+            int partCount = this.vessel.parts.Count();
+            var KFMWList = new List<KFModuleWheel>();
+
+            for (int i = 0; i < partCount; i++)
+            {
+                var KFMW = this.vessel.parts[i].GetComponent<KFModuleWheel>();
+                if (KFMW)
+                {
+                    KFMWList.Add(KFMW);
+                    print("found KFModuleWheel in " + this.vessel.parts[i].partInfo.name);
+                    
+                    colliderCount += KFMW.wcList.Count();
+                }
+            }
+            float colliderMass = this.vessel.GetTotalMass() / colliderCount;
+            print(colliderMass);
+
+            /// set all this up in the other wheels to prevent them having to do so themselves. First part has the honour.
+            for (int i = 0; i < KFMWList.Count(); i++)
+            {
+                    print("setting collidermass in other wheel " + this.vessel.parts[i].partInfo.name);
+
+                    KFMWList[i]._colliderMass = colliderMass;
+                    KFMWList[i].lastPartCount = partCount; //this should mean that the method does not get triggered for subsequent wheels.
+            }
+            
+            return colliderMass;
+        }
 
         public void UpdateColliders(string mode)
         {
