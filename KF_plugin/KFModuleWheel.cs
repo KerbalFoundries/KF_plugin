@@ -177,7 +177,7 @@ namespace KerbalFoundries
 			base.OnStart(state);
 
             _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
-            StartCoroutine(StartupStuff());
+            
 
             Vector3 partOrientationForward = new Vector3(0,0,0);
             Vector3 partOrientationRight = new Vector3(0, 0, 0);
@@ -260,7 +260,7 @@ namespace KerbalFoundries
 
             if (HighLogic.LoadedSceneIsFlight)
             {
-                
+                StartCoroutine(StartupStuff());
                 maxRPM /= tweakScaleCorrector;
                 startRetracted = false;
                 if (!hasRetract)
