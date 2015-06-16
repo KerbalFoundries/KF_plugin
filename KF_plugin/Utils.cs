@@ -38,6 +38,8 @@ namespace KerbalFoundries
         }
         //tr.name.StartsWith(rotatorsName, StringComparison.Ordinal
 
+		/// <summary>Gets a battery.  Names it "Jennifer" and gives it a good home.</summary>
+		/// <remarks>My father once played a game where he had to choose a mascot.  He grabbed a dead battery and named it "Jennifer" and the story never gets old. - Gaalidas</remarks>
         public static float GetBattery(Part part)
         {
             PartResourceDefinition resourceDefinitions = PartResourceLibrary.Instance.GetDefinition("ElectricCharge");
@@ -48,6 +50,7 @@ namespace KerbalFoundries
             return ratio;
         }
 
+		/// <summary>Converts the textual axis to an integer index.</summary>
         public static int SetAxisIndex(string axisString)
         {
 			int index = 1; // Default to Y
@@ -72,7 +75,7 @@ namespace KerbalFoundries
             return index;
         }
 
-		// I had to rename "parta" to "thePart" so it wouldn't look so much like a typo.
+		// I had to rename "parta" to "thePart" so it wouldn't look so much like a typo.  I always had issues when looking over it before. - Gaalidas
 		public static void PlaySound(Part thePart, string effectName, float effectPower)
         {
 			thePart.Effect(effectName, effectPower);
@@ -104,12 +107,9 @@ namespace KerbalFoundries
             }
         }
 
-
         public static string GetLast(this string source, int tail_length)
         {
 			return tail_length >= source.Length ? source : source.Substring(source.Length - tail_length);
         }
-
-
     }
 }

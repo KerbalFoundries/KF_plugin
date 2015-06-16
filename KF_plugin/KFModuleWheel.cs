@@ -84,19 +84,19 @@ namespace KerbalFoundries
         [KSPField]
 		public float chargeConsumptionRate = 1f;
 
-        /// <summary>Enables retraction of the suspension</summary>
+        /// <summary>Enables retraction of the suspension.</summary>
         [KSPField]
         public bool hasRetract = false;
 
-        /// <summary>DOes the part has an animation to be triggered when retracting</summary>
+        /// <summary>Does the part have an animation to be triggered when retracting.</summary>
         [KSPField]
         public bool hasRetractAnimation = false;
 
-        /// <summary>Name of the Bounds object</summary>
+        /// <summary>Name of the Bounds object.</summary>
         [KSPField]
         public string boundsName = "Bounds";
 
-        /// <summary>Name of the Bounds object</summary>
+        /// <summary>Name of the orientation object.</summary>
         [KSPField]
         public string orientationObjectName = "Default";
 
@@ -104,7 +104,7 @@ namespace KerbalFoundries
         [KSPField]
         public bool passivePart = false;
 
-        /// <summary>Used for parts which use the module for passive functions</summary>
+        /// <summary>Used for parts which use the module for passive functions.</summary>
         [KSPField]
         public bool disableTweakables = false;
 
@@ -172,7 +172,7 @@ namespace KerbalFoundries
 			return strInfo;
 		}
 		
-		public override void OnStart(PartModule.StartState state)  //when started 
+		public override void OnStart(PartModule.StartState state)  //when started
         {
 			base.OnStart(state);
 
@@ -267,9 +267,9 @@ namespace KerbalFoundries
                     Extensions.DisableAnimateButton(this.part);
 
 				// Wheel steering ratio setup
-                rootIndexLong = WheelUtils.GetRefAxis(partOrientationForward, this.vessel.rootPart.transform); //Find the root part axis which matches each wheel axis.
-                rootIndexLat = WheelUtils.GetRefAxis(partOrientationRight, this.vessel.rootPart.transform);
-                rootIndexUp = WheelUtils.GetRefAxis(partOrientationUp, this.vessel.rootPart.transform);
+                rootIndexLong = WheelUtils.GetRefAxis(this.part.transform.forward, this.vessel.rootPart.transform); //Find the root part axis which matches each wheel axis.
+                rootIndexLat = WheelUtils.GetRefAxis(this.part.transform.right, this.vessel.rootPart.transform);
+                rootIndexUp = WheelUtils.GetRefAxis(this.part.transform.up, this.vessel.rootPart.transform);
 
                 steeringRatio = WheelUtils.SetupRatios(rootIndexLong, this.part, this.vessel, groupNumber); //use the axis which corresponds to the forward axis of the wheel.
 				GetControlAxis();

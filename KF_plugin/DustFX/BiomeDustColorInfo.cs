@@ -24,20 +24,20 @@ namespace KerbalFoundries
         
 		/// <summary>Persistent biome color list.</summary>
 		[Persistent]
-		public List<KFBiomeDustColorInfo> BiomeColors = new List<KFBiomeDustColorInfo> ();
+		public List<KFBiomeDustColorInfo> BiomeColors = new List<KFBiomeDustColorInfo>();
 		
 		/// <summary>Dictionary containing all of our color configurations.</summary>
-		Dictionary<string, Color> _colorDictionary = new Dictionary<string, Color> ();
+		Dictionary<string, Color> _colorDictionary = new Dictionary<string, Color>();
  		
 		/// <summary>Persistence loader for our color configurations.</summary>
-		public void PersistenceLoad ()
+		public void PersistenceLoad()
 		{
 			_colorDictionary = BiomeColors.ToDictionary(ci => ci.Name, ci => ci.Color);
 		}
 		
 		/// <summary>The function called by other classes which need to discover the color pertaining to their discovered body or biome.</summary>
 		/// <param name="name">Name of the location we are attempting to compare with the configs.</param>
-		public Color GetDustColor ( string name )
+		public Color GetDustColor(string name)
 		{
 			Color color;
 			return _colorDictionary.TryGetValue(name, out color) ? color : DefaultColor;

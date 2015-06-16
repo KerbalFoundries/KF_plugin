@@ -13,7 +13,6 @@ namespace KerbalFoundries
 {
     public class Repulsor : PartModule
     {
-
         public JointSpring userspring;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Repulsor Settings")]
 		public string settings = string.Empty; //Not used anywhere, it seems. - Gaalidas

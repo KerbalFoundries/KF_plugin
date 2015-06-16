@@ -18,24 +18,23 @@
 using System;
 using UnityEngine;
 using KerbalFoundries;
-using System.Collections.Generic; 
 
 namespace KerbalFoundries
 {
 	/// <summary>DustFX class which is based on, but heavily modified from, CollisionFX by pizzaoverload.</summary>
 	public class KFDustFX : PartModule
 	{
+		// Class-wide disabled warnings in SharpDevelop
+		// disable AccessToStaticMemberViaDerivedType
+		// disable RedundantDefaultFieldInitializer
+		
 		/// <summary>Local definition of the KFModuleWheel class.</summary>
 		KFModuleWheel _KFModuleWheel;
 		
 		/// <summary>Local copy of the tweakScaleCorrector parameter in the KFModuleWheel module.</summary>
-		private float TSWheelCorrector;
-
-        private int colCount;
-		
-		// Class-wide disabled warnings in SharpDevelop
-		// disable AccessToStaticMemberViaDerivedType
-		// disable RedundantDefaultFieldInitializer
+		public float tweakScaleCorrector;
+		/// <summary>An integer count of the colliders present on the current part.</summary>
+		int colCount;
 		
 		/// <summary>Mostly unnecessary, since there is no other purpose to having the module active.</summary>
 		/// <remarks>Default is "true"</remarks>
@@ -48,34 +47,49 @@ namespace KerbalFoundries
 		public bool wheelImpact;
 		
 		/// <summary>Minimum scrape speed.</summary>
-		/// <remarks>Default is 1.  Repulsors should have this extremely low.</remarks>
+		/// <remarks>Default is 0.5.  Repulsors should have this extremely low.</remarks>
 		[KSPField]
-		public float minScrapeSpeed = 1f;
+		public float minScrapeSpeed = 0.5f;
 		
 		/// <summary>Minimum dust energy value.</summary>
-		/// <remarks>Default is 0</remarks>
+		/// <remarks>Default is 0.1.  Represents the minimum thickness of the particles.</remarks>
 		[KSPField]
-		public float minDustEnergy = 0f;
+		public float minDustEnergy = 0.1f;
+		
+		/// <summary>Minimum dust energy value.</summary>
+		/// <remarks>Default is 1.  Represents the maximum thickness of the particles.</remarks>
+		[KSPField]
+		public float maxDustEnergy = 1f;
 		
 		/// <summary>Minimum emission value of the dust particles.</summary>
-		/// <remarks>Default is 0</remarks>
+		/// <remarks>Default is 0.1.  This is the number of particles to emit per second.</remarks>
 		[KSPField]
-		public float minDustEmission = 0f;
-		
-		/// <summary>Maximum emission energy divisor.</summary>
-		/// <remarks>Default is 10</remarks>
-		[KSPField]
-		public float maxDustEnergyDiv = 10f;
-		
-		/// <summary>Maximum emission multiplier.</summary>
-		/// <remarks>Default is 2</remarks>
-		[KSPField]
-		public float maxDustEmissionMult = 2f;
+		public float minDustEmission = 0.1f;
 		
 		/// <summary>Maximum emission value of the dust particles.</summary>
-		/// <remarks>Default is 35</remarks>
+		/// <remarks>Default is 20.  This is the number of particles to emit per second.</remarks>
 		[KSPField]
-		public float maxDustEmission = 35f;
+		public float maxDustEmission = 20f;
+		
+		/// <summary>Minimum size value of the dust particles.</summary>
+		/// <remarks>Default is 0.1.  Represents the size of the particles themselves.</remarks>
+		[KSPField]
+		public float minDustSize = 0.1f;
+		
+		/// <summary>Maximum size value of the dust particles.</summary>
+		/// <remarks>Default is 2.  Represents the size of the particles themselves.</remarks>
+		[KSPField]
+		public float maxDustSize = 2f;
+		
+		/// <summary>Maximum emission energy divisor.</summary>
+		/// <remarks>Default is 2.  Divides the thickness by the value provided.</remarks>
+		[KSPField]
+		public float maxDustEnergyDiv = 2f;
+		
+		/// <summary>Maximum emission multiplier.</summary>
+		/// <remarks>Default is 2.  Multiplies the </remarks>
+		[KSPField]
+		public float maxDustEmissionMult = 2f;
 		
 		/// <summary>Path to the sound file that is to be used for impacts.</summary>
 		/// <remarks>Default is Empty.</remarks>
@@ -83,9 +97,9 @@ namespace KerbalFoundries
 		public string wheelImpactSound = string.Empty;
 		
 		/// <summary>Used in the OnCollisionEnter/Stay methods to define the minimum velocity magnitude to check against.</summary>
-		/// <remarks>Default is 3.  Would set very low for repulsors.</remarks>
+		/// <remarks>Default is 2.  Would set very low for repulsors.</remarks>
 		[KSPField]
-		public float minVelocityMag = 3f;
+		public float minVelocityMag = 2f;
 		
 		/// <summary>Pitch-range that is used to vary the sound pitch.</summary>
 		/// <remarks>Default is 0.3</remarks>
@@ -113,7 +127,7 @@ namespace KerbalFoundries
 		/// <summary>Prefix the logs with this to identify it.</summary>
 		public string logprefix = "[DustFX - Main]: ";
 		
-		bool paused;
+		bool isPaused;
 		GameObject kfdustFx;
 		ParticleAnimator dustAnimator;
 		Color dustColor;
@@ -123,25 +137,25 @@ namespace KerbalFoundries
 		public class CollisionInfo
 		{
 			public KFDustFX KFDustFX;
-			public CollisionInfo (KFDustFX kfdustFX)
+			public CollisionInfo(KFDustFX kfdustFX)
 			{
 				KFDustFX = kfdustFX;
 			}
 		}
 		
-		public override string GetInfo ()
+		public override string GetInfo()
 		{
 			return partInfoString;
 		}
 		
-		public override void OnStart ( StartState state )
+		public override void OnStart(StartState state)
 		{
 			const string locallog = "OnStart(): ";
 			_KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
-            colCount = _KFModuleWheel.wcList.Count;
-			TSWheelCorrector = _KFModuleWheel.tweakScaleCorrector;
-			if (!Equals(TSWheelCorrector, 0))
-				Debug.Log(string.Format("{0}{1}TSWheelCorrector = {2}", logprefix, locallog, TSWheelCorrector));
+			colCount = _KFModuleWheel.wcList.Count;
+			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
+			if (!Equals(tweakScaleCorrector, 0))
+				Debug.Log(string.Format("{0}{1}TSWheelCorrector = {2}", logprefix, locallog, tweakScaleCorrector));
 			
 			if (Equals(state, StartState.Editor) || Equals(state, StartState.None))
 				return;
@@ -154,7 +168,7 @@ namespace KerbalFoundries
 		}
 		
 		/// <summary>Defines the particle effects used in this module.</summary>
-		void SetupParticles ()
+		void SetupParticles()
 		{
 			const string locallog = "SetupParticles(): ";
 			if (!dustEffects)
@@ -167,82 +181,60 @@ namespace KerbalFoundries
 			kfdustFx.particleEmitter.emit = false;
 			kfdustFx.particleEmitter.minEnergy = minDustEnergy;
 			kfdustFx.particleEmitter.minEmission = minDustEmission;
+			kfdustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = kfdustFx.particleEmitter.GetComponent<ParticleAnimator>();
 			Debug.Log(string.Format("{0}{1}Particles have been set up.", logprefix, locallog));
 		}
 		
 		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
 		/// <param name="col">The collider being referenced.</param>
-        /// 
-        
-		public void OnCollisionEnter ( Collision col )
+		public void OnCollisionEnter(Collision col)
 		{
 			if (col.relativeVelocity.magnitude >= minVelocityMag)
 			{
 				if (Equals(col.contacts.Length, 0))
 					return;
-                int collisionCount = 0;
-                Vector3 collisionAverage = new Vector3(0, 0, 0);
+				int collisionCount = 0;
+				var collisionAverage = new Vector3(0, 0, 0);
 
-                for (int i = 0; i < colCount; i++)
-                {
-                    WheelHit hit;
-                    bool grounded = _KFModuleWheel.wcList[i].GetGroundHit(out hit);
-                    if (grounded)
-                    {
-                        collisionAverage += hit.point;
-                        collisionCount++;
-                    }
-                }
-                collisionAverage /= collisionCount;
-                CollisionInfo cInfo = GetClosestChild(part, collisionAverage + (part.rigidbody.velocity * Time.deltaTime));
+				for (int i = 0; i < colCount; i++)
+				{
+					WheelHit hit;
+					bool grounded = _KFModuleWheel.wcList[i].GetGroundHit(out hit);
+					if (grounded)
+					{
+						collisionAverage += hit.point;
+						collisionCount++;
+					}
+				}
+				collisionAverage /= collisionCount;
+				CollisionInfo cInfo = GetClosestChild(part, collisionAverage + (part.rigidbody.velocity * Time.deltaTime));
 				if (!Equals(cInfo.KFDustFX, null))
 					cInfo.KFDustFX.DustImpact();
 			}
 		}
-       
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void OnCollisionStay ( Collision col )
+		public void OnCollisionStay(Collision col)
 		{
-			if (paused || Equals(col.contacts.Length, 0))
+			if (isPaused || Equals(col.contacts.Length, 0))
 				return;
+			int collisionCount = 0;
+			var collisionAverage = new Vector3(0, 0, 0); 
 
-            int collisionCount = 0;
-            Vector3 collisionAverage = new Vector3(0,0,0); 
-
-            for (int i = 0; i < colCount; i++)
-            {
-                WheelHit hit;
-                bool grounded = _KFModuleWheel.wcList[i].GetGroundHit(out hit);
-                if (grounded)
-                {
-                    collisionAverage += hit.point;
-                    collisionCount++;
-                }
-            }
-            collisionAverage /= collisionCount;
-
-
-			//CollisionInfo cInfo = KFDustFX.GetClosestChild(part, col.contacts[0].point + part.rigidbody.velocity * Time.deltaTime);
-            /*
-            var collisions = new Vector3(0, 0, 0);
-            var collisionCount = 0;
-
-            foreach (ContactPoint cols in col.contacts)
-            {
-                collisions += cols.point;
-                collisionCount++;
-            }
-            Vector3 averageCollision = collisions / collisionCount;
-            CollisionInfo cInfo = GetClosestChild(part, averageCollision + (part.rigidbody.velocity * Time.deltaTime));
-			if (!Equals(cInfo.KFDustFX, null))
-				cInfo.KFDustFX.Scrape(col, averageCollision);
-             * */
-
-
-            Scrape(col, collisionAverage);
+			for (int i = 0; i < colCount; i++)
+			{
+				WheelHit hit;
+				bool grounded = _KFModuleWheel.wcList[i].GetGroundHit(out hit);
+				if (grounded)
+				{
+					collisionAverage += hit.point;
+					collisionCount++;
+				}
+			}
+			collisionAverage /= collisionCount;
+			Scrape(col, collisionAverage);
 		}
 		
 		/// <summary>Searches child parts for the nearest instance of this class to the given point.</summary>
@@ -253,7 +245,7 @@ namespace KerbalFoundries
 		/// <param name="parent">The parent part whose children should be tested.</param>
 		/// <param name="point">The point to test the distance from.</param>
 		/// <returns>The nearest child part with a DustFX module, or null if the parent part is nearest.</returns>
-		static CollisionInfo GetClosestChild ( Part parent, Vector3 point )
+		static CollisionInfo GetClosestChild(Part parent, Vector3 point)
 		{
 			float parentDistance = Vector3.Distance(parent.transform.position, point);
 			float minDistance = parentDistance;
@@ -271,31 +263,31 @@ namespace KerbalFoundries
 					}
 				}
 			}
-			return new CollisionInfo (closestChild);
+			return new CollisionInfo(closestChild);
 		}
 		
 		/// <summary>Called when the part is scraping over a surface.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void Scrape ( Collision col, Vector3 position )
+		/// <param name="position">The position of the scape.</param>
+		public void Scrape(Collision col, Vector3 position)
 		{
-			if ((paused || Equals(part, null)) || Equals(part.rigidbody, null) || Equals(col.contacts.Length, 0))
+			if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null) || Equals(col.contacts.Length, 0))
 				return;
-			float m = col.relativeVelocity.magnitude;
-			DustParticles(m, position + (part.rigidbody.velocity * Time.deltaTime), col.collider);
+			float fMagnitude = col.relativeVelocity.magnitude;
+			DustParticles(fMagnitude, position + (part.rigidbody.velocity * Time.deltaTime), col.collider);
 		}
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
 		/// <param name="speed">Speed of the part which is scraping.</param>
 		/// <param name="contactPoint">The point at which the collider and the scraped surface make contact.</param>
 		/// <param name="col">The collider being referenced.</param>
-		void DustParticles ( float speed, Vector3 contactPoint, Collider col )
+		void DustParticles(float speed, Vector3 contactPoint, Collider col)
 		{
 			const string locallog = "DustParticles(): ";
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null))
 				return;
-			float correctionvalue = TSWheelCorrector;
-			if (Equals(TSWheelCorrector, 0) || TSWheelCorrector < 0)
-				correctionvalue = 1f;
+			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
+				tweakScaleCorrector = 1f;
 			BiomeColor = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
 			if (Equals(BiomeColor, null))
 				Debug.Log(string.Format("{0}{1}Color \"BiomeColor\" is null!", logprefix, locallog)); 
@@ -303,61 +295,66 @@ namespace KerbalFoundries
 			{
 				if (!Equals(BiomeColor, dustColor))
 				{
-					Color [] colors = dustAnimator.colorAnimation; 
+					Color[] colors = dustAnimator.colorAnimation; 
 					colors[0] = BiomeColor;
 					colors[1] = BiomeColor;
 					colors[2] = BiomeColor;
 					colors[3] = BiomeColor;
 					colors[4] = BiomeColor;
 					dustAnimator.colorAnimation = colors;
+					dustAnimator.sizeGrow = -0.5f; // Testing, lets see if they will shrink over time slightly.
 					dustColor = BiomeColor;
 				}
 				kfdustFx.transform.position = contactPoint;
-				kfdustFx.particleEmitter.maxEnergy = speed / (maxDustEnergyDiv * correctionvalue);
-				kfdustFx.particleEmitter.maxEmission = Mathf.Clamp((speed * (maxDustEmissionMult * correctionvalue)), minDustEmission, (maxDustEmission * correctionvalue));
+				kfdustFx.particleEmitter.maxEnergy = Mathf.Clamp(((speed / maxDustEnergyDiv) * tweakScaleCorrector), minDustEnergy, maxDustEnergy);
+				// Energy is the thickness of the particles.
+				kfdustFx.particleEmitter.maxEmission = Mathf.Clamp((speed * (maxDustEmissionMult * tweakScaleCorrector)), minDustEmission, (maxDustEmission * tweakScaleCorrector));
+				// Emission is the number of particles emitted per second.
+				kfdustFx.particleEmitter.maxSize = Mathf.Clamp((speed * tweakScaleCorrector), minDustSize, maxDustSize);
+				// Size is self explanatory.  For wheels, I suggest values between 0.1 and 2.
 				kfdustFx.particleEmitter.Emit();
 			}
 			return;
 		}
 		
 		/// <summary>Called when the game enters a "paused" state.</summary>
-		void OnPause ()
+		void OnPause()
 		{
-			paused = true;
+			isPaused = true;
 			kfdustFx.particleEmitter.enabled = false;
-			if (!Equals(WheelImpactSound, null) && !Equals(WheelImpactSound.audio, null))
+			if (wheelImpact && (!Equals(WheelImpactSound, null) || !Equals(WheelImpactSound.audio, null)))
 				WheelImpactSound.audio.Stop();
 		}
 		
 		/// <summary>Called when the game leaves a "paused" state.</summary>
-		void OnUnpause ()
+		void OnUnpause()
 		{
-			paused = false;
+			isPaused = false;
 			kfdustFx.particleEmitter.enabled = true;
 		}
 		
 		/// <summary>Called when the object being referenced is destroyed, or when the module instance is deactivated.</summary>
-		void OnDestroy ()
+		void OnDestroy()
 		{
-			if (!Equals(WheelImpactSound, null) && !Equals(WheelImpactSound.audio, null))
+			if (wheelImpact && (!Equals(WheelImpactSound, null) || !Equals(WheelImpactSound.audio, null)))
 				WheelImpactSound.audio.Stop();
 			GameEvents.onGamePause.Remove(OnPause);
 			GameEvents.onGameUnpause.Remove(OnUnpause);
 		}
-
+		
 		/// <summary>Gets the current volume setting for Ship sounds.</summary>
 		/// <returns>The volume value as a float.</returns>
-		static float GetShipVolume ()
+		static float GetShipVolume()
 		{
 			return GameSettings.SHIP_VOLUME;
 		}
-
+		
 		/// <summary>Sets up and maintains the audio effect which is, currently, not widely used.</summary>
-		void DustAudio ()
+		void DustAudio()
 		{
-			if (Equals(wheelImpactSound, string.Empty))
+			if (!wheelImpact || Equals(WheelImpactSound, null) || Equals(wheelImpactSound, string.Empty))
 				return;
-			WheelImpactSound = new FXGroup ("WheelImpactSound");
+			WheelImpactSound = new FXGroup("WheelImpactSound");
 			part.fxGroups.Add(WheelImpactSound);
 			WheelImpactSound.audio = gameObject.AddComponent<AudioSource>();
 			WheelImpactSound.audio.clip = GameDatabase.Instance.GetAudioClip(wheelImpactSound);
@@ -369,9 +366,9 @@ namespace KerbalFoundries
 		}
 		
 		/// <summary>Called when the part impacts with a surface with enough magnitude to be audible.</summary>
-		public void DustImpact ()
+		public void DustImpact()
 		{
-			if (Equals(WheelImpactSound, null) || Equals(wheelImpactSound, string.Empty))
+			if (wheelImpact && (Equals(WheelImpactSound, null) || Equals(wheelImpactSound, string.Empty)))
 			{
 				WheelImpactSound.audio.Stop();
 				return;

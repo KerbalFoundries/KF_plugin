@@ -9,10 +9,10 @@ namespace KerbalFoundries
 		/// <summary>Prefix the logs with this to identify it.</summary>
 		public string logprefix = "[DustFX - DustColorFileWriter]: ";
 		
-		readonly KFDustColorDefinitions dustDefinitions = new KFDustColorDefinitions ();
+		readonly KFDustColorDefinitions dustDefinitions = new KFDustColorDefinitions();
 		
 		/// <summary>Are we awake yet?</summary>
-		void Awake ()
+		void Awake()
 		{
 			// const string locallog = "Awake(): ";
 			// save default config
