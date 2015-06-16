@@ -338,7 +338,7 @@ namespace KerbalFoundries
             if (!steeringDisabled)
             {
                 steeringTorque = torqueSteeringCurve.Evaluate((float)this.vessel.srfSpeed / tweakScaleCorrector) * torque * steeringInvert; //low speed steering mode. Differential motor torque
-                brakeSteering = brakeSteeringCurve.Evaluate(travelDirection) / tweakScaleCorrector * steeringInvert; //high speed steering. Brake on inside track because Unity seems to weight reverse motor torque less at high speed.
+                brakeSteering = brakeSteeringCurve.Evaluate(travelDirection) / tweakScaleCorrector * steeringInvert * torque; //high speed steering. Brake on inside track because Unity seems to weight reverse motor torque less at high speed.
                 steeringAngle = (steeringCurve.Evaluate((float)this.vessel.srfSpeed)) * -this.vessel.ctrlState.wheelSteer * steeringRatio * steeringCorrector * steeringInvert; //low speed steering mode. Differential motor torque
             }
             else

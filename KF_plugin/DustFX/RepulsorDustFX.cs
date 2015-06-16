@@ -170,6 +170,10 @@ namespace KerbalFoundries
 		public void OnCollisionStay ( Collision col )
 		{
 			CollisionInfo cInfo;
+            if (string.Equals("ModuleWaterSlider.Collider", col.gameObject.name))
+            {
+                //do some stuff
+            }
 			if (paused || Equals(col.contacts.Length, 0) || Equals(Rideheight, 0))
 				return;
 			cInfo = KFRepulsorDustFX.GetClosestChild(part, col.contacts[0].point + part.rigidbody.velocity * Time.deltaTime);
