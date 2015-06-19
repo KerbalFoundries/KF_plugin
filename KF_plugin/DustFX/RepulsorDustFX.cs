@@ -48,40 +48,54 @@ namespace KerbalFoundries
 		[KSPField]
 		public bool dustEffects = true;
 		
+		/// <summary>Minimum size value of the dust particles.</summary>
+		/// <remarks>Default is 0.1.  Represents the size of the particles themselves.</remarks>
+		[KSPField]
+		public float minDustSize = 0.1f;
+		
+		/// <summary>Maximum size value of the dust particles.</summary>
+		/// <remarks>Default is 2.  Represents the size of the particles themselves.</remarks>
+		[KSPField]
+		public float maxDustSize = 2f;
 		/// <summary>Minimum scrape speed.</summary>
 		/// <remarks>Default is 0</remarks>
 		[KSPField]
 		public float minScrapeSpeed = 0f;
 		
 		/// <summary>Minimum dust energy value.</summary>
-		/// <remarks>Default is 0.1</remarks>
+		/// <remarks>Default is 0.1.  Represents the minimum thickness of the particles.</remarks>
 		[KSPField]
 		public float minDustEnergy = 0.1f;
 		
-		/// <summary>Minimum emission value of the dust particles.</summary>
-		/// <remarks>Default is 0.1</remarks>
+		/// <summary>Minimum dust energy value.</summary>
+		/// <remarks>Default is 1.  Represents the maximum thickness of the particles.</remarks>
 		[KSPField]
-		public float minDustEmission = 0.1f;
+		public float maxDustEnergy = 1f;
 		
 		/// <summary>Maximum emission energy divisor.</summary>
-		/// <remarks>Default is 10</remarks>
+		/// <remarks>Default is 2</remarks>
 		[KSPField]
-		public float maxDustEnergyDiv = 10f;
+		public float maxDustEnergyDiv = 2f;
 		
 		/// <summary>Maximum emission multiplier.</summary>
 		/// <remarks>Default is 2</remarks>
 		[KSPField]
 		public float maxDustEmissionMult = 2f;
 		
-		/// <summary>Maximum emission value of the dust particles.</summary>
-		/// <remarks>Default is 35</remarks>
+		/// <summary>Minimum emission value of the dust particles.</summary>
+		/// <remarks>Default is 0.1.  This is the number of particles to emit per second.</remarks>
 		[KSPField]
-		public float maxDustEmission = 35f;
+		public float minDustEmission = 0.1f;
+		
+		/// <summary>Maximum emission value of the dust particles.</summary>
+		/// <remarks>Default is 20</remarks>
+		[KSPField]
+		public float maxDustEmission = 20f;
 		
 		/// <summary>Used in the OnCollisionEnter/Stay methods to define the minimum velocity magnitude to check against.</summary>
-		/// <remarks>Default is 1</remarks>
+		/// <remarks>Default is 0.5</remarks>
 		[KSPField]
-		public float minVelocityMag = 1f;
+		public float minVelocityMag = 0.5f;
 		
 		/// <summary>KSP path to the effect being used here.  Made into a field so that it can be customized in the future.</summary>
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
@@ -96,7 +110,7 @@ namespace KerbalFoundries
 		/// <summary>Prefix the logs with this to identify it.  Will be obsolete soon(ish).</summary>
 		public string logprefix = "[DustFX - Main]: ";
 		
-		bool paused;
+		bool isPaused;
 		GameObject kfrepdustFx;
 		ParticleAnimator dustAnimator;
 		Color dustColor;
@@ -106,23 +120,29 @@ namespace KerbalFoundries
 		public class CollisionInfo
 		{
 			public KFRepulsorDustFX KFRepDustFX;
-			public CollisionInfo (KFRepulsorDustFX kfrepdustFX)
+			public CollisionInfo(KFRepulsorDustFX kfrepdustFX)
 			{
 				KFRepDustFX = kfrepdustFX;
 			}
 		}
 		
-		public override string GetInfo ()
+		public override string GetInfo()
 		{
 			return partInfoString;
 		}
 		
-		public override void OnStart ( StartState state )
+		public override void OnStart(StartState state)
 		{
 			_KFRepulsor = part.GetComponentInChildren<KFRepulsor>();
+<<<<<<< HEAD
 				// This allows me to get the parameter value from the current active part.
 			Rideheight = _KFRepulsor.rideHeight;
 				// Public variable is set to the value of the remote variable here.
+=======
+			// This allows me to get the parameter value from the current active part.
+			Rideheight = _KFRepulsor.Rideheight;
+			// Public variable is set to the value of the remote variable here.
+>>>>>>> origin/master
 			
 			if (Equals(state, StartState.Editor) || Equals(state, StartState.None))
 				return;
@@ -135,7 +155,7 @@ namespace KerbalFoundries
 		}
 		
 		/// <summary>Defines the particle effects used in this module.</summary>
-		void SetupParticles ()
+		void SetupParticles()
 		{
 			const string locallog = "SetupParticles(): ";
 			if (!dustEffects)
@@ -148,13 +168,14 @@ namespace KerbalFoundries
 			kfrepdustFx.particleEmitter.emit = false;
 			kfrepdustFx.particleEmitter.minEnergy = minDustEnergy;
 			kfrepdustFx.particleEmitter.minEmission = minDustEmission;
+			kfrepdustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = kfrepdustFx.particleEmitter.GetComponent<ParticleAnimator>();
 			Debug.Log(string.Format("{0}{1}Particles have been set up.", logprefix, locallog));
 		}
 		
 		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void OnCollisionEnter ( Collision col )
+		public void OnCollisionEnter(Collision col)
 		{
 			CollisionInfo cInfo;
 			if (col.relativeVelocity.magnitude >= minVelocityMag)
@@ -167,14 +188,14 @@ namespace KerbalFoundries
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void OnCollisionStay ( Collision col )
+		public void OnCollisionStay(Collision col)
 		{
 			CollisionInfo cInfo;
             if (string.Equals("ModuleWaterSlider.Collider", col.gameObject.name))
             {
                 //do some stuff
             }
-			if (paused || Equals(col.contacts.Length, 0) || Equals(Rideheight, 0))
+			if (isPaused || Equals(col.contacts.Length, 0) || Equals(Rideheight, 0))
 				return;
 			cInfo = KFRepulsorDustFX.GetClosestChild(part, col.contacts[0].point + part.rigidbody.velocity * Time.deltaTime);
 			if (!Equals(cInfo.KFRepDustFX, null))
@@ -190,7 +211,7 @@ namespace KerbalFoundries
 		/// <param name="parent">The parent part whose children should be tested.</param>
 		/// <param name="point">The point to test the distance from.</param>
 		/// <returns>The nearest child part with a DustFX module, or null if the parent part is nearest.</returns>
-		static CollisionInfo GetClosestChild ( Part parent, Vector3 point )
+		static CollisionInfo GetClosestChild(Part parent, Vector3 point)
 		{
 			float parentDistance = Vector3.Distance(parent.transform.position, point);
 			float minDistance = parentDistance;
@@ -208,24 +229,24 @@ namespace KerbalFoundries
 					}
 				}
 			}
-			return new CollisionInfo (closestChild);
+			return new CollisionInfo(closestChild);
 		}
 		
 		/// <summary>Called when the part is scraping over a surface.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void Scrape ( Collision col )
+		public void Scrape(Collision col)
 		{
-			if ((paused || Equals(part, null)) || Equals(part.rigidbody, null) || Equals(col.contacts.Length, 0))
+			if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null) || Equals(col.contacts.Length, 0))
 				return;
-			float m = col.relativeVelocity.magnitude;
-			DustParticles(m, col.contacts[0].point + (part.rigidbody.velocity * Time.deltaTime), col.collider);
+			float fMagnitude = col.relativeVelocity.magnitude;
+			DustParticles(fMagnitude, col.contacts[0].point + (part.rigidbody.velocity * Time.deltaTime), col.collider);
 		}
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
 		/// <param name="speed">Speed of the part which is scraping.</param>
 		/// <param name="contactPoint">The point at which the collider and the scraped surface make contact.</param>
 		/// <param name="col">The collider being referenced.</param>
-		void DustParticles ( float speed, Vector3 contactPoint, Collider col )
+		void DustParticles(float speed, Vector3 contactPoint, Collider col)
 		{
 			const string locallog = "DustParticles(): ";
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || Equals(Rideheight, 0))
@@ -238,7 +259,7 @@ namespace KerbalFoundries
 			{
 				if (!Equals(BiomeColor, dustColor))
 				{
-					Color [] colors = dustAnimator.colorAnimation;
+					Color[] colors = dustAnimator.colorAnimation;
 					colors[0] = BiomeColor;
 					colors[1] = BiomeColor;
 					colors[2] = BiomeColor;
@@ -248,29 +269,30 @@ namespace KerbalFoundries
 					dustColor = BiomeColor;
 				}
 				kfrepdustFx.transform.position = contactPoint;
-				kfrepdustFx.particleEmitter.maxEnergy = speed / maxDustEnergyDiv;
-				kfrepdustFx.particleEmitter.maxEmission = Mathf.Clamp((speed * (maxDustEmissionMult)), (minDustEmission * appliedRideHeight), (maxDustEmission * appliedRideHeight));
+				kfrepdustFx.particleEmitter.maxEnergy = Mathf.Clamp((speed / maxDustEnergyDiv), minDustEnergy, maxDustEnergy);
+				kfrepdustFx.particleEmitter.maxEmission = Mathf.Clamp((speed * maxDustEmissionMult), (minDustEmission * appliedRideHeight), (maxDustEmission * appliedRideHeight));
+				kfrepdustFx.particleEmitter.maxSize = Mathf.Clamp((speed / appliedRideHeight), minDustSize, maxDustSize);
 				kfrepdustFx.particleEmitter.Emit();
 			}
 			return;
 		}
 		
 		/// <summary>Called when the game enters a "paused" state.</summary>
-		void OnPause ()
+		void OnPause()
 		{
-			paused = true;
+			isPaused = true;
 			kfrepdustFx.particleEmitter.enabled = false;
 		}
 		
 		/// <summary>Called when the game leaves a "paused" state.</summary>
-		void OnUnpause ()
+		void OnUnpause()
 		{
-			paused = false;
+			isPaused = false;
 			kfrepdustFx.particleEmitter.enabled = true;
 		}
 		
 		/// <summary>Called when the object being referenced is destroyed, or when the module instance is deactivated.</summary>
-		void OnDestroy ()
+		void OnDestroy()
 		{
 			GameEvents.onGamePause.Remove(OnPause);
 			GameEvents.onGameUnpause.Remove(OnUnpause);

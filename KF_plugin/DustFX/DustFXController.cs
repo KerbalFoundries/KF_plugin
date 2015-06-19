@@ -12,10 +12,10 @@ namespace KerbalFoundries
 		public const string strKFDustFXController = "KFDustFXController";
 		
 		static KFDustFXController _instance;
-		readonly KFDustColorDefinitions _dustDefinitions = new KFDustColorDefinitions ();
+		readonly KFDustColorDefinitions _dustDefinitions = new KFDustColorDefinitions();
 		
 		/// <summary>Game state "awake" event.</summary>
-		void Awake ()
+		void Awake()
 		{
 			const string locallog = "Awake(): ";
 			_instance = this;
@@ -27,7 +27,7 @@ namespace KerbalFoundries
 		}
 		
 		/// <summary>Object destruction event.</summary>
-		void OnDestroy ()
+		void OnDestroy()
 		{
 			_instance = null;
 		}

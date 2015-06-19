@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+<<<<<<< HEAD
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class RepulsorSkim : MonoBehaviour
     {
@@ -20,6 +21,18 @@ namespace KerbalFoundries
             int repulsorCount = 0;
 
             foreach (Vessel va in FlightGlobals.Vessels)
+=======
+	[KSPAddon(KSPAddon.Startup.Flight, false)]
+	public class RepulsorSkim : MonoBehaviour
+	{
+		void Start()
+		{
+			print("RepulsorSkim Start");
+			int partCount = 0;
+			int repulsorCount = 0;
+            
+            foreach (Part PA in FlightGlobals.ActiveVessel.Parts)
+>>>>>>> origin/master
             {
                 foreach (Part PA in va.parts)
                 {

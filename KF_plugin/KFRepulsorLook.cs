@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace KerbalFoundries
 {
     public class KFRepulsorLook :PartModule
     {
-        
         [KSPField]
         public string gridName;
 
@@ -22,7 +19,7 @@ namespace KerbalFoundries
         {
  	        base.OnStart(state);
             _grid = transform.Search(gridName);
-            _repulsor = this.part.GetComponentInChildren<KFRepulsor>();
+            _repulsor = part.GetComponentInChildren<KFRepulsor>();
             _gridScale = _grid.transform.localScale;
             isReady = true;
         }
@@ -41,26 +38,26 @@ namespace KerbalFoundries
                 StartCoroutine("Shrink");
         }
 
-        IEnumerator Shrink() //Coroutine for steering
+        /// <summary>Coroutine for steering.</summary>
+        IEnumerator Shrink()
         {
             while (_grid.transform.localScale.x > 0.1f)
             {
                 _grid.transform.localScale -= (_gridScale / 50);
                 yield return null;
             }
-            Debug.LogWarning("Finished shrinking");
+            Debug.LogWarning("Finished shrinking.");
         }
 
-        IEnumerator Grow() //Coroutine for steering
+        /// <summary>Coroutine for steering.</summary>
+        IEnumerator Grow()
         {
             while (_grid.transform.localScale.x < _gridScale.x)
             {
                 _grid.transform.localScale += (_gridScale / 50);
                 yield return null;
             }
-            Debug.LogWarning("Finished growing");
+            Debug.LogWarning("Finished growing.");
         }
-        
-        
     }
 }

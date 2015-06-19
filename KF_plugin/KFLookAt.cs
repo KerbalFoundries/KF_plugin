@@ -95,7 +95,6 @@ namespace KerbalFoundries
                 yield return null;
             }
         }
-
     }
 }
 
