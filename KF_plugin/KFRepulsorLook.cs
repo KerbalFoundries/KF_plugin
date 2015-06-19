@@ -37,7 +37,7 @@ namespace KerbalFoundries
 
         public void UpdateSettings()
         {
-            if(_repulsor.Rideheight < 0.1f)
+            if(_repulsor.rideHeight < 0.1f)
                 StartCoroutine("Shrink");
         }
 

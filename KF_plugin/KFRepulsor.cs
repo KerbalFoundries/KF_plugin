@@ -24,13 +24,13 @@ namespace KerbalFoundries
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group Number"), UI_FloatRange(minValue = 0, maxValue = 10f, stepIncrement = 1f)]
         public float groupNumber = 1;
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Height"), UI_FloatRange(minValue = 0, maxValue = 100f, stepIncrement = 5f)]
-        public float Rideheight = 25;
+        public float rideHeight = 25;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Strength"), UI_FloatRange(minValue = 0, maxValue = 6.00f, stepIncrement = 0.2f)]
         public float SpringRate;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Damping"), UI_FloatRange(minValue = 0, maxValue = 0.3f, stepIncrement = 0.05f)]
         public float DamperRate;
         [KSPField]
-        public bool deployed;
+        public bool deployed = true;
         [KSPField]
         public bool lowEnergy;
         [KSPField]
@@ -50,9 +50,9 @@ namespace KerbalFoundries
         float effectPower; 
         float effectPowerMax;
         float appliedRideHeight;
-        float smoothedRideHeight;
+        //float smoothedRideHeight;
         float currentRideHeight;
-        const float maxRepulsorHeight = 8;
+        const float maxRepulsorHeight = 100;
 
         public float repulsorCount = 0;
         [KSPField]
@@ -77,12 +77,9 @@ namespace KerbalFoundries
             // degub only: print("onstart");
             base.OnStart(state);
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            effectPowerMax = 1 * repulsorCount * chargeConsumptionRate * Time.fixedDeltaTime;
+            print("max effect power " + effectPowerMax);
 
-            //this.part.AddModule("ModuleWaterSlider");
-            if (HighLogic.LoadedSceneIsGame || HighLogic.LoadedSceneIsEditor)
-            {
-            	// do absolutely nothing.
-            }
             if (HighLogic.LoadedSceneIsFlight)
             {
                 _grid = transform.Search(gridName);
@@ -96,13 +93,13 @@ namespace KerbalFoundries
                     userspring.spring = SpringRate;
                     userspring.damper = DamperRate;
                     b.suspensionSpring = userspring;
-                    b.suspensionDistance = Rideheight;
+                    b.suspensionDistance = 1f; //default to low setting to save stupid shenanigans on takeoff
                     wcList.Add(b);
                 }
                 
 				this.part.force_activate(); // Force the part active or OnFixedUpate is not called.
-                currentRideHeight = Rideheight;
-                UpdateHeight();
+
+                
 
                 foreach (ModuleWaterSlider mws in this.vessel.FindPartModulesImplementing<ModuleWaterSlider>())
                     _MWS = mws;
@@ -113,11 +110,12 @@ namespace KerbalFoundries
                     StopAllCoroutines();
                     StartCoroutine("LookAt");
                 }
+                appliedRideHeight = rideHeight;
+                StartCoroutine("UpdateHeight"); //start updating to height set before launch
             }
             DestroyBounds();
-            effectPowerMax = 1 * repulsorCount * chargeConsumptionRate * Time.deltaTime;
-            //print("max effect power");
-            //print(effectPowerMax);
+            
+
 		}
 		// End start
 
@@ -155,7 +153,6 @@ namespace KerbalFoundries
                 _gimbal.transform.LookAt(FlightGlobals.ActiveVessel.mainBody.transform.position);
                 yield return null;
             }
-            Debug.LogWarning("Finished shrinking"); // Unreachable code warning here.
         }
 
         public void DestroyBounds()
@@ -164,41 +161,50 @@ namespace KerbalFoundries
 			if (!Equals(bounds, null))
             {
 				UnityEngine.Object.Destroy(bounds.gameObject);
-				//boundsDestroyed = true; // Remove the bounds object to let the wheel colliders take over
-                print("destroying Bounds");
+				print("destroying Bounds");
             }
         }
 
         public void RepulsorSound()
         {
-            part.Effect("RepulsorEffect", effectPower);
+            part.Effect("RepulsorEffect", effectPower/ effectPowerMax);
+        }
+
+        public void UpdateWaterSlider()
+        {
+            _MWS.colliderHeight = -2.5f;
+        }
+
+        public float ChargeConsumption()
+        {
+            float chargeConsumption = (appliedRideHeight / 100) * (1 + SpringRate) * repulsorCount * Time.deltaTime * chargeConsumptionRate / 4;
+            float requestCharge = chargeConsumption / effectPowerMax;
+            float electricCharge = part.RequestResource("ElectricCharge", requestCharge);
+            return electricCharge;
         }
 
         public override void OnFixedUpdate()
         {
-            smoothedRideHeight = Mathf.Lerp(smoothedRideHeight, currentRideHeight, Time.deltaTime * 2);
-            appliedRideHeight = smoothedRideHeight / 100;
-
-            //Vector3d oceanNormal = this.part.vessel.mainBody.GetSurfaceNVector(vessel.latitude, vessel.longitude);
-
-            for (int i = 0; i < wcList.Count(); i++)
-                wcList[i].suspensionDistance = maxRepulsorHeight * appliedRideHeight;
+            //smoothedRideHeight = Mathf.Lerp(smoothedRideHeight, currentRideHeight, Time.deltaTime * 2);
+            //appliedRideHeight = smoothedRideHeight / 100;
+                        
+            //for (int i = 0; i < wcList.Count(); i++)
+               // wcList[i].suspensionDistance = maxRepulsorHeight * rideHeight;
 
             if (deployed)
             {
-				_MWS.colliderHeight = -2.5f; // Reset the height of the water collider that slips away every frame.
-				float chargeConsumption = appliedRideHeight * (1 + SpringRate) * repulsorCount * Time.deltaTime * chargeConsumptionRate / 4;
-                effectPower = chargeConsumption / effectPowerMax;
-
-                float electricCharge = part.RequestResource("ElectricCharge", chargeConsumption);
+				 // Reset the height of the water collider that slips away every frame.
+                UpdateWaterSlider();
+                float electricCharge = ChargeConsumption();
+                
                 //print(electricCharge);
                 // = Extensions.GetBattery(this.part);
-
+                /*
                 if (electricCharge < (chargeConsumption * 0.5f))
                 {
                     print("Retracting due to low Electric Charge");
                     lowEnergy = true;
-                    Rideheight = 0;
+                    rideHeight = 0;
                     UpdateHeight();
                     status = "Low Charge";
                 }
@@ -208,75 +214,76 @@ namespace KerbalFoundries
                     status = "Nominal";
                 }
 
-                if (Equals(appliedRideHeight, 0) || lowEnergy) //disable the colliders if there is not enough energy or height slips below the threshold
+                if (Equals(rideHeight, 0) || lowEnergy) //disable the colliders if there is not enough energy or height slips below the threshold
                 {
                     deployed = false;
                     DisableColliders();
                     //print(appliedRideHeight);
                 }
+                 * */
             }
             else
                 effectPower = 0;
 			
-            RepulsorSound();
+            //RepulsorSound();
             effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //print(effectPower);
         }
 
-        public void EnableColliders()
+
+        IEnumerator UpdateHeight()
         {
-            //print(wcList.Count());
-            for (int i = 0; i < wcList.Count(); i++)
+            if (appliedRideHeight > 0)
             {
-                wcList[i].enabled = true;
-                deployed = true;
-            }
-            if (retractEffect)
-            {
-                //StopCoroutine("Shrink");
+                for (int i = 0; i < wcList.Count(); i++)
+                {
+                    wcList[i].enabled = true;
+                }
                 StartCoroutine("Grow");
             }
-        }
+            Debug.LogWarning("UpdateHeight Couroutine Start");
+            while (Math.Round(currentRideHeight, 1) != appliedRideHeight)
+            {
 
-        public void DisableColliders()
-        {
-            for (int i = 0; i < wcList.Count(); i++)
-            {
-                wcList[i].enabled = false;
-                deployed = false;
+                currentRideHeight = Mathf.Lerp(currentRideHeight, appliedRideHeight, Time.deltaTime * 2);
+                Debug.LogWarning(currentRideHeight);
+                for (int i = 0; i < wcList.Count(); i++)
+                {
+                    wcList[i].suspensionDistance = appliedRideHeight / 20f;
+                }
+                yield return new WaitForFixedUpdate();
             }
-            if (retractEffect)
+            if (currentRideHeight < 1)
             {
-                //StopCoroutine("Grow");
+                Debug.LogWarning("Disabling Colliders");
+                for (int i = 0; i < wcList.Count(); i++)
+                {
+                    wcList[i].enabled = false;
+                }
                 StartCoroutine("Shrink");
             }
-        }
-
-        public void UpdateHeight()
-        {
-            currentRideHeight = Rideheight;
-            EnableColliders();
+            Debug.LogWarning("Finished height update");
         }
 
         [KSPAction("Retract")]
         public void Retract(KSPActionParam param)
         {
-            if (Rideheight > 0)
+            if (rideHeight > 0)
             {
-                Rideheight -= 5f;
+                rideHeight -= 5f;
                 print("Retracting");
-                UpdateHeight();
+                StartCoroutine("UpdateHeight");
             }
 		}
 
         [KSPAction("Extend")]
         public void Extend(KSPActionParam param)
         {
-            if (Rideheight < 100)
+            if (rideHeight < 100)
             {
-                Rideheight += 5f;
+                rideHeight += 5f;
                 print("Extending");
-                UpdateHeight();
+                StartCoroutine("UpdateHeight");
             }
 		}
 
@@ -289,17 +296,17 @@ namespace KerbalFoundries
         [KSPEvent(guiActive = true, guiName = "Apply Settings", active = true)]
         public void ApplySettings()
         {
+            appliedRideHeight = rideHeight;
             foreach (KFRepulsor mt in this.vessel.FindPartModulesImplementing<KFRepulsor>())
             {
                 if (!Equals(groupNumber, 0) && Equals(groupNumber, mt.groupNumber))
                 {
-                    mt.Rideheight = Rideheight;
-                    currentRideHeight = Rideheight;
-                    mt.currentRideHeight = Rideheight;
-                    mt.UpdateHeight();
+                    mt.rideHeight = rideHeight;
+                    mt.appliedRideHeight = appliedRideHeight;
+                    mt.StartCoroutine("UpdateHeight"); 
                 }
             }
-            UpdateHeight();
+            StartCoroutine("UpdateHeight"); 
         }
 	}
 	// End class

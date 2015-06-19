@@ -57,7 +57,7 @@ namespace KerbalFoundries
         public float suspensionDamper;
         [KSPField(isPersistant = true)]
         public bool isConfigured = false;
-        //[KSPField(isPersistant = true)]
+        
         float tweakScaleCorrector = 1;
 
         //object types

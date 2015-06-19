@@ -20,8 +20,6 @@ namespace KerbalFoundries
 
         string[] rotatorList;
         string[] targetList;
-        List<float> rotationY = new List<float>();
-        List<float> rotationZ = new List<float>();
 
         int objectCount = 0;
 

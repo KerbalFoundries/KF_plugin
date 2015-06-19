@@ -16,25 +16,27 @@ namespace KerbalFoundries
         void Start()
         {
             print("RepulsorSkim Start");
-            int partCount = 0;
+
             int repulsorCount = 0;
-            
-            foreach (Part PA in FlightGlobals.ActiveVessel.Parts)
+
+            foreach (Vessel va in FlightGlobals.Vessels)
             {
-                partCount++;
-                foreach (RepulsorTest RA in PA.GetComponentsInChildren<RepulsorTest>())
-                    repulsorCount++;
+                foreach (Part PA in va.parts)
+                {
 
-                foreach (KFRepulsor RA in PA.GetComponentsInChildren<KFRepulsor>())
-                    repulsorCount++;
+                    foreach (KFRepulsor RA in PA.GetComponentsInChildren<KFRepulsor>())
+                        repulsorCount++;
 
-                foreach (RepulsorWheel RA in PA.GetComponentsInChildren<RepulsorWheel>())
-                    repulsorCount++;
+                    foreach (RepulsorWheel RA in PA.GetComponentsInChildren<RepulsorWheel>())
+                        repulsorCount++;
                 }
-            
-            if (repulsorCount > 0)
-                FlightGlobals.ActiveVessel.rootPart.AddModule("ModuleWaterSlider"); 
+
+                if (repulsorCount > 0)
+                    va.rootPart.AddModule("ModuleWaterSlider");
             }
+            }
+
+
         }
 
     public class ModuleWaterSlider : PartModule
