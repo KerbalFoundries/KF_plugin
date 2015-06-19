@@ -121,7 +121,7 @@ namespace KerbalFoundries
 		{
 			_KFRepulsor = part.GetComponentInChildren<KFRepulsor>();
 				// This allows me to get the parameter value from the current active part.
-			Rideheight = _KFRepulsor.Rideheight;
+			Rideheight = _KFRepulsor.rideHeight;
 				// Public variable is set to the value of the remote variable here.
 			
 			if (Equals(state, StartState.Editor) || Equals(state, StartState.None))
