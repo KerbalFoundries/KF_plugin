@@ -185,14 +185,14 @@ namespace KerbalFoundries
 
             if (!string.Equals(orientationObjectName, "Default"))
             {
-                Debug.LogWarning("Default part orientation");
+                Debug.LogWarning("Transformed part orientation");
                 partOrientationUp = transform.Search(orientationObjectName).up;
                 partOrientationForward = transform.Search(orientationObjectName).forward;
                 partOrientationRight = transform.Search(orientationObjectName).right;
             }
             else
             {
-                Debug.LogWarning("Transformed part orientation");
+                Debug.LogWarning("Default part orientation");
                 partOrientationUp = this.part.transform.up;
                 partOrientationForward = this.part.transform.forward;
                 partOrientationRight = this.part.transform.right;
@@ -260,6 +260,7 @@ namespace KerbalFoundries
 
             if (HighLogic.LoadedSceneIsFlight)
             {
+                appliedRideHeight = rideHeight / 100; // need to be here if no KFWheel or everything gets set to zero as below.
                 StartCoroutine(StartupStuff());
                 maxRPM /= tweakScaleCorrector;
                 startRetracted = false;

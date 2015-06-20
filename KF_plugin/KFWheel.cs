@@ -97,7 +97,7 @@ namespace KerbalFoundries
 					{
 						_wheelCollider = wc;
 						suspensionDistance = wc.suspensionDistance;
-						//Debug.LogError("suspensionDistance is" + suspensionDistance);
+						Debug.LogError("suspensionDistance is" + suspensionDistance);
 						isConfigured = true;
 					}
 				}

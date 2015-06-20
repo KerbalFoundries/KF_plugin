@@ -94,16 +94,16 @@ namespace KerbalFoundries
                         traverse = 0;
                 }
                 else
-                    traverse = lastFrameTraverse; //movement defaults back to last position when the collider is not grounded. Ungrounded collider returns suspension travel of zero!
+                    traverse = colliders[i].suspensionDistance; //movement defaults back to last position when the collider is not grounded. Ungrounded collider returns suspension travel of zero!
 
                 suspensionMovement += traverse; //debug only
             }
 
             frameTraverse = suspensionMovement / objectCount; //average the movement.
-            lastFrameTraverse = suspensionMovement;
+            lastFrameTraverse = frameTraverse;
 
             susTrav.localPosition = initialPosition;
-            MoveSuspension(susTravIndex, -suspensionMovement, susTrav);
+            MoveSuspension(susTravIndex, -frameTraverse, susTrav);
         }
 
         public void MoveSuspension(int index, float movement, Transform movedObject) //susTrav Axis, amount to move, named object.
