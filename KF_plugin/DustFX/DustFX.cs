@@ -320,10 +320,14 @@ namespace KerbalFoundries
 		/// <summary>Called when the game enters a "paused" state.</summary>
 		void OnPause()
 		{
+            //Debug.LogError("Enter OnPause");
 			isPaused = true;
+            //Debug.LogError("Set isPaused");
 			kfdustFx.particleEmitter.enabled = false;
+            //Debug.LogError("disabled particle emitter");
 			if (wheelImpact && (!Equals(WheelImpactSound, null) || !Equals(WheelImpactSound.audio, null)))
 				WheelImpactSound.audio.Stop();
+            //Debug.LogError("disabled sound");
 		}
 		
 		/// <summary>Called when the game leaves a "paused" state.</summary>
@@ -352,8 +356,9 @@ namespace KerbalFoundries
 		/// <summary>Sets up and maintains the audio effect which is, currently, not widely used.</summary>
 		void DustAudio()
 		{
-			if (!wheelImpact || Equals(WheelImpactSound, null) || Equals(wheelImpactSound, string.Empty))
+			if (!wheelImpact || Equals(wheelImpactSound, string.Empty))
 				return;
+            //Debug.LogError("continuing to add FXGroup");
 			WheelImpactSound = new FXGroup("WheelImpactSound");
 			part.fxGroups.Add(WheelImpactSound);
 			WheelImpactSound.audio = gameObject.AddComponent<AudioSource>();
@@ -363,6 +368,7 @@ namespace KerbalFoundries
 			WheelImpactSound.audio.Stop();
 			WheelImpactSound.audio.loop = false;
 			WheelImpactSound.audio.volume = GetShipVolume();
+            //Debug.LogError("Finished adding FX Group");
 		}
 		
 		/// <summary>Called when the part impacts with a surface with enough magnitude to be audible.</summary>

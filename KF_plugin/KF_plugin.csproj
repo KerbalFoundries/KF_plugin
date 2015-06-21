@@ -7,7 +7,7 @@
     <ProjectGuid>{C97D02EA-B1D2-4563-A821-4B88F50A19F9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>KF_plugin</RootNamespace>
+    <RootNamespace>KerbalFoundries</RootNamespace>
     <AssemblyName>KF_plugin</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
