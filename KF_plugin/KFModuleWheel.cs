@@ -109,6 +109,10 @@ namespace KerbalFoundries
         [KSPField]
         public bool disableTweakables = false;
 
+        /// <summary>Definition for resource to consume. Defaulted to stock EC</summary>
+        [KSPField]
+        public string resourceDefinition = "ElectricCharge";
+
         //persistent fields
 		/// <summary>Will be negative one (-1) if inverted.</summary>
         [KSPField(isPersistant = true)]
@@ -354,7 +358,7 @@ namespace KerbalFoundries
                 brakeSteeringTorque = Mathf.Clamp(brakeSteering * this.vessel.ctrlState.wheelSteer, 0, 1000); //if the calculated value is negative, disregard: Only brake on inside track. no need to direction correct as we are using the velocity or the part not the vessel.
 
                 float chargeConsumption = Time.deltaTime * chargeConsumptionRate * (Math.Abs(motorTorque) / 100);
-                electricCharge = part.RequestResource("ElectricCharge", chargeConsumption);
+                electricCharge = part.RequestResource(resourceDefinition, chargeConsumption);
                 float freeWheelRPM = 0;
 
                 if (!Equals(electricCharge, chargeConsumption))

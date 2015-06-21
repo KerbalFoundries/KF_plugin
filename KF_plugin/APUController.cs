@@ -9,7 +9,7 @@ namespace KerbalFoundries
 	{
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Throttle"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5f)]
 		public float throttleSetting = 50;
-		public ModuleEngines thisEngine;
+		public ModuleEnginesFX thisEngine;
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Mode"), UI_Toggle(disabledText = "Manual", enabledText = "Auto")]
 		public bool autoThrottle = true;
 		public float lastRatio = .5f;
@@ -54,7 +54,7 @@ namespace KerbalFoundries
 
 		public void FindEngine()
 		{
-			foreach (ModuleEngines me in part.GetComponentsInChildren<ModuleEngines>())
+			foreach (ModuleEnginesFX me in part.GetComponentsInChildren<ModuleEngines>())
 			{
 				print("Found an engine");
 				thisEngine = me;

@@ -42,6 +42,8 @@ namespace KerbalFoundries
         public string gridName;
         [KSPField]
         public string gimbalName;
+        [KSPField]
+        public string resourceDefinition = "ElectricCharge";
         bool isReady;
         Transform _grid;
         Transform _gimbal;
@@ -176,7 +178,7 @@ namespace KerbalFoundries
         {
             float chargeConsumption = (appliedRideHeight / 100) * (1 + SpringRate) * repulsorCount * Time.deltaTime * chargeConsumptionRate / 4;
             float requestCharge = chargeConsumption / effectPowerMax;
-            float electricCharge = part.RequestResource("ElectricCharge", requestCharge);
+            float electricCharge = part.RequestResource(resourceDefinition, requestCharge);
             return electricCharge;
         }
 
