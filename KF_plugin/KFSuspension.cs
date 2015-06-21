@@ -1,55 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace KerbalFoundries
 {
-    public class KFSuspension : PartModule
-    {
-        [KSPField]
-        public string colliderNames;
-        [KSPField]
-        public string susTravName;
-        [KSPField]
-        public string susTravAxis = "Y";
+	public class KFSuspension : PartModule
+	{
+		[KSPField]
+		public string colliderNames;
+		[KSPField]
+		public string susTravName;
+		[KSPField]
+		public string susTravAxis = "Y";
 
-        List<WheelCollider> colliders = new List<WheelCollider>();
-        Transform susTrav;
+		List<WheelCollider> colliders = new List<WheelCollider>();
+		Transform susTrav;
 
-        Vector3 initialPosition = new Vector3(0,0,0);
+		Vector3 initialPosition = new Vector3(0, 0, 0);
 
-        string[] colliderList;
+		string[] colliderList;
+
+		int objectCount;
+		int susTravIndex = 1;
 
 
-        int objectCount;
-        int susTravIndex = 1;
+		//persistent fields. Not to be used for config
+		[KSPField(isPersistant = true)]
+		public float lastFrameTraverse;
+		[KSPField(isPersistant = true)]
+		public float suspensionDistance;
 
+		const float tweakScaleCorrector = 1;
 
-        //persistent fields. Not to be used for config
-        [KSPField(isPersistant = true)]
-        public float lastFrameTraverse;
-        [KSPField(isPersistant = true)]
-        public float suspensionDistance;
+		bool isReady;
 
-        float tweakScaleCorrector = 1;
+		public override void OnStart(PartModule.StartState state)
+		{
+			base.OnStart(state);
+			if (HighLogic.LoadedSceneIsFlight)
+			{
+				//GameEvents.onGamePause.Add(new EventVoid.OnEvent(this.OnPause));
+				//GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(this.OnUnPause));
 
-        bool isReady;
-
-        public override void OnStart(PartModule.StartState state)
-        {
-            base.OnStart(state);
-            if (HighLogic.LoadedSceneIsFlight)
-            {
-
-                //GameEvents.onGamePause.Add(new EventVoid.OnEvent(this.OnPause));
-                //GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(this.OnUnPause));
-
-                colliderList = Extensions.SplitString(colliderNames);
+				colliderList = Extensions.SplitString(colliderNames);
                 
-                
-                for (int i = 0; i < colliderList.Count(); i++)
+				for (int i = 0; i < colliderList.Count(); i++)
                 {
                     colliders.Add(transform.SearchStartsWith(colliderList[i]).GetComponent<WheelCollider>());
                     objectCount++;

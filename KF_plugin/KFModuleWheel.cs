@@ -9,6 +9,7 @@ namespace KerbalFoundries
     public class KFModuleWheel : PartModule
     {
 		// disable RedundantDefaultFieldInitializer
+		// disable RedundantThisQualifier
 		
 		// Name definitions
         public string right = "right";
@@ -17,7 +18,7 @@ namespace KerbalFoundries
 
 		// Tweakables
         [KSPField(isPersistant = false, guiActive = true, guiName = "Wheel Settings")]
-        public string settings = "";
+        public string settings = string.Empty;
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group Number"), UI_FloatRange(minValue = 0, maxValue = 10f, stepIncrement = 1f)]
         public float groupNumber = 1;
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Torque Ratio"), UI_FloatRange(minValue = 0, maxValue = 2f, stepIncrement = .25f)]
@@ -100,7 +101,7 @@ namespace KerbalFoundries
         [KSPField]
         public string orientationObjectName = "Default";
 
-        /// <summary>I'm not sure</summary>
+        /// <summary>Is the part passive or not?</summary>
         [KSPField]
         public bool passivePart = false;
 
@@ -159,7 +160,6 @@ namespace KerbalFoundries
         [KSPField(isPersistant = false, guiActive = true, guiName = "Collider Mass", guiFormat = "F2")]
         public float _colliderMass = 0;
 
-
         public List<WheelCollider> wcList = new List<WheelCollider>();
         public ModuleAnimateGeneric retractionAnimation;
         
@@ -178,10 +178,9 @@ namespace KerbalFoundries
 
             _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
             
-
-            Vector3 partOrientationForward = new Vector3(0,0,0);
-            Vector3 partOrientationRight = new Vector3(0, 0, 0);
-            Vector3 partOrientationUp = new Vector3(0, 0, 0);
+            var partOrientationForward = new Vector3(0,0,0);
+            var partOrientationRight = new Vector3(0, 0, 0);
+            var partOrientationUp = new Vector3(0, 0, 0);
 
             if (!string.Equals(orientationObjectName, "Default"))
             {
@@ -241,12 +240,6 @@ namespace KerbalFoundries
                 currentRideHeight = rideHeight; //set up correct values from persistence
             else
                 currentRideHeight = 0;
-			/* SharpDevelop reports that these two "if" checks can be replaced with single line checks. - Gaalidas ... WRONG ... actually, not wrong, but suppressing for now.
-            isRetracted |= startRetracted;
-            currentRideHeight = !isRetracted ? rideHeight : 0;
-            smoothedRideHeight = currentRideHeight;
-            appliedRideHeight = smoothedRideHeight / 100;
-             */
             //print(appliedRideHeight);
            
 			if (HighLogic.LoadedSceneIsEditor && !hasRetract)
@@ -314,12 +307,10 @@ namespace KerbalFoundries
         {
             yield return new WaitForFixedUpdate();
             lastPartCount = this.vessel.Parts.Count();
-            print("Part Count " + lastPartCount);
-
-            print("Checking vessel mass");
+			print(string.Format("Part Count {0}", lastPartCount));
+            print("Checking vessel mass.");
             _colliderMass = ChangeColliderMass();
         }
-
 
         public override void OnFixedUpdate()
         {
@@ -351,15 +342,13 @@ namespace KerbalFoundries
     
             if (!isRetracted)
             {
-                
-
-                if (this.vessel.Parts.Count() != lastPartCount)
-                {
-                    print("vessel mass changed");
-                    _colliderMass = ChangeColliderMass();
-                    lastPartCount = this.vessel.Parts.Count();
-                    ApplySteeringSettings();
-                }
+				if (!Equals(this.vessel.Parts.Count(), lastPartCount))
+				{
+					print("Vessel mass changed.");
+					_colliderMass = ChangeColliderMass();
+					lastPartCount = this.vessel.Parts.Count();
+					ApplySteeringSettings();
+				}
 
                 motorTorque = (forwardTorque * directionCorrector * this.vessel.ctrlState.wheelThrottle) - (steeringTorque * this.vessel.ctrlState.wheelSteer); //forward and low speed steering torque. Direction controlled by precalulated directioncorrector
                 brakeSteeringTorque = Mathf.Clamp(brakeSteering * this.vessel.ctrlState.wheelSteer, 0, 1000); //if the calculated value is negative, disregard: Only brake on inside track. no need to direction correct as we are using the velocity or the part not the vessel.
@@ -471,7 +460,7 @@ namespace KerbalFoundries
                 if (KFMW)
                 {
                     KFMWList.Add(KFMW);
-                    print("found KFModuleWheel in " + this.vessel.parts[i].partInfo.name);
+					print(string.Format("Found KFModuleWheel in {0}.", this.vessel.parts[i].partInfo.name));
                     
                     colliderCount += KFMW.wcList.Count();
                 }
@@ -479,13 +468,12 @@ namespace KerbalFoundries
             float colliderMass = this.vessel.GetTotalMass() / colliderCount;
             print(colliderMass);
 
-            /// set all this up in the other wheels to prevent them having to do so themselves. First part has the honour.
+            // set all this up in the other wheels to prevent them having to do so themselves. First part has the honour.
             for (int i = 0; i < KFMWList.Count(); i++)
             {
-                    print("setting collidermass in other wheel " + this.vessel.parts[i].partInfo.name);
-
-                    KFMWList[i]._colliderMass = colliderMass;
-                    KFMWList[i].lastPartCount = partCount; //this should mean that the method does not get triggered for subsequent wheels.
+				print(string.Format("Setting collidermass in other wheel {0}.", this.vessel.parts[i].partInfo.name));
+				KFMWList[i]._colliderMass = colliderMass;
+				KFMWList[i].lastPartCount = partCount; //this should mean that the method does not get triggered for subsequent wheels.
             }
             
             return colliderMass;
@@ -550,8 +538,7 @@ namespace KerbalFoundries
             // if this isn't the case, needs fixing
             
             if (!retractionAnimation)
-                return; //the Log.Error line fails syntax check with 'The name 'Log' does not appear in the current context.
-
+                return; //the Log.Error line fails syntax check when 'The name 'Log' does not appear in the current context.
             retractionAnimation.Toggle();
         }
 

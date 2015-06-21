@@ -37,7 +37,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Local copy of the Rideheight parameter in the KFRepulsor module.</summary>
 		/// <remarks>Maximum value this will ever be is 8, which is the constant maximum for the parameter in the repulsor module.</remarks>
-		public float Rideheight;
+		public float rideHeight;
 		
 		// Class-wide disabled warnings in SharpDevelop
 		// disable AccessToStaticMemberViaDerivedType
@@ -111,10 +111,11 @@ namespace KerbalFoundries
 		public string logprefix = "[DustFX - Main]: ";
 		
 		bool isPaused;
+		bool isColorOverrideActive;
 		GameObject kfrepdustFx;
 		ParticleAnimator dustAnimator;
-		Color dustColor;
-		Color BiomeColor;
+		Color colorDust;
+		Color colorBiome;
 		
 		/// <summary>CollisionInfo class for the KFRepulsorDustFX module.</summary>
 		public class CollisionInfo
@@ -134,15 +135,9 @@ namespace KerbalFoundries
 		public override void OnStart(StartState state)
 		{
 			_KFRepulsor = part.GetComponentInChildren<KFRepulsor>();
-
-				// This allows me to get the parameter value from the current active part.
-			Rideheight = _KFRepulsor.rideHeight;
-				// Public variable is set to the value of the remote variable here.
-
 			// This allows me to get the parameter value from the current active part.
-			Rideheight = _KFRepulsor.rideHeight;
+			rideHeight = _KFRepulsor.rideHeight;
 			// Public variable is set to the value of the remote variable here.
-
 			
 			if (Equals(state, StartState.Editor) || Equals(state, StartState.None))
 				return;
@@ -191,11 +186,8 @@ namespace KerbalFoundries
 		public void OnCollisionStay(Collision col)
 		{
 			CollisionInfo cInfo;
-            if (string.Equals("ModuleWaterSlider.Collider", col.gameObject.name))
-            {
-                //do some stuff
-            }
-			if (isPaused || Equals(col.contacts.Length, 0) || Equals(Rideheight, 0))
+			isColorOverrideActive |= string.Equals("ModuleWaterSlider.Collider", col.gameObject.name);
+			if (isPaused || Equals(col.contacts.Length, 0) || Equals(rideHeight, 0))
 				return;
 			cInfo = KFRepulsorDustFX.GetClosestChild(part, col.contacts[0].point + part.rigidbody.velocity * Time.deltaTime);
 			if (!Equals(cInfo.KFRepDustFX, null))
@@ -248,25 +240,29 @@ namespace KerbalFoundries
 		/// <param name="col">The collider being referenced.</param>
 		void DustParticles(float speed, Vector3 contactPoint, Collider col)
 		{
+			var WaterColor = new Color(0.65f, 0.65f, 0.65f, 0.025f);
 			const string locallog = "DustParticles(): ";
-			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || Equals(Rideheight, 0))
+			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || Equals(rideHeight, 0))
 				return;
-			float appliedRideHeight = Mathf.Clamp((Rideheight / 2), 1, 4);
-			BiomeColor = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
-			if (Equals(BiomeColor, null))
+			float appliedRideHeight = Mathf.Clamp((rideHeight / 2), 1, 4);
+			colorBiome = !isColorOverrideActive ? KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
+			if (Equals(colorBiome, null))
+			{
 				Debug.Log(string.Format("{0}{1}Color \"BiomeColor\" is null!", logprefix, locallog));
+				return;
+			}
 			if (speed >= minScrapeSpeed)
 			{
-				if (!Equals(BiomeColor, dustColor))
+				if (!Equals(colorBiome, colorDust))
 				{
 					Color[] colors = dustAnimator.colorAnimation;
-					colors[0] = BiomeColor;
-					colors[1] = BiomeColor;
-					colors[2] = BiomeColor;
-					colors[3] = BiomeColor;
-					colors[4] = BiomeColor;
+					colors[0] = colorBiome;
+					colors[1] = colorBiome;
+					colors[2] = colorBiome;
+					colors[3] = colorBiome;
+					colors[4] = colorBiome;
 					dustAnimator.colorAnimation = colors;
-					dustColor = BiomeColor;
+					colorDust = colorBiome;
 				}
 				kfrepdustFx.transform.position = contactPoint;
 				kfrepdustFx.particleEmitter.maxEnergy = Mathf.Clamp((speed / maxDustEnergyDiv), minDustEnergy, maxDustEnergy);

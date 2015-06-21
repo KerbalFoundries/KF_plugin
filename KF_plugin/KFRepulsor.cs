@@ -15,10 +15,11 @@ namespace KerbalFoundries
     public class KFRepulsor : PartModule
     {
         // disable RedundantDefaultFieldInitializer
+		// disable RedundantThisQualifier
 
         public JointSpring userspring;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Repulsor Settings")]
-        public string settings = "";
+        public string settings = string.Empty;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Status")]
         public string status = "Nominal";
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group Number"), UI_FloatRange(minValue = 0, maxValue = 10f, stepIncrement = 1f)]
@@ -66,7 +67,6 @@ namespace KerbalFoundries
 		/// <remarks>This can be overridden in the part config for this module.</remarks>
 		[KSPField]
 		public string strInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.";
-		
         public override string GetInfo()
 		{
 			return strInfo;
@@ -74,11 +74,13 @@ namespace KerbalFoundries
         
         public override void OnStart(PartModule.StartState state)  //when started
         {
-            // degub only: print("onstart");
+			// debug only: print("onstart");
+			if (!isReady)
+				isReady = true; // Now it won't complain about not being used or initialized anywhere.
             base.OnStart(state);
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-            effectPowerMax = 1 * repulsorCount * chargeConsumptionRate * Time.fixedDeltaTime;
-            print("max effect power " + effectPowerMax);
+            effectPowerMax = repulsorCount * resourceConsumptionRate * Time.fixedDeltaTime; // Previously it had "1 * blahblahblah" in it, which is kinda stupid since 1x of any value is equal to that value.  So I nuked the "1 *" part. - Gaalidas
+			print(string.Format("Max effect power is {0}.", effectPowerMax));
 
             if (HighLogic.LoadedSceneIsFlight)
             {
@@ -96,11 +98,8 @@ namespace KerbalFoundries
                     b.suspensionDistance = 1f; //default to low setting to save stupid shenanigans on takeoff
                     wcList.Add(b);
                 }
-                
 				this.part.force_activate(); // Force the part active or OnFixedUpate is not called.
-
-                
-
+ 
                 foreach (ModuleWaterSlider mws in this.vessel.FindPartModulesImplementing<ModuleWaterSlider>())
                     _MWS = mws;
 				
@@ -114,8 +113,6 @@ namespace KerbalFoundries
                 StartCoroutine("UpdateHeight"); //start updating to height set before launch
             }
             DestroyBounds();
-            
-
 		}
 		// End start
 
@@ -161,7 +158,7 @@ namespace KerbalFoundries
 			if (!Equals(bounds, null))
             {
 				UnityEngine.Object.Destroy(bounds.gameObject);
-				print("destroying Bounds");
+				print("Destroying Bounds.");
             }
         }
 
@@ -241,28 +238,23 @@ namespace KerbalFoundries
                 }
                 StartCoroutine("Grow");
             }
-            Debug.LogWarning("UpdateHeight Couroutine Start");
-            while (Math.Round(currentRideHeight, 1) != appliedRideHeight)
-            {
-
-                currentRideHeight = Mathf.Lerp(currentRideHeight, appliedRideHeight, Time.deltaTime * 2);
-                Debug.LogWarning(currentRideHeight);
-                for (int i = 0; i < wcList.Count(); i++)
-                {
-                    wcList[i].suspensionDistance = appliedRideHeight / 20f;
-                }
-                yield return new WaitForFixedUpdate();
-            }
+            Debug.LogWarning("UpdateHeight Couroutine Start.");
+			while (!Equals(Math.Round(currentRideHeight, 1), appliedRideHeight))
+			{
+				currentRideHeight = Mathf.Lerp(currentRideHeight, appliedRideHeight, Time.deltaTime * 2);
+				Debug.LogWarning(currentRideHeight);
+				for (int i = 0; i < wcList.Count(); i++)
+					wcList[i].suspensionDistance = appliedRideHeight / 20f;
+				yield return new WaitForFixedUpdate();
+			}
             if (currentRideHeight < 1)
             {
-                Debug.LogWarning("Disabling Colliders");
-                for (int i = 0; i < wcList.Count(); i++)
-                {
-                    wcList[i].enabled = false;
-                }
+                Debug.LogWarning("Disabling Colliders.");
+				for (int i = 0; i < wcList.Count(); i++)
+					wcList[i].enabled = false;
                 StartCoroutine("Shrink");
             }
-            Debug.LogWarning("Finished height update");
+            Debug.LogWarning("Finished height update.");
         }
 
         [KSPAction("Retract")]
@@ -271,7 +263,7 @@ namespace KerbalFoundries
             if (rideHeight > 0)
             {
                 rideHeight -= 5f;
-                print("Retracting");
+                print("Retracting...");
                 StartCoroutine("UpdateHeight");
             }
 		}
@@ -282,7 +274,7 @@ namespace KerbalFoundries
             if (rideHeight < 100)
             {
                 rideHeight += 5f;
-                print("Extending");
+                print("Extending...");
                 StartCoroutine("UpdateHeight");
             }
 		}

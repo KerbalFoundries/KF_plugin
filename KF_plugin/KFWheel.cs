@@ -48,21 +48,17 @@ namespace KerbalFoundries
 		[KSPField(isPersistant = true)]
 		public float lastFrameTraverse;
 
-
-        //persistent fields. Not to be used for config
-        [KSPField(isPersistant = true)]
-        public float suspensionDistance;
-        [KSPField(isPersistant = true)]
-        public float suspensionSpring;
-        [KSPField(isPersistant = true)]
-        public float suspensionDamper;
-        [KSPField(isPersistant = true)]
-        public bool isConfigured = false;
+		//persistent fields. Not to be used for config
+		[KSPField(isPersistant = true)]
+		public float suspensionDistance;
+		[KSPField(isPersistant = true)]
+		public float suspensionSpring;
+		[KSPField(isPersistant = true)]
+		public float suspensionDamper;
+		[KSPField(isPersistant = true)]
+		public bool isConfigured = false;
         
         float tweakScaleCorrector = 1;
-
-
-
 
 		//object types
 		WheelCollider _wheelCollider;
@@ -97,7 +93,7 @@ namespace KerbalFoundries
 					{
 						_wheelCollider = wc;
 						suspensionDistance = wc.suspensionDistance;
-						Debug.LogError("suspensionDistance is" + suspensionDistance);
+						Debug.LogError(string.Format("SuspensionDistance is {0}.", suspensionDistance));
 						isConfigured = true;
 					}
 				}

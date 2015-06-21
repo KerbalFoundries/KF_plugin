@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace KerbalFoundries
 {
-
-
     public static class Extensions
     {
         // disable EmptyGeneralCatchClause

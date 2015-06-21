@@ -10,36 +10,27 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class RepulsorSkim : MonoBehaviour
     {
         void Start()
         {
             print("RepulsorSkim Start");
-
             int repulsorCount = 0;
-
-            foreach (Vessel va in FlightGlobals.Vessels)
-
-            {
-                foreach (Part PA in va.parts)
-                {
-
-                    foreach (KFRepulsor RA in PA.GetComponentsInChildren<KFRepulsor>())
-                        repulsorCount++;
-
-                    foreach (RepulsorWheel RA in PA.GetComponentsInChildren<RepulsorWheel>())
-                        repulsorCount++;
-                }
-
+			foreach (Vessel va in FlightGlobals.Vessels)
+			{
+				foreach (Part PA in va.parts)
+				{
+					foreach (KFRepulsor RA in PA.GetComponentsInChildren<KFRepulsor>())
+						repulsorCount++;
+					foreach (RepulsorWheel RA in PA.GetComponentsInChildren<RepulsorWheel>())
+						repulsorCount++;
+				}
                 if (repulsorCount > 0)
                     va.rootPart.AddModule("ModuleWaterSlider");
-            }
-            }
-
-
-        }
+			}
+		}
+	}
 
     public class ModuleWaterSlider : PartModule
     {

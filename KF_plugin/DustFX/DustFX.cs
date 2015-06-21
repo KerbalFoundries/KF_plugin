@@ -130,8 +130,8 @@ namespace KerbalFoundries
 		bool isPaused;
 		GameObject kfdustFx;
 		ParticleAnimator dustAnimator;
-		Color dustColor;
-		Color BiomeColor;
+		Color colorDust;
+		Color colorBiome;
 
 		/// <summary>CollisionInfo class for the DustFX module.</summary>
 		public class CollisionInfo
@@ -143,9 +143,17 @@ namespace KerbalFoundries
 			}
 		}
 		
+		// Basic override for the info class.  Already has its own XML documentation.
 		public override string GetInfo()
 		{
 			return partInfoString;
+		}
+		
+		/// <summary>Checks if the impact sound data or the object has null or empty information in it.</summary>
+		/// <returns>True if null is detected.</returns>
+		public bool isImpactDataNull()
+		{
+			return string.IsNullOrEmpty(wheelImpactSound);
 		}
 		
 		public override void OnStart(StartState state)
@@ -161,14 +169,14 @@ namespace KerbalFoundries
 				return;
 			if (dustEffects)
 				SetupParticles();
-			if (wheelImpact && !string.IsNullOrEmpty(wheelImpactSound))
+			if (wheelImpact && !isImpactDataNull())
 				DustAudio();
 			GameEvents.onGamePause.Add(OnPause);
 			GameEvents.onGameUnpause.Add(OnUnpause);
 		}
 		
 		/// <summary>Defines the particle effects used in this module.</summary>
-		void SetupParticles()
+		public void SetupParticles()
 		{
 			const string locallog = "SetupParticles(): ";
 			if (!dustEffects)
@@ -245,7 +253,7 @@ namespace KerbalFoundries
 		/// <param name="parent">The parent part whose children should be tested.</param>
 		/// <param name="point">The point to test the distance from.</param>
 		/// <returns>The nearest child part with a DustFX module, or null if the parent part is nearest.</returns>
-		static CollisionInfo GetClosestChild(Part parent, Vector3 point)
+		public static CollisionInfo GetClosestChild(Part parent, Vector3 point)
 		{
 			float parentDistance = Vector3.Distance(parent.transform.position, point);
 			float minDistance = parentDistance;
@@ -281,29 +289,29 @@ namespace KerbalFoundries
 		/// <param name="speed">Speed of the part which is scraping.</param>
 		/// <param name="contactPoint">The point at which the collider and the scraped surface make contact.</param>
 		/// <param name="col">The collider being referenced.</param>
-		void DustParticles(float speed, Vector3 contactPoint, Collider col)
+		public void DustParticles(float speed, Vector3 contactPoint, Collider col)
 		{
 			const string locallog = "DustParticles(): ";
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null))
 				return;
 			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
 				tweakScaleCorrector = 1f;
-			BiomeColor = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
-			if (Equals(BiomeColor, null))
+			colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
+			if (Equals(colorBiome, null))
 				Debug.Log(string.Format("{0}{1}Color \"BiomeColor\" is null!", logprefix, locallog)); 
 			if (speed >= minScrapeSpeed)
 			{
-				if (!Equals(BiomeColor, dustColor))
+				if (!Equals(colorBiome, colorDust))
 				{
 					Color[] colors = dustAnimator.colorAnimation; 
-					colors[0] = BiomeColor;
-					colors[1] = BiomeColor;
-					colors[2] = BiomeColor;
-					colors[3] = BiomeColor;
-					colors[4] = BiomeColor;
+					colors[0] = colorBiome;
+					colors[1] = colorBiome;
+					colors[2] = colorBiome;
+					colors[3] = colorBiome;
+					colors[4] = colorBiome;
 					dustAnimator.colorAnimation = colors;
-					dustAnimator.sizeGrow = -0.5f; // Testing, lets see if they will shrink over time slightly.
-					dustColor = BiomeColor;
+					//dustAnimator.sizeGrow = -0.5f; // Testing, lets see if they will shrink over time slightly.
+					colorDust = colorBiome;
 				}
 				kfdustFx.transform.position = contactPoint;
 				kfdustFx.particleEmitter.maxEnergy = Mathf.Clamp(((speed / maxDustEnergyDiv) * tweakScaleCorrector), minDustEnergy, maxDustEnergy);
@@ -320,14 +328,10 @@ namespace KerbalFoundries
 		/// <summary>Called when the game enters a "paused" state.</summary>
 		void OnPause()
 		{
-            //Debug.LogError("Enter OnPause");
 			isPaused = true;
-            //Debug.LogError("Set isPaused");
 			kfdustFx.particleEmitter.enabled = false;
-            //Debug.LogError("disabled particle emitter");
-			if (wheelImpact && (!Equals(WheelImpactSound, null) || !Equals(WheelImpactSound.audio, null)))
+			if (wheelImpact && !isImpactDataNull())
 				WheelImpactSound.audio.Stop();
-            //Debug.LogError("disabled sound");
 		}
 		
 		/// <summary>Called when the game leaves a "paused" state.</summary>
@@ -340,7 +344,7 @@ namespace KerbalFoundries
 		/// <summary>Called when the object being referenced is destroyed, or when the module instance is deactivated.</summary>
 		void OnDestroy()
 		{
-			if (wheelImpact && (!Equals(WheelImpactSound, null) || !Equals(WheelImpactSound.audio, null)))
+			if (wheelImpact && !isImpactDataNull())
 				WheelImpactSound.audio.Stop();
 			GameEvents.onGamePause.Remove(OnPause);
 			GameEvents.onGameUnpause.Remove(OnUnpause);
@@ -356,9 +360,8 @@ namespace KerbalFoundries
 		/// <summary>Sets up and maintains the audio effect which is, currently, not widely used.</summary>
 		void DustAudio()
 		{
-			if (!wheelImpact || Equals(wheelImpactSound, string.Empty))
+			if (!wheelImpact || isImpactDataNull())
 				return;
-            //Debug.LogError("continuing to add FXGroup");
 			WheelImpactSound = new FXGroup("WheelImpactSound");
 			part.fxGroups.Add(WheelImpactSound);
 			WheelImpactSound.audio = gameObject.AddComponent<AudioSource>();
@@ -368,15 +371,15 @@ namespace KerbalFoundries
 			WheelImpactSound.audio.Stop();
 			WheelImpactSound.audio.loop = false;
 			WheelImpactSound.audio.volume = GetShipVolume();
-            //Debug.LogError("Finished adding FX Group");
 		}
 		
 		/// <summary>Called when the part impacts with a surface with enough magnitude to be audible.</summary>
 		public void DustImpact()
 		{
-			if (wheelImpact && (Equals(WheelImpactSound, null) || Equals(wheelImpactSound, string.Empty)))
+			if (wheelImpact && isImpactDataNull())
 			{
 				WheelImpactSound.audio.Stop();
+				wheelImpact = false;
 				return;
 			}
 			WheelImpactSound.audio.pitch = UnityEngine.Random.Range(1 - pitchRange, 1 + pitchRange);
