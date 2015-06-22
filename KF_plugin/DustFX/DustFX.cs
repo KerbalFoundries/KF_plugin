@@ -164,13 +164,15 @@ namespace KerbalFoundries
 			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
 			if (!Equals(tweakScaleCorrector, 0))
 				Debug.Log(string.Format("{0}{1}TSWheelCorrector = {2}", logprefix, locallog, tweakScaleCorrector));
-			
-			if (Equals(state, StartState.Editor) || Equals(state, StartState.None))
-				return;
-			if (dustEffects)
-				SetupParticles();
-			if (wheelImpact && !isImpactDataNull())
-				DustAudio();
+
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+
+                if (dustEffects)
+                    SetupParticles();
+                if (wheelImpact && !isImpactDataNull())
+                    DustAudio();
+            }
 			GameEvents.onGamePause.Add(OnPause);
 			GameEvents.onGameUnpause.Add(OnUnpause);
 		}
@@ -345,13 +347,13 @@ namespace KerbalFoundries
 		void OnDestroy()
 		{
             
-			if (wheelImpact && !isImpactDataNull())
+			if (wheelImpact && !isImpactDataNull() && HighLogic.LoadedSceneIsFlight)
 				WheelImpactSound.audio.Stop();
-            Debug.LogWarning("stopped Audio");
+            //Debug.LogWarning("stopped Audio");
 			GameEvents.onGamePause.Remove(OnPause);
-            Debug.LogWarning("Removed OnPause hook");
+            //Debug.LogWarning("Removed OnPause hook");
 			GameEvents.onGameUnpause.Remove(OnUnpause);
-            Debug.LogWarning("Removed OnUnPause hook");
+            //Debug.LogWarning("Removed OnUnPause hook");
 		}
 		
 		/// <summary>Gets the current volume setting for Ship sounds.</summary>
