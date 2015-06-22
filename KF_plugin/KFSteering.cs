@@ -35,7 +35,7 @@ namespace KerbalFoundries
             while (true)
             {
                 Vector3 newSteeringAngle = initialSteeringAngle;
-                newSteeringAngle[steeringIndex] += _KFModuleWheel.steeringAngleSmoothed;
+                newSteeringAngle[steeringIndex] += _KFModuleWheel.steeringAngle;
                 _steering.transform.localEulerAngles = newSteeringAngle;
                 yield return new WaitForFixedUpdate();
             }

@@ -146,10 +146,12 @@ namespace KerbalFoundries
         float effectPower;
         float trackRPM = 0;
         float lastPartCount;
+        float steeringInputSmoothed;
+        float throttleInputSmoothed;
 
 		// Stuff deliberately made available to other modules:
         public float steeringAngle;
-        public float steeringAngleSmoothed;
+        //public float steeringAngleSmoothed;
         public float appliedRideHeight;
         public int wheelCount;
         
@@ -332,6 +334,9 @@ namespace KerbalFoundries
             float steeringTorque;
             float brakeSteeringTorque;
 
+            throttleInputSmoothed = Mathf.Lerp(throttleInputSmoothed, this.vessel.ctrlState.wheelThrottle + this.vessel.ctrlState.wheelThrottleTrim, smoothSpeed * Time.deltaTime);
+            steeringInputSmoothed = Mathf.Lerp(steeringInputSmoothed, this.vessel.ctrlState.wheelSteer + this.vessel.ctrlState.wheelSteerTrim, smoothSpeed * Time.deltaTime);
+
             Vector3 travelVector = this.vessel.GetSrfVelocity();
 
             float travelDirection = Vector3.Dot(this.part.transform.forward, travelVector); //compare travel velocity with the direction the part is pointed.
@@ -341,7 +346,7 @@ namespace KerbalFoundries
             {
                 steeringTorque = torqueSteeringCurve.Evaluate((float)this.vessel.srfSpeed / tweakScaleCorrector) * torque * steeringInvert; //low speed steering mode. Differential motor torque
                 brakeSteering = brakeSteeringCurve.Evaluate(travelDirection) / tweakScaleCorrector * steeringInvert * torque; //high speed steering. Brake on inside track because Unity seems to weight reverse motor torque less at high speed.
-                steeringAngle = (steeringCurve.Evaluate((float)this.vessel.srfSpeed)) * -this.vessel.ctrlState.wheelSteer * steeringRatio * steeringCorrector * steeringInvert; //low speed steering mode. Differential motor torque
+                steeringAngle = (steeringCurve.Evaluate((float)this.vessel.srfSpeed)) * -steeringInputSmoothed * steeringRatio * steeringCorrector * steeringInvert; //low speed steering mode. Differential motor torque
             }
             else
             {
@@ -360,8 +365,8 @@ namespace KerbalFoundries
 					ApplySteeringSettings();
 				}
 
-                motorTorque = (forwardTorque * directionCorrector * this.vessel.ctrlState.wheelThrottle) - (steeringTorque * this.vessel.ctrlState.wheelSteer); //forward and low speed steering torque. Direction controlled by precalulated directioncorrector
-                brakeSteeringTorque = Mathf.Clamp(brakeSteering * this.vessel.ctrlState.wheelSteer, 0, 1000); //if the calculated value is negative, disregard: Only brake on inside track. no need to direction correct as we are using the velocity or the part not the vessel.
+                motorTorque = (forwardTorque * directionCorrector * throttleInputSmoothed) - (steeringTorque * steeringInputSmoothed); //forward and low speed steering torque. Direction controlled by precalulated directioncorrector
+                brakeSteeringTorque = Mathf.Clamp(brakeSteering * steeringInputSmoothed, 0, 1000); //if the calculated value is negative, disregard: Only brake on inside track. no need to direction correct as we are using the velocity or the part not the vessel.
 
                 float resourceConsumption = Time.deltaTime * resourceConsumptionRate * (Math.Abs(motorTorque) / 100);
                 requestedResource = part.RequestResource(resourceName, resourceConsumption);
@@ -405,7 +410,7 @@ namespace KerbalFoundries
                         freeWheelRPM += wcList[i].rpm;
 
 					if (hasSteering)
-                        wcList[i].steerAngle = steeringAngleSmoothed;
+                        wcList[i].steerAngle = steeringAngle;
                 }
 
                 if (groundedWheels >= 1)
@@ -432,7 +437,7 @@ namespace KerbalFoundries
             }
             smoothedRideHeight = Mathf.Lerp(smoothedRideHeight, currentRideHeight, Time.deltaTime * 2);
             appliedRideHeight = smoothedRideHeight / 100;
-            steeringAngleSmoothed = Mathf.Lerp(steeringAngleSmoothed, steeringAngle, Time.deltaTime * smoothSpeed);
+            //steeringAngleSmoothed = steeringAngle;
             
 		}
 		//End OnFixedUpdate

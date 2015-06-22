@@ -83,7 +83,7 @@ namespace KerbalFoundries
 				isReady = true; // Now it won't complain about not being used or initialized anywhere.
             base.OnStart(state);
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-            effectPowerMax = repulsorCount * resourceConsumptionRate * Time.fixedDeltaTime; // Previously it had "1 * blahblahblah" in it, which is kinda stupid since 1x of any value is equal to that value.  So I nuked the "1 *" part. - Gaalidas
+            effectPowerMax = repulsorCount * chargeConsumptionRate * Time.fixedDeltaTime; // Previously it had "1 * blahblahblah" in it, which is kinda stupid since 1x of any value is equal to that value.  So I nuked the "1 *" part. - Gaalidas
 			print(string.Format("Max effect power is {0}.", effectPowerMax));
 
             if (HighLogic.LoadedSceneIsFlight)
