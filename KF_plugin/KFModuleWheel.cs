@@ -61,11 +61,11 @@ namespace KerbalFoundries
         [KSPField]
 		public float brakingTorque;
 		
-		/// <summary>Constant brake value aplpied to simulate rolling resistance.</summary>
+		/// <summary>Brake value applied to simulate rolling resistance.</summary>
         [KSPField]
 		public FloatCurve rollingResistance = new FloatCurve();
 		
-		/// <summary>Constant brake value aplpied to simulate rolling resistance.</summary>
+		/// <summary>Brake value applied to simulate rolling resistance.</summary>
         [KSPField]
 		public FloatCurve loadCoefficient = new FloatCurve();
 		
@@ -80,9 +80,9 @@ namespace KerbalFoundries
 		/// <summary>Rev limiter. Stops freewheel runaway and sets a speed limit.</summary>
         [KSPField]
 		public float maxRPM = 350;
-		
-		/// <summary>How fast to consume the requested resource.</summary>
-		/// <remarks>Default: 1.0</remarks>
+
+        /// <summary>How fast to consume the requested resource.</summary>
+        /// <remarks>Default: 1.0</remarks>
         [KSPField]
 		public float resourceConsumptionRate = 1f;
 
@@ -110,14 +110,9 @@ namespace KerbalFoundries
         [KSPField]
         public bool disableTweakables = false;
 
-        /// <summary>Name of the resource being requested.</summary>
-        /// <remarks>Default: ElectricCharge</remarks>
+        /// <summary>Definition for resource to consume. Defaulted to stock EC</summary>
         [KSPField]
-		public string resourceName = "ElectricCharge";
-		
-        /// <summary>Status text for the "Low Charge" state.</summary>
-        [KSPField]
-		public string statusLowResource = "Low Charge";
+        public string resourceDefinition = "ElectricCharge";
 
         //persistent fields
 		/// <summary>Will be negative one (-1) if inverted.</summary>
@@ -163,6 +158,8 @@ namespace KerbalFoundries
         public float smoothedRideHeight;
 
         //Visible fields
+        [KSPField(isPersistant = false, guiActive = true, guiName = "Last Vessel Mass", guiFormat = "F1")]
+        public float lastVesselMass;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Vessel Mass", guiFormat = "F1")]
         public float vesselMass;
         [KSPField(isPersistant = false, guiActive = true, guiName = "RPM", guiFormat = "F1")]
@@ -171,6 +168,10 @@ namespace KerbalFoundries
         public int _colliderCount = 0;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Collider Mass", guiFormat = "F2")]
         public float _colliderMass = 0;
+        [KSPField(isPersistant = false, guiActive = true, guiName = "Collider load", guiFormat = "F3")]
+        public float colliderLoad = 0;
+        [KSPField(isPersistant = false, guiActive = true, guiName = "Rolling Friction", guiFormat = "F3")]
+        public float rollingFriction;
 
         public List<WheelCollider> wcList = new List<WheelCollider>();
         public ModuleAnimateGeneric retractionAnimation;
@@ -327,8 +328,16 @@ namespace KerbalFoundries
         public override void OnFixedUpdate()
         {
             vesselMass = this.vessel.GetTotalMass();
+            if (!Equals(Math.Round(vesselMass, 1),Math.Round(lastVesselMass, 1) ))
+            {
+                print("Vessel mass changed.");
+                _colliderMass = ChangeColliderMass();
+                lastPartCount = this.vessel.Parts.Count();
+                ApplySteeringSettings();
+            }
+
 			// User input
-            float requestedResource;
+            float electricCharge;
             float unitLoad = 0;
 			float forwardTorque = torqueCurve.Evaluate((float)this.vessel.srfSpeed / tweakScaleCorrector) * torque; //this is used a lot, so may as well calculate once
             float steeringTorque;
@@ -357,25 +366,17 @@ namespace KerbalFoundries
     
             if (!isRetracted)
             {
-				if (!Equals(this.vessel.Parts.Count(), lastPartCount))
-				{
-					print("Vessel mass changed.");
-					_colliderMass = ChangeColliderMass();
-					lastPartCount = this.vessel.Parts.Count();
-					ApplySteeringSettings();
-				}
-
                 motorTorque = (forwardTorque * directionCorrector * throttleInputSmoothed) - (steeringTorque * steeringInputSmoothed); //forward and low speed steering torque. Direction controlled by precalulated directioncorrector
                 brakeSteeringTorque = Mathf.Clamp(brakeSteering * steeringInputSmoothed, 0, 1000); //if the calculated value is negative, disregard: Only brake on inside track. no need to direction correct as we are using the velocity or the part not the vessel.
 
-                float resourceConsumption = Time.deltaTime * resourceConsumptionRate * (Math.Abs(motorTorque) / 100);
-                requestedResource = part.RequestResource(resourceName, resourceConsumption);
+                float chargeConsumption = Time.deltaTime * resourceConsumptionRate * (Math.Abs(motorTorque) / 100);
+                electricCharge = part.RequestResource(resourceDefinition, chargeConsumption);
                 float freeWheelRPM = 0;
 
-                if (!Equals(requestedResource, resourceConsumption))
+                if (!Equals(electricCharge, chargeConsumption))
                 {
                     motorTorque = 0;
-                    status = statusLowResource;
+                    status = "Low Charge";
                 }
                 else if (Math.Abs(averageTrackRPM) >= maxRPM)
                 {
@@ -384,7 +385,7 @@ namespace KerbalFoundries
                 }
                 else
                     status = "Nominal";
-
+                colliderLoad = 0;
 				for (int i = 0; i < wcList.Count(); i++)
                 {
 				
@@ -394,9 +395,9 @@ namespace KerbalFoundries
                     //unitLoad /= wcList.Count();
                     //unitLoad *= 10;
                     //print("unitLoad = " + unitLoad);
-                    var rollingFriction = rollingResistance.Evaluate((float)this.vessel.srfSpeed) * loadCoefficient.Evaluate((float)unitLoad); // 
+                    // 
                     //print("rollingfriction = "+ rollingFriction);
-
+                    
                     wcList[i].motorTorque = motorTorque;
                     wcList[i].brakeTorque = brakeTorque + brakeSteeringTorque + rollingFriction;
                     wcList[i].mass = _colliderMass;
@@ -405,6 +406,7 @@ namespace KerbalFoundries
                     {
                         groundedWheels++;
                         trackRPM += wcList[i].rpm;
+                        colliderLoad += hit.force;
                     }
 					else if (!Equals(wcList[i].suspensionDistance, 0)) //the sprocket colliders could be doing anything. Don't count them.
                         freeWheelRPM += wcList[i].rpm;
@@ -414,7 +416,11 @@ namespace KerbalFoundries
                 }
 
                 if (groundedWheels >= 1)
+                {
                     averageTrackRPM = trackRPM / groundedWheels;
+                    colliderLoad /= groundedWheels;
+                    rollingFriction = rollingResistance.Evaluate((float)this.vessel.srfSpeed) + loadCoefficient.Evaluate((float)colliderLoad);
+                }
                 else
                     averageTrackRPM = freeWheelRPM / wheelCount;
 				
@@ -445,6 +451,7 @@ namespace KerbalFoundries
         public override void OnUpdate()
         {
             base.OnUpdate();
+            
             commandId = this.vessel.referenceTransformId;
 			if (!Equals(commandId, lastCommandId))
             {
@@ -472,7 +479,7 @@ namespace KerbalFoundries
             for (int i = 0; i < partCount; i++)
             {
                 var KFMW = this.vessel.parts[i].GetComponent<KFModuleWheel>();
-                if (KFMW)
+                if (!Equals(KFMW, null) )
                 {
                     KFMWList.Add(KFMW);
 					print(string.Format("Found KFModuleWheel in {0}.", this.vessel.parts[i].partInfo.name));
@@ -486,9 +493,10 @@ namespace KerbalFoundries
             // set all this up in the other wheels to prevent them having to do so themselves. First part has the honour.
             for (int i = 0; i < KFMWList.Count(); i++)
             {
-				print(string.Format("Setting collidermass in other wheel {0}.", this.vessel.parts[i].partInfo.name));
+				print(string.Format("Setting collidermass in other wheel {0}.", KFMWList[i].part.partInfo.name));
 				KFMWList[i]._colliderMass = colliderMass;
-				KFMWList[i].lastPartCount = partCount; //this should mean that the method does not get triggered for subsequent wheels.
+				KFMWList[i].lastVesselMass = this.vesselMass; //this should mean that the method does not get triggered for subsequent wheels.
+                KFMWList[i].vesselMass = this.vesselMass;
             }
             
             return colliderMass;

@@ -344,10 +344,14 @@ namespace KerbalFoundries
 		/// <summary>Called when the object being referenced is destroyed, or when the module instance is deactivated.</summary>
 		void OnDestroy()
 		{
+            
 			if (wheelImpact && !isImpactDataNull())
 				WheelImpactSound.audio.Stop();
+            Debug.LogWarning("stopped Audio");
 			GameEvents.onGamePause.Remove(OnPause);
+            Debug.LogWarning("Removed OnPause hook");
 			GameEvents.onGameUnpause.Remove(OnUnpause);
+            Debug.LogWarning("Removed OnUnPause hook");
 		}
 		
 		/// <summary>Gets the current volume setting for Ship sounds.</summary>
