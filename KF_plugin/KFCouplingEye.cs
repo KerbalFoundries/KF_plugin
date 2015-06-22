@@ -6,6 +6,8 @@ namespace KerbalFoundries
 {
     public class KFCouplingEyeOLD : PartModule
     {
+		// disable RedundantThisQualifier
+		
         public bool isHitched;
         public bool isPacked;
         public Transform _hitchObject;
@@ -21,7 +23,7 @@ namespace KerbalFoundries
         {
 			if (Equals(vessel, this.vessel))
             {
-                Debug.LogWarning("Unpacked and this vessel");
+                Debug.LogWarning("Unpacked this vessel.");
                 isPacked = false;
             }
         }
@@ -30,7 +32,7 @@ namespace KerbalFoundries
         {
 			if (Equals(vessel, this.vessel))
             {
-                Debug.LogWarning("Packed and this vessel");
+                Debug.LogWarning("Packed this vessel.");
                 isPacked = true;
             }
         }

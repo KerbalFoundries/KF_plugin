@@ -42,8 +42,6 @@ namespace KerbalFoundries
         public string gridName;
         [KSPField]
         public string gimbalName;
-        [KSPField]
-        public string resourceDefinition = "ElectricCharge";
         bool isReady;
         Transform _grid;
         Transform _gimbal;
@@ -59,12 +57,16 @@ namespace KerbalFoundries
 
         public float repulsorCount = 0;
         [KSPField]
-        public float chargeConsumptionRate = 1f;
+        public float resourceConsumptionRate = 1f;
         //begin start
         public List<WheelCollider> wcList = new List<WheelCollider>();
         //public List<float> susDistList = new List<float>();
         ModuleWaterSlider _MWS;
 
+		/// <summary>The name of the resource to consume.</summary>
+        [KSPField]
+		public string resourceName = "ElectricCharge";
+        
         /// <summary>This is the info string that will display when the part info is shown.</summary>
 		/// <remarks>This can be overridden in the part config for this module.</remarks>
 		[KSPField]
@@ -174,11 +176,11 @@ namespace KerbalFoundries
             _MWS.colliderHeight = -2.5f;
         }
 
-        public float ChargeConsumption()
+        public float ResourceConsumption()
         {
-            float chargeConsumption = (appliedRideHeight / 100) * (1 + SpringRate) * repulsorCount * Time.deltaTime * chargeConsumptionRate / 4;
-            float requestCharge = chargeConsumption / effectPowerMax;
-            float electricCharge = part.RequestResource(resourceDefinition, requestCharge);
+            float resourceConsumption = (appliedRideHeight / 100) * (1 + SpringRate) * repulsorCount * Time.deltaTime * resourceConsumptionRate / 4;
+            float requestResource = resourceConsumption / effectPowerMax;
+            float electricCharge = part.RequestResource(resourceName, requestResource);
             return electricCharge;
         }
 
@@ -194,7 +196,7 @@ namespace KerbalFoundries
             {
 				 // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
-                float electricCharge = ChargeConsumption();
+                float requestRecource = ResourceConsumption();
                 
                 //print(electricCharge);
                 // = Extensions.GetBattery(this.part);

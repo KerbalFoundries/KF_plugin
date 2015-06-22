@@ -81,9 +81,10 @@ namespace KerbalFoundries
         [KSPField]
 		public float maxRPM = 350;
 		
-		/// <summary>How fast to consume ElectricCharge.</summary>
+		/// <summary>How fast to consume the requested resource.</summary>
+		/// <remarks>Default: 1.0</remarks>
         [KSPField]
-		public float chargeConsumptionRate = 1f;
+		public float resourceConsumptionRate = 1f;
 
         /// <summary>Enables retraction of the suspension.</summary>
         [KSPField]
@@ -109,9 +110,14 @@ namespace KerbalFoundries
         [KSPField]
         public bool disableTweakables = false;
 
-        /// <summary>Definition for resource to consume. Defaulted to stock EC</summary>
+        /// <summary>Name of the resource being requested.</summary>
+        /// <remarks>Default: ElectricCharge</remarks>
         [KSPField]
-        public string resourceDefinition = "ElectricCharge";
+		public string resourceName = "ElectricCharge";
+		
+        /// <summary>Status text for the "Low Charge" state.</summary>
+        [KSPField]
+		public string statusLowResource = "Low Charge";
 
         //persistent fields
 		/// <summary>Will be negative one (-1) if inverted.</summary>
@@ -320,7 +326,7 @@ namespace KerbalFoundries
         {
             vesselMass = this.vessel.GetTotalMass();
 			// User input
-            float electricCharge;
+            float requestedResource;
             float unitLoad = 0;
 			float forwardTorque = torqueCurve.Evaluate((float)this.vessel.srfSpeed / tweakScaleCorrector) * torque; //this is used a lot, so may as well calculate once
             float steeringTorque;
@@ -357,14 +363,14 @@ namespace KerbalFoundries
                 motorTorque = (forwardTorque * directionCorrector * this.vessel.ctrlState.wheelThrottle) - (steeringTorque * this.vessel.ctrlState.wheelSteer); //forward and low speed steering torque. Direction controlled by precalulated directioncorrector
                 brakeSteeringTorque = Mathf.Clamp(brakeSteering * this.vessel.ctrlState.wheelSteer, 0, 1000); //if the calculated value is negative, disregard: Only brake on inside track. no need to direction correct as we are using the velocity or the part not the vessel.
 
-                float chargeConsumption = Time.deltaTime * chargeConsumptionRate * (Math.Abs(motorTorque) / 100);
-                electricCharge = part.RequestResource(resourceDefinition, chargeConsumption);
+                float resourceConsumption = Time.deltaTime * resourceConsumptionRate * (Math.Abs(motorTorque) / 100);
+                requestedResource = part.RequestResource(resourceName, resourceConsumption);
                 float freeWheelRPM = 0;
 
-                if (!Equals(electricCharge, chargeConsumption))
+                if (!Equals(requestedResource, resourceConsumption))
                 {
                     motorTorque = 0;
-                    status = "Low Charge";
+                    status = statusLowResource;
                 }
                 else if (Math.Abs(averageTrackRPM) >= maxRPM)
                 {
