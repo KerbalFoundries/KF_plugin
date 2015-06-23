@@ -91,6 +91,7 @@ namespace KerbalFoundries
                 _grid = transform.Search(gridName);
                 _gridScale = _grid.transform.localScale;
                 _gimbal = transform.Search(gimbalName);
+                SetupWaterSlider();
 
                 foreach (WheelCollider b in this.part.GetComponentsInChildren<WheelCollider>())
                 {
@@ -103,9 +104,9 @@ namespace KerbalFoundries
                     wcList.Add(b);
                 }
 				this.part.force_activate(); // Force the part active or OnFixedUpate is not called.
- 
-                foreach (ModuleWaterSlider mws in this.vessel.FindPartModulesImplementing<ModuleWaterSlider>())
-                    _MWS = mws;
+
+                
+
 				
                 //print("water slider height is" + _MWS.colliderHeight);
                 if (pointDown && Equals(this.vessel, FlightGlobals.ActiveVessel))
@@ -119,6 +120,15 @@ namespace KerbalFoundries
             DestroyBounds();
 		}
 		// End start
+
+        void SetupWaterSlider()
+        {
+            _MWS = this.vessel.GetComponent<ModuleWaterSlider>();
+            if (!Equals(_MWS, null))
+                Debug.LogError("Found MWS");
+            else
+                Debug.LogError("did not find MWS");
+       }
 
         /// <summary>A "Shrink" coroutine for steering.</summary>
         IEnumerator Shrink()
@@ -243,7 +253,7 @@ namespace KerbalFoundries
                 StartCoroutine("Grow");
             }
             Debug.LogWarning("UpdateHeight Couroutine Start.");
-			while (!Equals(Math.Round(currentRideHeight, 1), appliedRideHeight))
+			while (!Equals(Mathf.Round(currentRideHeight), appliedRideHeight))
 			{
 				currentRideHeight = Mathf.Lerp(currentRideHeight, appliedRideHeight, Time.deltaTime * 2);
 				Debug.LogWarning(currentRideHeight);
