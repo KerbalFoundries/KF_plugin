@@ -127,6 +127,7 @@ namespace KerbalFoundries
 			}
 		}
 		
+		// Has it's own XML documentation, no need to add to it here.
 		public override string GetInfo()
 		{
 			return partInfoString;
@@ -245,7 +246,7 @@ namespace KerbalFoundries
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || Equals(rideHeight, 0))
 				return;
 			float appliedRideHeight = Mathf.Clamp((rideHeight / 2), 1, 4);
-			colorBiome = !isColorOverrideActive ? KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
+			colorBiome = !isColorOverrideActive ? DustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
 			if (Equals(colorBiome, null))
 			{
 				Debug.Log(string.Format("{0}{1}Color \"BiomeColor\" is null!", logprefix, locallog));

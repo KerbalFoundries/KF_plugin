@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-	public class KFBiomeDustColorInfo : IPersistenceLoad
+	public class BiomeDustColorInfo : IPersistenceLoad
 	{
 		/// <summary>Prefix the logs with this to identify it.</summary>
 		public string logprefix = "[DustFX - BiomeDustColorInfo]: ";
@@ -24,7 +24,7 @@ namespace KerbalFoundries
         
 		/// <summary>Persistent biome color list.</summary>
 		[Persistent]
-		public List<KFBiomeDustColorInfo> BiomeColors = new List<KFBiomeDustColorInfo>();
+		public List<BiomeDustColorInfo> BiomeColors = new List<BiomeDustColorInfo> ();
 		
 		/// <summary>Dictionary containing all of our color configurations.</summary>
 		Dictionary<string, Color> _colorDictionary = new Dictionary<string, Color>();

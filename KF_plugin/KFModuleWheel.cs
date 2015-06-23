@@ -110,9 +110,15 @@ namespace KerbalFoundries
         [KSPField]
         public bool disableTweakables = false;
 
-        /// <summary>Definition for resource to consume. Defaulted to stock EC</summary>
+        /// <summary>Name of the resource being requested.</summary>
+        /// <remarks>Default: ElectricCharge</remarks>
         [KSPField]
-        public string resourceDefinition = "ElectricCharge";
+		public string resourceName = "ElectricCharge";
+		
+        /// <summary>Status text for the "Low Resource" state.</summary>
+		public string statusLowResource = "Low Charge";
+		public string statusNominal = "Nominal";
+		public string statusRetracted = "Retracted";
 
         //persistent fields
 		/// <summary>Will be negative one (-1) if inverted.</summary>
@@ -189,6 +195,8 @@ namespace KerbalFoundries
         {
 			base.OnStart(state);
 
+			CustomResourceTextSetup(); // Calls a method to set up the statusLowResource text for resource alternatives.
+			
             _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
             
             var partOrientationForward = new Vector3(0,0,0);
@@ -337,7 +345,7 @@ namespace KerbalFoundries
             }
 
 			// User input
-            float electricCharge;
+            float requestedResource;
             float unitLoad = 0;
 			float forwardTorque = torqueCurve.Evaluate((float)this.vessel.srfSpeed / tweakScaleCorrector) * torque; //this is used a lot, so may as well calculate once
             float steeringTorque;
@@ -369,14 +377,14 @@ namespace KerbalFoundries
                 motorTorque = (forwardTorque * directionCorrector * throttleInputSmoothed) - (steeringTorque * steeringInputSmoothed); //forward and low speed steering torque. Direction controlled by precalulated directioncorrector
                 brakeSteeringTorque = Mathf.Clamp(brakeSteering * steeringInputSmoothed, 0, 1000); //if the calculated value is negative, disregard: Only brake on inside track. no need to direction correct as we are using the velocity or the part not the vessel.
 
-                float chargeConsumption = Time.deltaTime * resourceConsumptionRate * (Math.Abs(motorTorque) / 100);
-                electricCharge = part.RequestResource(resourceDefinition, chargeConsumption);
+                float resourceConsumption = Time.deltaTime * resourceConsumptionRate * (Math.Abs(motorTorque) / 100);
+                requestedResource = part.RequestResource(resourceName, resourceConsumption);
                 float freeWheelRPM = 0;
 
-                if (!Equals(electricCharge, chargeConsumption))
+                if (!Equals(requestedResource, resourceConsumption))
                 {
                     motorTorque = 0;
-                    status = "Low Charge";
+                    status = statusLowResource;
                 }
                 else if (Math.Abs(averageTrackRPM) >= maxRPM)
                 {
@@ -451,7 +459,6 @@ namespace KerbalFoundries
         public override void OnUpdate()
         {
             base.OnUpdate();
-            
             commandId = this.vessel.referenceTransformId;
 			if (!Equals(commandId, lastCommandId))
             {
@@ -518,7 +525,7 @@ namespace KerbalFoundries
                 	//Fields["springRate"].guiActive = false;
                 	//Fields["damperRate"].guiActive = false;
                 	Fields["steeringDisabled"].guiActive = false;
-                	status = "Retracted";
+					status = statusRetracted;
 					break;
 				case "deploy":
                 	isRetracted = false;
@@ -530,7 +537,7 @@ namespace KerbalFoundries
                 	//Fields["springRate"].guiActive = true;
                 	//Fields["damperRate"].guiActive = true;
                 	Fields["steeringDisabled"].guiActive = true;
-                	status = "Nominal";
+					status = statusNominal;
 					break;
 				case "update":
 					break;
@@ -573,7 +580,7 @@ namespace KerbalFoundries
             {
 				UnityEngine.Object.Destroy(bounds.gameObject);
                 //boundsDestroyed = true; //remove the bounds object to let the wheel colliders take over
-                print("destroying Bounds");
+                print("Destroying Bounds.");
             }
         }
 
@@ -592,33 +599,33 @@ namespace KerbalFoundries
                 brakesApplied = false;
             }
         }
-		
+
         [KSPAction("Increase Torque")]
         public void increase(KSPActionParam param)
         {
             if (torque < 2)
                 torque += 0.25f;
         }
-		
+
         [KSPAction("Decrease Torque")]
         public void decrease(KSPActionParam param)
         {
             if (torque > 0)
                 torque -= 0.25f;
         }
-		
+
         [KSPAction("Toggle Steering")]
         public void toggleSteering(KSPActionParam param)
         {
             steeringDisabled = !steeringDisabled;
 		}
-		
+
         [KSPAction("Invert Steering")]
         public void InvertSteeringAG(KSPActionParam param)
         {
             InvertSteering();
 		}
-        
+
         [KSPEvent(guiActive = true, guiName = "Invert Steering", active = true)]
         public void InvertSteering()
         {
@@ -630,7 +637,7 @@ namespace KerbalFoundries
         {
             ApplySettings(false);
         }
-        
+ 
         public void ApplySettings(bool actionGroup)
         {
 			foreach (KFModuleWheel mt in vessel.FindPartModulesImplementing<KFModuleWheel>())
@@ -702,7 +709,7 @@ namespace KerbalFoundries
 
 			ApplySettings(true);
         }
-  
+
         [KSPAction("Raise Suspension")]
         public void RaiseRideHeight(KSPActionParam param)
         {
@@ -717,11 +724,28 @@ namespace KerbalFoundries
         {
             ApplySettings(true);
         }
-  
+
         [KSPAction("Apply Steering")]
         public void ApplySteeringAction(KSPActionParam param)
         {
             ApplySteeringSettings();
+        }
+   
+        /// <summary>Initializes some custom text data for the status strings.</summary>
+        public void CustomResourceTextSetup()
+        {
+			string textoutput = string.Empty;
+			// Setting up some strings in relation to the modular resource system. - Gaalidas
+			switch (resourceName)
+			{
+				case "ElectricCharge":
+					textoutput = "Charge";
+					break;
+				default:
+					textoutput = resourceName;
+					break;
+			}
+			statusLowResource = string.Format("Low {0}", textoutput);
         }
 	}
 	//end class

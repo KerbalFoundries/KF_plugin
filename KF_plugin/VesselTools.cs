@@ -37,15 +37,8 @@ namespace KerbalFoundries
             if (!isActive)
                 return;
 
-
             var box = _collider.collider as BoxCollider;
 			box.size = new Vector3(300f, .5f, 300f); // Probably should encapsulate other colliders in real code
-			/*
-			The line above reports that a NullReferenceException will occur when "using memver of a null reference."
-			Might want to look into this.  I's the "box.size" part that it doesn't like, and gives no suggestions
-			on how to fix. - Gaalidas
-			 */
-            //has always worked fine - assume we don't do that! - Lo-Fi
 
             var rb = _collider.rigidbody;
             rb.isKinematic = true;

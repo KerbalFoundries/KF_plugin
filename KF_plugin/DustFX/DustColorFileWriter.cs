@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-	public class KFDustColorFileWriter : MonoBehaviour
+	public class DustColorFileWriter : MonoBehaviour
 	{
 		/// <summary>Prefix the logs with this to identify it.</summary>
 		public string logprefix = "[DustFX - DustColorFileWriter]: ";
 		
-		readonly KFDustColorDefinitions dustDefinitions = new KFDustColorDefinitions();
+		readonly DustColorDefinitions dustDefinitions = new DustColorDefinitions();
 		
 		/// <summary>Are we awake yet?</summary>
 		void Awake()

@@ -4,15 +4,15 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-	public class KFDustFXController : MonoBehaviour
+	public class DustFXController : MonoBehaviour
 	{
 		/// <summary>Prefix the logs with this to identify it.</summary>
 		public string logprefix = "[DustFX - DustFXController]: ";
 		/// <summary>Constant definition of the class name for use in a string format.</summary>
-		public const string strKFDustFXController = "KFDustFXController";
+		public const string strDustFXController = "DustFXController";
 		
-		static KFDustFXController _instance;
-		readonly KFDustColorDefinitions _dustDefinitions = new KFDustColorDefinitions();
+		static DustFXController _instance;
+		readonly DustColorDefinitions _dustDefinitions = new DustColorDefinitions();
 		
 		/// <summary>Game state "awake" event.</summary>
 		void Awake()
@@ -33,11 +33,11 @@ namespace KerbalFoundries
 		}
 		
 		/// <summary>Definition for the dust colors.</summary>
-		public static KFDustColorDefinitions DustColors
+		public static DustColorDefinitions DustColors
 		{
 			get
 			{
-				_instance = _instance ?? new GameObject(strKFDustFXController).AddComponent<KFDustFXController>();
+				_instance = _instance ?? new GameObject(strDustFXController).AddComponent<DustFXController>();
 				return _instance._dustDefinitions;
 			}
 		}

@@ -125,7 +125,7 @@ namespace KerbalFoundries
 		FXGroup WheelImpactSound;
 		
 		/// <summary>Prefix the logs with this to identify it.</summary>
-		public string logprefix = "[DustFX - Main]: ";
+		public string logprefix = "[DustFX]: ";
 		
 		bool isPaused;
 		GameObject kfdustFx;
@@ -167,7 +167,6 @@ namespace KerbalFoundries
 
             if (HighLogic.LoadedSceneIsFlight)
             {
-
                 if (dustEffects)
                     SetupParticles();
                 if (wheelImpact && !isImpactDataNull())
@@ -298,7 +297,7 @@ namespace KerbalFoundries
 				return;
 			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
 				tweakScaleCorrector = 1f;
-			colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
+			colorBiome = DustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
 			if (Equals(colorBiome, null))
 				Debug.Log(string.Format("{0}{1}Color \"BiomeColor\" is null!", logprefix, locallog)); 
 			if (speed >= minScrapeSpeed)
@@ -349,11 +348,11 @@ namespace KerbalFoundries
             
 			if (wheelImpact && !isImpactDataNull() && HighLogic.LoadedSceneIsFlight)
 				WheelImpactSound.audio.Stop();
-            //Debug.LogWarning("stopped Audio");
+            //Debug.LogWarning(string.Format("{0}Stopped Audio.", logprefix));
 			GameEvents.onGamePause.Remove(OnPause);
-            //Debug.LogWarning("Removed OnPause hook");
+            //Debug.LogWarning(string.Format("{0}Removed OnPause hook.", logprefix));
 			GameEvents.onGameUnpause.Remove(OnUnpause);
-            //Debug.LogWarning("Removed OnUnPause hook");
+            //Debug.LogWarning(string.Format("{0}Removed OnUnPause hook.", logprefix));
 		}
 		
 		/// <summary>Gets the current volume setting for Ship sounds.</summary>
