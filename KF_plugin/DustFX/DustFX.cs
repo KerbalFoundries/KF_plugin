@@ -198,53 +198,23 @@ namespace KerbalFoundries
 		
 		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void OnCollisionEnter(Collision col)
+		public void CollisionEnter(Vector3 col)
 		{
-			if (col.relativeVelocity.magnitude >= minVelocityMag)
-			{
-				if (Equals(col.contacts.Length, 0))
-					return;
-				int collisionCount = 0;
-				var collisionAverage = new Vector3(0, 0, 0);
 
-				for (int i = 0; i < colCount; i++)
-				{
-					WheelHit hit;
-					bool grounded = _KFModuleWheel.wcList[i].GetGroundHit(out hit);
-					if (grounded)
-					{
-						collisionAverage += hit.point;
-						collisionCount++;
-					}
-				}
-				collisionAverage /= collisionCount;
-				CollisionInfo cInfo = GetClosestChild(part, collisionAverage + (part.rigidbody.velocity * Time.deltaTime));
-				if (!Equals(cInfo.KFDustFX, null))
-					cInfo.KFDustFX.DustImpact();
-			}
+			CollisionInfo cInfo = GetClosestChild(part, col + (part.rigidbody.velocity * Time.deltaTime));
+			if (!Equals(cInfo.KFDustFX, null))
+				cInfo.KFDustFX.DustImpact();
+			
 		}
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void OnCollisionStay(Collision col)
+		public void CollisionStay(Vector3 position, Collider col)
 		{
-			if (isPaused || Equals(col.contacts.Length, 0))
+			if (isPaused)
 				return;
-			int collisionCount = 0;
-			var collisionAverage = new Vector3(0, 0, 0); 
 
-			for (int i = 0; i < colCount; i++)
-			{
-				WheelHit hit;
-				bool grounded = _KFModuleWheel.wcList[i].GetGroundHit(out hit);
-				if (grounded)
-				{
-					collisionAverage += hit.point;
-					collisionCount++;
-				}
-			}
-			collisionAverage /= collisionCount;
-			Scrape(col, collisionAverage);
+			Scrape(position, col);
 		}
 		
 		/// <summary>Searches child parts for the nearest instance of this class to the given point.</summary>
@@ -279,11 +249,11 @@ namespace KerbalFoundries
 		/// <summary>Called when the part is scraping over a surface.</summary>
 		/// <param name="col">The collider being referenced.</param>
 		/// <param name="position">The position of the scape.</param>
-		public void Scrape(Collision col, Vector3 position)
+		public void Scrape(Vector3 position, Collider col)
 		{
-			if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null) || Equals(col.contacts.Length, 0))
+			if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
 				return;
-			float fMagnitude = col.relativeVelocity.magnitude;
+			float fMagnitude = this.part.rigidbody.velocity.magnitude;
 			DustParticles(fMagnitude, position + (part.rigidbody.velocity * Time.deltaTime), col.collider);
 		}
 		

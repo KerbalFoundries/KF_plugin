@@ -256,7 +256,7 @@ namespace KerbalFoundries
 			while (!Equals(Mathf.Round(currentRideHeight), appliedRideHeight))
 			{
 				currentRideHeight = Mathf.Lerp(currentRideHeight, appliedRideHeight, Time.deltaTime * 2);
-				Debug.LogWarning(currentRideHeight);
+				//Debug.LogWarning(currentRideHeight);
 				for (int i = 0; i < wcList.Count(); i++)
 					wcList[i].suspensionDistance = appliedRideHeight / 20f;
 				yield return new WaitForFixedUpdate();
