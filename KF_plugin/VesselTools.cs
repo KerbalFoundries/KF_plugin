@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-    class ModuleWaterSlider : VesselModule
+    public class ModuleWaterSlider : VesselModule
     {
 		readonly GameObject _collider = new GameObject("ModuleWaterSlider.Collider", typeof(BoxCollider), typeof(Rigidbody));
 		const float triggerDistance = 25f;
@@ -74,4 +74,108 @@ namespace KerbalFoundries
             colliderHeight = Mathf.Clamp((colliderHeight -= 0.1f), -10, 2.5f);
         }
     }
+
+    public class ModuleCameraShot : VesselModule
+    {
+        private bool takeHiResShot = false;
+        private int resWidth = 6;
+        private int resHeight = 6;
+        public Color _averageColour = new Color(1,1,1,0.025f);
+        int frameCount = 0;
+        int threshHold = 20;
+        Vessel _vessel;
+        GameObject _cameraObject;
+        
+
+        void Start()
+        {
+            _vessel = GetComponent<Vessel>();
+            _cameraObject = new GameObject("ColourCam");
+            _cameraObject.transform.parent = _vessel.transform;
+        }
+
+
+        public static string ScreenShotName(int width, int height)
+        {
+            return string.Format("{0}/screen_{1}x{2}_{3}.png",
+                                 Application.dataPath,
+                                 width, height,
+                                 System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+        }
+
+        public void TakeHiResShot()
+        {
+            takeHiResShot = true;
+        }
+
+        //[KSPEvent(active=true,guiActive=true,guiName="Take Shot",name="Take Shot")]
+        public void Update()
+        {
+            /*
+            takeHiResShot |= Input.GetKeyDown("k");
+            if (takeHiResShot && _vessel == FlightGlobals.ActiveVessel)
+            {
+             * */
+
+            
+            if(frameCount >= threshHold)
+            {
+                frameCount = 0;
+                var _camera = _cameraObject.AddComponent<Camera>();
+                _cameraObject.transform.position = _vessel.transform.position;
+                _cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
+                _cameraObject.transform.Translate(new Vector3(0,0,-10));
+                //Debug.LogError("created camera");
+                
+                RenderTexture rt = new RenderTexture(resWidth, resHeight, 24);
+                _camera.targetTexture = rt;
+                Texture2D groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
+                _camera.Render();
+                //Debug.LogError("rendered something...");
+                RenderTexture.active = rt;
+                groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+                _camera.targetTexture = null;
+                RenderTexture.active = null; // JC: added to avoid errors
+                Destroy(rt);
+                Destroy(_camera);
+                var rb = rt.colorBuffer;
+
+                Color[] texColors = groundShot.GetPixels();
+                int total = texColors.Length;
+                float r = 0;
+                float g = 0;
+                float b = 0;
+
+                for (int i = 0; i < total; i++)
+                {
+                    r += texColors[i].r;
+                    g += texColors[i].g;
+                    b += texColors[i].b;
+                }
+
+                _averageColour = new Color(r / total, g / total, b / total, 0.025f);
+                //print(_averageColour);
+
+                //takeHiResShot = false;
+                
+            }
+            frameCount++;
+        }
+    }
 }
+
+/*
+var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                visible.transform.parent = _cameraObject.transform;
+                visible.transform.localScale = new Vector3(0.1f,0.1f,0.5f);
+                visible.renderer.enabled = false;
+*/
+
+/*
+byte[] bytes = groundShot.EncodeToPNG();
+string filename = ScreenShotName(resWidth, resHeight);
+Debug.LogError("about to write screenshot");
+System.IO.File.WriteAllBytes(filename, bytes);
+//KSP.IO.File.WriteAllBytes<RenderTexture>(bytes, filename, _vessel);
+Debug.Log(string.Format("Took screenshot to: {0}", filename));
+ * */

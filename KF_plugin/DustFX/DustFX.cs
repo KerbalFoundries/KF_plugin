@@ -30,6 +30,8 @@ namespace KerbalFoundries
 		
 		/// <summary>Local definition of the KFModuleWheel class.</summary>
 		KFModuleWheel _KFModuleWheel;
+
+        ModuleCameraShot _ModuleCameraShot;
 		
 		/// <summary>Local copy of the tweakScaleCorrector parameter in the KFModuleWheel module.</summary>
 		public float tweakScaleCorrector;
@@ -167,7 +169,7 @@ namespace KerbalFoundries
 
             if (HighLogic.LoadedSceneIsFlight)
             {
-
+                _ModuleCameraShot = this.vessel.GetComponent<ModuleCameraShot>();
                 if (dustEffects)
                     SetupParticles();
                 if (wheelImpact && !isImpactDataNull())
@@ -198,7 +200,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void CollisionEnter(Vector3 col)
+		public void CollisionImpact(Vector3 col)
 		{
 
 			CollisionInfo cInfo = GetClosestChild(part, col + (part.rigidbody.velocity * Time.deltaTime));
@@ -209,7 +211,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void CollisionStay(Vector3 position, Collider col)
+		public void CollisionScrape(Vector3 position, Collider col)
 		{
 			if (isPaused)
 				return;
@@ -254,7 +256,7 @@ namespace KerbalFoundries
 			if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
 				return;
 			float fMagnitude = this.part.rigidbody.velocity.magnitude;
-			DustParticles(fMagnitude, position + (part.rigidbody.velocity * Time.deltaTime), col.collider);
+			DustParticles(fMagnitude, position + (part.rigidbody.velocity * Time.deltaTime), col);
 		}
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
@@ -268,7 +270,8 @@ namespace KerbalFoundries
 				return;
 			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
 				tweakScaleCorrector = 1f;
-			colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
+			//colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
+            colorBiome = _ModuleCameraShot._averageColour;
 			if (Equals(colorBiome, null))
 				Debug.Log(string.Format("{0}{1}Color \"BiomeColor\" is null!", logprefix, locallog)); 
 			if (speed >= minScrapeSpeed)
