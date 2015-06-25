@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+    //[KSPAddon(KSPAddon.Startup.SpaceCentre, false)] 
+    //uncomment above to get a fresh DustColorDefinitions.cfg generated when you enter the space centre.
 	public class KFDustColorFileWriter : MonoBehaviour
 	{
 		/// <summary>Prefix the logs with this to identify it.</summary>
