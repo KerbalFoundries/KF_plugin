@@ -8,6 +8,8 @@ using System;
 using System.Linq;
 using UnityEngine;
 
+
+
 namespace KerbalFoundries
 {
     public class ModuleWaterSlider : VesselModule
@@ -82,7 +84,7 @@ namespace KerbalFoundries
         private int resHeight = 6;
         public Color _averageColour = new Color(1,1,1,0.025f);
         int frameCount = 0;
-        int threshHold = 20;
+        int threshHold = 1;
         Vessel _vessel;
         GameObject _cameraObject;
         
@@ -116,10 +118,12 @@ namespace KerbalFoundries
             if (takeHiResShot && _vessel == FlightGlobals.ActiveVessel)
             {
              * */
+            System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
+            timer.Start();
 
-            
-            if(frameCount >= threshHold)
+            if(frameCount >= threshHold && _vessel == FlightGlobals.ActiveVessel)
             {
+                
                 frameCount = 0;
                 var _camera = _cameraObject.AddComponent<Camera>();
                 _cameraObject.transform.position = _vessel.transform.position;
@@ -138,10 +142,11 @@ namespace KerbalFoundries
                 RenderTexture.active = null; // JC: added to avoid errors
                 Destroy(rt);
                 Destroy(_camera);
-                var rb = rt.colorBuffer;
+                //var rb = rt.colorBuffer;
 
                 Color[] texColors = groundShot.GetPixels();
                 int total = texColors.Length;
+                float divider = total * 1.25f;
                 float r = 0;
                 float g = 0;
                 float b = 0;
@@ -153,13 +158,15 @@ namespace KerbalFoundries
                     b += texColors[i].b;
                 }
 
-                _averageColour = new Color(r / total, g / total, b / total, 0.025f);
-                //print(_averageColour);
+                _averageColour = new Color(r / divider, g / divider, b / divider, 0.025f);
+                //print("fired this frame" + _averageColour);
 
                 //takeHiResShot = false;
                 
             }
             frameCount++;
+            timer.Stop();
+            print(timer.Elapsed);
         }
     }
 }
