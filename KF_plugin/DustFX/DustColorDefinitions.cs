@@ -5,23 +5,20 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-	public class DustColorDefinitions : IPersistenceLoad, IPersistenceSave
+	public class KFDustColorDefinitions : IPersistenceLoad, IPersistenceSave
 	{
 		// disable MemberCanBeMadeStatic.Local
 		
-		/// <summary>Prefix the logs so we can identify the class producing them.</summary>
-		public string logprefix = "[DustFX - DustColorDefinitions]: ";
-		
 		/// <summary>Persistent list of BodyDustColors.</summary>
 		[Persistent]
-		List<BiomeDustColorInfo> BodyDustColors = new List<BiomeDustColorInfo>();
+		List<KFBiomeDustColorInfo> BodyDustColors = new List<KFBiomeDustColorInfo>();
 		
 		/// <summary>The default color to be used in case no other is defined.</summary>
 		[Persistent]
 		public Color DefaultColor;
 		
 		/// <summary>Dictionary containing all of our available color configurations.</summary>
-		Dictionary<CelestialBody, BiomeDustColorInfo> _dustColors = new Dictionary<CelestialBody, BiomeDustColorInfo>();
+		Dictionary<CelestialBody, KFBiomeDustColorInfo> _dustColors = new Dictionary<CelestialBody, KFBiomeDustColorInfo>();
 		
 		/// <summary>Method used to get the color we need for a specific body or biome.</summary>
 		/// <param name="body">The planetary body we are calling from.</param>
@@ -31,7 +28,7 @@ namespace KerbalFoundries
 		/// <returns>The color that corresponds to the body or biome in the configs.</returns>
 		public Color GetDustColor(CelestialBody body, Collider col, double lat, double lon)
 		{
-			BiomeDustColorInfo biomeColors;
+			KFBiomeDustColorInfo biomeColors;
 			if (!_dustColors.TryGetValue(body, out biomeColors))
 				return DefaultColor;
 			string BodyOrBiome = string.Empty;
@@ -75,7 +72,7 @@ namespace KerbalFoundries
 		public void PersistenceSave()
 		{
 			if (!BodyDustColors.Any())
-				BodyDustColors = FlightGlobals.Bodies.Where(cb => !Equals(cb.BiomeMap, null)).Select(b => new BiomeDustColorInfo { DefaultColor = DefaultColor, Name = b.bodyName, BiomeColors = b.BiomeMap.Attributes.GroupBy(attr => attr.name).Select(group => group.First()).Select(attr => new BiomeDustColorInfo { Color = attr.mapColor, Name = attr.name }).ToList() }).ToList();
+				BodyDustColors = FlightGlobals.Bodies.Where(cb => !Equals(cb.BiomeMap, null)).Select(b => new KFBiomeDustColorInfo { DefaultColor = DefaultColor, Name = b.bodyName, BiomeColors = b.BiomeMap.Attributes.GroupBy(attr => attr.name).Select(group => group.First()).Select(attr => new KFBiomeDustColorInfo { Color = attr.mapColor, Name = attr.name }).ToList() }).ToList();
 		}
 	}
 }

@@ -107,8 +107,10 @@ namespace KerbalFoundries
 		[KSPField]
 		public string partInfoString = "This part will throw up dust when the repulsion field is actively repulsing.";
 		
-		/// <summary>Prefix the logs with this to identify it.  Will be obsolete soon(ish).</summary>
-		public string logprefix = "[DustFX - Main]: ";
+		readonly KFLogUtil KFLog = new KFLogUtil();
+		
+		/// <summary>Prefix the logs with this to identify it.</summary>
+		public string strClassName = "KFRepulsorDustFX";
 		
 		bool isPaused;
 		bool isColorOverrideActive;
@@ -153,7 +155,6 @@ namespace KerbalFoundries
 		/// <summary>Defines the particle effects used in this module.</summary>
 		void SetupParticles()
 		{
-			const string locallog = "SetupParticles(): ";
 			if (!dustEffects)
 				return;
 			kfrepdustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectsObject));
@@ -166,7 +167,7 @@ namespace KerbalFoundries
 			kfrepdustFx.particleEmitter.minEmission = minDustEmission;
 			kfrepdustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = kfrepdustFx.particleEmitter.GetComponent<ParticleAnimator>();
-			Debug.Log(string.Format("{0}{1}Particles have been set up.", logprefix, locallog));
+			KFLog.Log("Particles have been set up.", strClassName);
 		}
 		
 		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
@@ -242,14 +243,13 @@ namespace KerbalFoundries
 		void DustParticles(float speed, Vector3 contactPoint, Collider col)
 		{
 			var WaterColor = new Color(0.65f, 0.65f, 0.65f, 0.025f);
-			const string locallog = "DustParticles(): ";
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || Equals(rideHeight, 0))
 				return;
 			float appliedRideHeight = Mathf.Clamp((rideHeight / 2), 1, 4);
-			colorBiome = !isColorOverrideActive ? DustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
+			colorBiome = !isColorOverrideActive ? KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
 			if (Equals(colorBiome, null))
 			{
-				Debug.Log(string.Format("{0}{1}Color \"BiomeColor\" is null!", logprefix, locallog));
+				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
 				return;
 			}
 			if (speed >= minScrapeSpeed)

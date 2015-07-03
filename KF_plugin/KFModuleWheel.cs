@@ -180,7 +180,8 @@ namespace KerbalFoundries
         public float rollingFriction;
 
         public List<WheelCollider> wcList = new List<WheelCollider>();
-        public ModuleAnimateGeneric retractionAnimation;
+        ModuleAnimateGeneric retractionAnimation;
+        KFDustFX _dustFX;
         
 		/// <summary>This is the info string that will display when the part info is shown.</summary>
 		/// <remarks>This can be overridden in the config for this module in the part file.</remarks>
@@ -196,7 +197,7 @@ namespace KerbalFoundries
 			base.OnStart(state);
 
 			CustomResourceTextSetup(); // Calls a method to set up the statusLowResource text for resource alternatives.
-			
+            _dustFX = this.part.GetComponent<KFDustFX>();
             _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
             
             var partOrientationForward = new Vector3(0,0,0);
@@ -400,11 +401,6 @@ namespace KerbalFoundries
                     WheelHit hit;
                     bool grounded = wcList[i].GetGroundHit(out hit); //set up to pass out wheelhit coordinates 
                     unitLoad += hit.force;
-                    //unitLoad /= wcList.Count();
-                    //unitLoad *= 10;
-                    //print("unitLoad = " + unitLoad);
-                    // 
-                    //print("rollingfriction = "+ rollingFriction);
                     
                     wcList[i].motorTorque = motorTorque;
                     wcList[i].brakeTorque = brakeTorque + brakeSteeringTorque + rollingFriction;
@@ -415,6 +411,7 @@ namespace KerbalFoundries
                         groundedWheels++;
                         trackRPM += wcList[i].rpm;
                         colliderLoad += hit.force;
+                        _dustFX.CollisionScrape(hit.point, hit.collider);
                     }
 					else if (!Equals(wcList[i].suspensionDistance, 0)) //the sprocket colliders could be doing anything. Don't count them.
                         freeWheelRPM += wcList[i].rpm;

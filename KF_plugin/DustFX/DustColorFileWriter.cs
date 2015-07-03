@@ -4,17 +4,15 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-	public class DustColorFileWriter : MonoBehaviour
+    //[KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
+    //uncomment above to get a fresh DustColorDefinitions.cfg generated when you enter the space centre.
+	public class KFDustColorFileWriter : MonoBehaviour
 	{
-		/// <summary>Prefix the logs with this to identify it.</summary>
-		public string logprefix = "[DustFX - DustColorFileWriter]: ";
-		
-		readonly DustColorDefinitions dustDefinitions = new DustColorDefinitions();
+		readonly KFDustColorDefinitions dustDefinitions = new KFDustColorDefinitions();
 		
 		/// <summary>Are we awake yet?</summary>
 		void Awake()
 		{
-			// const string locallog = "Awake(): ";
 			// save default config
 			// ConfigNode.Save sometimes strips out the root node which could be a problem if it's empty,
 			// leading to a blank cfg = crashes KSP loader
