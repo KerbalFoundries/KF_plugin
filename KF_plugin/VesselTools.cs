@@ -166,7 +166,7 @@ namespace KerbalFoundries
             }
             frameCount++;
             timer.Stop();
-            print(timer.Elapsed);
+            //print(timer.Elapsed);
         }
     }
 }

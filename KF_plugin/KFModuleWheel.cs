@@ -190,7 +190,16 @@ namespace KerbalFoundries
         {
 			base.OnStart(state);
 
-            _dustFX = this.part.GetComponent<KFDustFX>();
+            _dustFX = this.part.GetComponent<KFDustFX>(); //see if it's been added by MM
+            if (Equals(_dustFX, null)) //add if not... sets some defaults.
+            {
+                this.part.AddModule("KFDustFX");
+                _dustFX = this.part.GetComponent<KFDustFX>();
+                _dustFX.wheelImpact = true;
+                _dustFX.wheelImpactSound = "KerbalFoundries/Sounds/TyreSqueal";
+                _dustFX.maxDustEmission = 28;
+                _dustFX.OnStart(state);
+            }
             _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
             
             var partOrientationForward = new Vector3(0,0,0);
