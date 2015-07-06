@@ -56,12 +56,15 @@ namespace KerbalFoundries
         const float maxRepulsorHeight = 100;
 
         public float repulsorCount = 0;
-        [KSPField]
-        public float resourceConsumptionRate = 1f;
+
         //begin start
         public List<WheelCollider> wcList = new List<WheelCollider>();
         //public List<float> susDistList = new List<float>();
         ModuleWaterSlider _MWS;
+
+		/// <summary>Defines the rate at which the specified resource is consumed.</summary>
+        [KSPField]
+        public float resourceConsumptionRate = 1f;
 
 		/// <summary>The name of the resource to consume.</summary>
         [KSPField]
@@ -104,9 +107,6 @@ namespace KerbalFoundries
                     wcList.Add(b);
                 }
 				this.part.force_activate(); // Force the part active or OnFixedUpate is not called.
-
-                
-
 				
                 //print("water slider height is" + _MWS.colliderHeight);
                 if (pointDown && Equals(this.vessel, FlightGlobals.ActiveVessel))
@@ -121,14 +121,14 @@ namespace KerbalFoundries
 		}
 		// End start
 
-        void SetupWaterSlider()
-        {
-            _MWS = this.vessel.GetComponent<ModuleWaterSlider>();
-            if (!Equals(_MWS, null))
-                Debug.LogError("Found MWS");
-            else
-                Debug.LogError("did not find MWS");
-       }
+		void SetupWaterSlider()
+		{
+			_MWS = this.vessel.GetComponent<ModuleWaterSlider>();
+			if (!Equals(_MWS, null))
+				Debug.LogError("Found MWS.");
+			else
+				Debug.LogError("Did not find MWS.");
+		}
 
         /// <summary>A "Shrink" coroutine for steering.</summary>
         IEnumerator Shrink()

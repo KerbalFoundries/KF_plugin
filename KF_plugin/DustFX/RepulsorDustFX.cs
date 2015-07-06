@@ -107,8 +107,10 @@ namespace KerbalFoundries
 		[KSPField]
 		public string partInfoString = "This part will throw up dust when the repulsion field is actively repulsing.";
 		
-		/// <summary>Prefix the logs with this to identify it.  Will be obsolete soon(ish).</summary>
-		public string logprefix = "[DustFX - Main]: ";
+		readonly KFLogUtil KFLog = new KFLogUtil();
+		
+		/// <summary>Prefix the logs with this to identify it.</summary>
+		public string strClassName = "KFRepulsorDustFX";
 		
 		bool isPaused;
 		bool isColorOverrideActive;
@@ -117,6 +119,16 @@ namespace KerbalFoundries
 		Color colorDust;
 		Color colorBiome;
 		
+		/// <summary>Loaded from the KFConfigManager class.</summary>
+		/// <remarks>Persistent field.</remarks>
+		[Persistent]
+		public bool isDustEnabledGlobally = true;
+		
+		/// <summary>Local dust disabler.</summary>
+		/// <remarks>Is Persistent and active in all appropriate scenes by default.</remarks>
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Dust Effects"), UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
+		public bool isDustEnabledLocally = true;
+
 		/// <summary>CollisionInfo class for the KFRepulsorDustFX module.</summary>
 		public class CollisionInfo
 		{
@@ -127,6 +139,7 @@ namespace KerbalFoundries
 			}
 		}
 		
+		// Has it's own XML documentation, no need to add to it here.
 		public override string GetInfo()
 		{
 			return partInfoString;
@@ -138,6 +151,19 @@ namespace KerbalFoundries
 			// This allows me to get the parameter value from the current active part.
 			rideHeight = _KFRepulsor.rideHeight;
 			// Public variable is set to the value of the remote variable here.
+
+			isDustEnabledGlobally = KFConfigManager.KFConfig.isDustEnabled;
+			
+			if (!isDustEnabledGlobally && isDustEnabledLocally)
+			{
+				isDustEnabledLocally = isDustEnabledGlobally;
+				Fields["localDisabledDust"].guiActive = false;
+				Fields["localdisabledDust"].guiActiveEditor = false;
+				return;
+			}
+			
+			if (isDustEnabledGlobally && !isDustEnabledLocally)
+				return;
 			
 			if (Equals(state, StartState.Editor) || Equals(state, StartState.None))
 				return;
@@ -152,7 +178,6 @@ namespace KerbalFoundries
 		/// <summary>Defines the particle effects used in this module.</summary>
 		void SetupParticles()
 		{
-			const string locallog = "SetupParticles(): ";
 			if (!dustEffects)
 				return;
 			kfrepdustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectsObject));
@@ -165,7 +190,7 @@ namespace KerbalFoundries
 			kfrepdustFx.particleEmitter.minEmission = minDustEmission;
 			kfrepdustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = kfrepdustFx.particleEmitter.GetComponent<ParticleAnimator>();
-			Debug.Log(string.Format("{0}{1}Particles have been set up.", logprefix, locallog));
+			KFLog.Log("Particles have been set up.", strClassName);
 		}
 		
 		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
@@ -241,14 +266,13 @@ namespace KerbalFoundries
 		void DustParticles(float speed, Vector3 contactPoint, Collider col)
 		{
 			var WaterColor = new Color(0.65f, 0.65f, 0.65f, 0.025f);
-			const string locallog = "DustParticles(): ";
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || Equals(rideHeight, 0))
 				return;
 			float appliedRideHeight = Mathf.Clamp((rideHeight / 2), 1, 4);
 			colorBiome = !isColorOverrideActive ? KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
 			if (Equals(colorBiome, null))
 			{
-				Debug.Log(string.Format("{0}{1}Color \"BiomeColor\" is null!", logprefix, locallog));
+				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
 				return;
 			}
 			if (speed >= minScrapeSpeed)

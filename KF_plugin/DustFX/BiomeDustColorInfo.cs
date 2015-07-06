@@ -7,9 +7,6 @@ namespace KerbalFoundries
 {
 	public class KFBiomeDustColorInfo : IPersistenceLoad
 	{
-		/// <summary>Prefix the logs with this to identify it.</summary>
-		public string logprefix = "[DustFX - BiomeDustColorInfo]: ";
-		
 		/// <summary>Persistent "name" identification.</summary>
 		[Persistent]
 		public string Name;

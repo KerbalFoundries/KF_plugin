@@ -9,9 +9,6 @@ namespace KerbalFoundries
 	{
 		// disable MemberCanBeMadeStatic.Local
 		
-		/// <summary>Prefix the logs so we can identify the class producing them.</summary>
-		public string logprefix = "[DustFX - DustColorDefinitions]: ";
-		
 		/// <summary>Persistent list of BodyDustColors.</summary>
 		[Persistent]
 		List<KFBiomeDustColorInfo> BodyDustColors = new List<KFBiomeDustColorInfo>();

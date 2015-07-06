@@ -28,13 +28,17 @@ namespace KerbalFoundries
 		// disable AccessToStaticMemberViaDerivedType
 		// disable RedundantDefaultFieldInitializer
 		
+		readonly KFLogUtil KFLog = new KFLogUtil();
+		
 		/// <summary>Local definition of the KFModuleWheel class.</summary>
 		KFModuleWheel _KFModuleWheel;
 
+		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
         ModuleCameraShot _ModuleCameraShot;
 		
 		/// <summary>Local copy of the tweakScaleCorrector parameter in the KFModuleWheel module.</summary>
 		public float tweakScaleCorrector;
+		
 		/// <summary>An integer count of the colliders present on the current part.</summary>
 		int colCount;
 		
@@ -127,14 +131,24 @@ namespace KerbalFoundries
 		FXGroup WheelImpactSound;
 		
 		/// <summary>Prefix the logs with this to identify it.</summary>
-		public string logprefix = "[DustFX - Main]: ";
+		public string strClassName = "KFDustFX";
 		
 		bool isPaused;
 		GameObject kfdustFx;
 		ParticleAnimator dustAnimator;
 		Color colorDust;
 		Color colorBiome;
-
+		
+		/// <summary>Loaded from the KFConfigManager class.</summary>
+		/// <remarks>Persistent field.</remarks>
+		[Persistent]
+		public bool isDustEnabledGlobally = true;
+		
+		/// <summary>Local dust disabler.</summary>
+		/// <remarks>Is Persistent and active in all appropriate scenes by default.</remarks>
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Dust Effects"), UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
+		public bool isDustEnabledLocally = true;
+		
 		/// <summary>CollisionInfo class for the DustFX module.</summary>
 		public class CollisionInfo
 		{
@@ -160,21 +174,33 @@ namespace KerbalFoundries
 		
 		public override void OnStart(StartState state)
 		{
-			const string locallog = "OnStart(): ";
 			_KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
 			colCount = _KFModuleWheel.wcList.Count;
 			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
-			if (!Equals(tweakScaleCorrector, 0))
-				Debug.Log(string.Format("{0}{1}TSWheelCorrector = {2}", logprefix, locallog, tweakScaleCorrector));
 
-            if (HighLogic.LoadedSceneIsFlight)
-            {
-                _ModuleCameraShot = this.vessel.GetComponent<ModuleCameraShot>();
-                if (dustEffects)
-                    SetupParticles();
-                if (wheelImpact && !isImpactDataNull())
-                    DustAudio();
-            }
+
+			isDustEnabledGlobally = KFConfigManager.KFConfig.isDustEnabled;
+			
+			if (!isDustEnabledGlobally && isDustEnabledLocally)
+			{
+				isDustEnabledLocally = isDustEnabledGlobally;
+				Fields["localDisabledDust"].guiActive = false;
+				Fields["localdisabledDust"].guiActiveEditor = false;
+				return;
+			}
+			
+			if (isDustEnabledGlobally && !isDustEnabledLocally)
+				return;
+			
+			if (HighLogic.LoadedSceneIsFlight)
+			{
+				_ModuleCameraShot = vessel.GetComponent<ModuleCameraShot>();
+				if (dustEffects)
+					SetupParticles();
+				if (wheelImpact && !isImpactDataNull())
+					DustAudio();
+			}
+
 			GameEvents.onGamePause.Add(OnPause);
 			GameEvents.onGameUnpause.Add(OnUnpause);
 		}
@@ -182,7 +208,6 @@ namespace KerbalFoundries
 		/// <summary>Defines the particle effects used in this module.</summary>
 		public void SetupParticles()
 		{
-			const string locallog = "SetupParticles(): ";
 			if (!dustEffects)
 				return;
 			kfdustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectObject));
@@ -195,33 +220,30 @@ namespace KerbalFoundries
 			kfdustFx.particleEmitter.minEmission = minDustEmission;
 			kfdustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = kfdustFx.particleEmitter.GetComponent<ParticleAnimator>();
-			Debug.Log(string.Format("{0}{1}Particles have been set up.", logprefix, locallog));
 		}
 		
 		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
 		/// <param name="col">The collider being referenced.</param>
 		public void CollisionImpact(Vector3 col)
 		{
-
 			CollisionInfo cInfo = GetClosestChild(part, col + (part.rigidbody.velocity * Time.deltaTime));
 			if (!Equals(cInfo.KFDustFX, null))
 				cInfo.KFDustFX.DustImpact();
-			
 		}
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
+		/// <param name="position">The position of the collision.</param>
 		/// <param name="col">The collider being referenced.</param>
 		public void CollisionScrape(Vector3 position, Collider col)
 		{
 			if (isPaused)
 				return;
-
 			Scrape(position, col);
 		}
 		
 		/// <summary>Searches child parts for the nearest instance of this class to the given point.</summary>
 		/// <remarks>
-		/// Parts with "physicsSignificance = 1" have their collisions detected by the parent part.
+		/// Parts with "Part.PhysicalSignificance.NONE" have their collisions detected by the parent part.
 		/// To identify which part is the source of a collision, check which part the collision is closest to.
 		/// </remarks>
 		/// <param name="parent">The parent part whose children should be tested.</param>
@@ -265,7 +287,6 @@ namespace KerbalFoundries
 		/// <param name="col">The collider being referenced.</param>
 		public void DustParticles(float speed, Vector3 contactPoint, Collider col)
 		{
-			const string locallog = "DustParticles(): ";
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null))
 				return;
 			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
@@ -273,19 +294,18 @@ namespace KerbalFoundries
 			//colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
             colorBiome = _ModuleCameraShot._averageColour;
 			if (Equals(colorBiome, null))
-				Debug.Log(string.Format("{0}{1}Color \"BiomeColor\" is null!", logprefix, locallog)); 
+				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
 			if (speed >= minScrapeSpeed)
 			{
 				if (!Equals(colorBiome, colorDust))
 				{
-					Color[] colors = dustAnimator.colorAnimation; 
+					Color[] colors = dustAnimator.colorAnimation;
 					colors[0] = colorBiome;
 					colors[1] = colorBiome;
 					colors[2] = colorBiome;
 					colors[3] = colorBiome;
 					colors[4] = colorBiome;
 					dustAnimator.colorAnimation = colors;
-					//dustAnimator.sizeGrow = -0.5f; // Testing, lets see if they will shrink over time slightly.
 					colorDust = colorBiome;
 				}
 				kfdustFx.transform.position = contactPoint;
@@ -319,14 +339,13 @@ namespace KerbalFoundries
 		/// <summary>Called when the object being referenced is destroyed, or when the module instance is deactivated.</summary>
 		void OnDestroy()
 		{
-            
 			if (wheelImpact && !isImpactDataNull() && HighLogic.LoadedSceneIsFlight)
 				WheelImpactSound.audio.Stop();
-            //Debug.LogWarning("stopped Audio");
+            //Debug.LogWarning(string.Format("{0}Stopped Audio.", logprefix));
 			GameEvents.onGamePause.Remove(OnPause);
-            //Debug.LogWarning("Removed OnPause hook");
+            //Debug.LogWarning(string.Format("{0}Removed OnPause hook.", logprefix));
 			GameEvents.onGameUnpause.Remove(OnUnpause);
-            //Debug.LogWarning("Removed OnUnPause hook");
+            //Debug.LogWarning(string.Format("{0}Removed OnUnPause hook.", logprefix));
 		}
 		
 		/// <summary>Gets the current volume setting for Ship sounds.</summary>

@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="APUController.cs" />
     <Compile Include="ArmMagnet.cs" />
+    <Compile Include="KFConfigManager.cs" />
     <Compile Include="DozerBlade.cs" />
     <Compile Include="DustFX\BiomeDustColorInfo.cs" />
     <Compile Include="DustFX\DustColorDefinitions.cs" />
@@ -82,7 +83,6 @@
     <Compile Include="VesselTools.cs" />
     <Compile Include="WheelUtils.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /y "$(TargetPath)" "C:\KSPDev\GameData\KerbalFoundries\Plugins\"
