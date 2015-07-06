@@ -9,6 +9,11 @@ namespace KerbalFoundries
 	{
 		[Persistent]
 		public bool isDustEnabled = true;
+        [Persistent]
+        public bool isDustCameraEnabled = true;
+        [Persistent]
+		public bool isMarkerEnabled = true;
+
 		
 		public static KFConfigManager KFConfig;
 		KFConfigManager()
@@ -31,6 +36,9 @@ namespace KerbalFoundries
 				ConfigNode.LoadObjectFromConfig(this, node);
 				
 				isDustEnabled = KFConfigManager.KFConfig.isDustEnabled;
+                isDustCameraEnabled = KFConfigManager.KFConfig.isDustCameraEnabled;
+                isMarkerEnabled = KFConfigManager.KFConfig.isMarkerEnabled;
+                
 				KFLog.Log(string.Format("Param \"isDustEnabled\" = {0}", isDustEnabled), strClassName);
 			}
 			else
