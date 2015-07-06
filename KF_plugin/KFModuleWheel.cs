@@ -6,15 +6,15 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-    public class KFModuleWheel : PartModule
+    public class KFModuleWheel : PartModule, IPartSizeModifier
     {
 		// disable RedundantDefaultFieldInitializer
 		// disable RedundantThisQualifier
 		
 		// Name definitions
-        public string right = "right";
-        public string forward = "forward";
-        public string up = "up";
+        public const string right = "right";
+        public const string forward = "forward";
+        public const string up = "up";
 
 		// Tweakables
         [KSPField(isPersistant = false, guiActive = true, guiName = "Wheel Settings")]
@@ -321,12 +321,17 @@ namespace KerbalFoundries
 		}
 		//end OnStart
 
+        public Vector3 GetModuleSize(Vector3 defaultSize) //to do with theIPartSizeModifier stupid jiggery.
+        {
+            return new Vector3(1,1,1);
+        }
+
         public void WheelSound()
         {
             part.Effect("WheelEffect", effectPower);
         }
 
-        /// <summary>Stuff that needs to wait for the first physics frame. Maybe because this ensure the vessel is totally spawnedor physics is active</summary>
+        /// <summary>Stuff that needs to wait for the first physics frame. Maybe because this ensure the vessel is totally spawned or physics is active</summary>
         IEnumerator StartupStuff()
         {
             yield return new WaitForFixedUpdate();
