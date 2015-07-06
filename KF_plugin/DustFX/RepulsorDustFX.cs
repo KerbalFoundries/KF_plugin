@@ -119,6 +119,16 @@ namespace KerbalFoundries
 		Color colorDust;
 		Color colorBiome;
 		
+		/// <summary>Loaded from the KFConfigManager class.</summary>
+		/// <remarks>Persistent field.</remarks>
+		[Persistent]
+		public bool isDustEnabledGlobally = true;
+		
+		/// <summary>Local dust disabler.</summary>
+		/// <remarks>Is Persistent and active in all appropriate scenes by default.</remarks>
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Dust Effects"), UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
+		public bool isDustEnabledLocally = true;
+
 		/// <summary>CollisionInfo class for the KFRepulsorDustFX module.</summary>
 		public class CollisionInfo
 		{
@@ -141,6 +151,19 @@ namespace KerbalFoundries
 			// This allows me to get the parameter value from the current active part.
 			rideHeight = _KFRepulsor.rideHeight;
 			// Public variable is set to the value of the remote variable here.
+
+			isDustEnabledGlobally = KFConfigManager.KFConfig.isDustEnabled;
+			
+			if (!isDustEnabledGlobally && isDustEnabledLocally)
+			{
+				isDustEnabledLocally = isDustEnabledGlobally;
+				Fields["localDisabledDust"].guiActive = false;
+				Fields["localdisabledDust"].guiActiveEditor = false;
+				return;
+			}
+			
+			if (isDustEnabledGlobally && !isDustEnabledLocally)
+				return;
 			
 			if (Equals(state, StartState.Editor) || Equals(state, StartState.None))
 				return;

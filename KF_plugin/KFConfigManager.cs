@@ -8,7 +8,7 @@ namespace KerbalFoundries
 	public class KFConfigManager : MonoBehaviour
 	{
 		[Persistent]
-		public bool globalDisableDust;
+		public bool isDustEnabled = true;
 		
 		public static KFConfigManager KFConfig;
 		KFConfigManager()
@@ -26,14 +26,15 @@ namespace KerbalFoundries
 			UrlDir.UrlConfig[] configNodes = GameDatabase.Instance.GetConfigs("KFGlobals");
 			if (configNodes.Length > 0)
 			{
-				KFLog.Debug("Loading global variables.", strClassName);
-				globalDisableDust = KFConfigManager.KFConfig.globalDisableDust;
-				KFLog.Debug(string.Format("Param \"globalDisableDust\" = {0}", globalDisableDust), strClassName);
+				KFLog.Log("Loading global variables.", strClassName);
 				ConfigNode node = configNodes[0].config;
 				ConfigNode.LoadObjectFromConfig(this, node);
+				
+				isDustEnabled = KFConfigManager.KFConfig.isDustEnabled;
+				KFLog.Log(string.Format("Param \"isDustEnabled\" = {0}", isDustEnabled), strClassName);
 			}
 			else
-				KFLog.Debug("Error loading global variables.", strClassName);
+				KFLog.Error("Error loading global variables.", strClassName);
 		}
 	}
 }

@@ -142,12 +142,12 @@ namespace KerbalFoundries
 		/// <summary>Loaded from the KFConfigManager class.</summary>
 		/// <remarks>Persistent field.</remarks>
 		[Persistent]
-		public bool globalDisableDust;
+		public bool isDustEnabledGlobally = true;
 		
 		/// <summary>Local dust disabler.</summary>
 		/// <remarks>Is Persistent and active in all appropriate scenes by default.</remarks>
-		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Dust Effects"), UI_Toggle(disabledText = "Enabled", enabledText = "Disabled")]
-		public bool localDisableDust;
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Dust Effects"), UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
+		public bool isDustEnabledLocally = true;
 		
 		/// <summary>CollisionInfo class for the DustFX module.</summary>
 		public class CollisionInfo
@@ -177,17 +177,18 @@ namespace KerbalFoundries
 			_KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
 			colCount = _KFModuleWheel.wcList.Count;
 			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
-			globalDisableDust = KFConfigManager.KFConfig.globalDisableDust;
+
+			isDustEnabledGlobally = KFConfigManager.KFConfig.isDustEnabled;
 			
-			if (globalDisableDust && !localDisableDust)
+			if (!isDustEnabledGlobally && isDustEnabledLocally)
 			{
-				localDisableDust = globalDisableDust;
+				isDustEnabledLocally = isDustEnabledGlobally;
 				Fields["localDisabledDust"].guiActive = false;
 				Fields["localdisabledDust"].guiActiveEditor = false;
 				return;
 			}
 			
-			if (!globalDisableDust && localDisableDust)
+			if (isDustEnabledGlobally && !isDustEnabledLocally)
 				return;
 			
 			if (HighLogic.LoadedSceneIsFlight)
