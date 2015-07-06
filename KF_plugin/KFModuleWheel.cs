@@ -6,15 +6,15 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-    public class KFModuleWheel : PartModule
+    public class KFModuleWheel : PartModule, IPartSizeModifier
     {
 		// disable RedundantDefaultFieldInitializer
 		// disable RedundantThisQualifier
 		
 		// Name definitions
-        public string right = "right";
-        public string forward = "forward";
-        public string up = "up";
+        public const string right = "right";
+        public const string forward = "forward";
+        public const string up = "up";
 
 		// Tweakables
         [KSPField(isPersistant = false, guiActive = true, guiName = "Wheel Settings")]
@@ -197,7 +197,18 @@ namespace KerbalFoundries
 			base.OnStart(state);
 
 			CustomResourceTextSetup(); // Calls a method to set up the statusLowResource text for resource alternatives.
-            _dustFX = this.part.GetComponent<KFDustFX>();
+
+            _dustFX = this.part.GetComponent<KFDustFX>(); //see if it's been added by MM
+            if (Equals(_dustFX, null)) //add if not... sets some defaults.
+            {
+                this.part.AddModule("KFDustFX");
+                _dustFX = this.part.GetComponent<KFDustFX>();
+                _dustFX.wheelImpact = true;
+                _dustFX.wheelImpactSound = "KerbalFoundries/Sounds/TyreSqueal";
+                _dustFX.maxDustEmission = 28;
+                _dustFX.OnStart(state);
+            }
+
             _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
             
             var partOrientationForward = new Vector3(0,0,0);
@@ -319,12 +330,17 @@ namespace KerbalFoundries
 		}
 		//end OnStart
 
+        public Vector3 GetModuleSize(Vector3 defaultSize) //to do with theIPartSizeModifier stupid jiggery.
+        {
+            return new Vector3(1,1,1);
+        }
+
         public void WheelSound()
         {
             part.Effect("WheelEffect", effectPower);
         }
 
-        /// <summary>Stuff that needs to wait for the first physics frame. Maybe because this ensure the vessel is totally spawnedor physics is active</summary>
+        /// <summary>Stuff that needs to wait for the first physics frame. Maybe because this ensure the vessel is totally spawned or physics is active</summary>
         IEnumerator StartupStuff()
         {
             yield return new WaitForFixedUpdate();

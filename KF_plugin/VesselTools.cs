@@ -8,10 +8,12 @@ using System;
 using System.Linq;
 using UnityEngine;
 
+
+
 namespace KerbalFoundries
 {
-	public class ModuleWaterSlider : VesselModule
-	{
+    public class ModuleWaterSlider : VesselModule
+    {
 		readonly GameObject _collider = new GameObject("ModuleWaterSlider.Collider", typeof(BoxCollider), typeof(Rigidbody));
 		const float triggerDistance = 25f;
 		bool isActive;
@@ -105,15 +107,16 @@ namespace KerbalFoundries
 		//[KSPEvent(active=true,guiActive=true,guiName="Take Shot",name="Take Shot")]
 		public void Update()
 		{
-			/*
+            /*
             takeHiResShot |= Input.GetKeyDown("k");
             if (takeHiResShot && _vessel == FlightGlobals.ActiveVessel)
             {
-             */
-			var timer = new System.Diagnostics.Stopwatch();
-			timer.Start();
+             
+            var timer = new System.Diagnostics.Stopwatch();
+            timer.Start();
+             * */
 
-			if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel))
+            if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel))
 			{
 				frameCount = 0;
 				var _camera = _cameraObject.AddComponent<Camera>();
@@ -155,8 +158,24 @@ namespace KerbalFoundries
 				//takeHiResShot = false;
 			}
 			frameCount++;
-			timer.Stop();
+			//timer.Stop();
 			//print(timer.Elapsed);
 		}
 	}
 }
+
+/*
+var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                visible.transform.parent = _cameraObject.transform;
+                visible.transform.localScale = new Vector3(0.1f,0.1f,0.5f);
+                visible.renderer.enabled = false;
+*/
+
+/*
+byte[] bytes = groundShot.EncodeToPNG();
+string filename = ScreenShotName(resWidth, resHeight);
+Debug.LogError("about to write screenshot");
+System.IO.File.WriteAllBytes(filename, bytes);
+//KSP.IO.File.WriteAllBytes<RenderTexture>(bytes, filename, _vessel);
+Debug.Log(string.Format("Took screenshot to: {0}", filename));
+ * */

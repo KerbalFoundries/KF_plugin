@@ -199,6 +199,7 @@ namespace KerbalFoundries
 				if (wheelImpact && !isImpactDataNull())
 					DustAudio();
 			}
+
 			GameEvents.onGamePause.Add(OnPause);
 			GameEvents.onGameUnpause.Add(OnUnpause);
 		}
