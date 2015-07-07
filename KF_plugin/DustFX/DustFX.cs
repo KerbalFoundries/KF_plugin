@@ -138,6 +138,8 @@ namespace KerbalFoundries
 		ParticleAnimator dustAnimator;
 		Color colorDust;
 		Color colorBiome;
+        Color colorAverage;
+        Color colorCam;
 		
 		/// <summary>Loaded from the KFConfigManager class.</summary>
 		/// <remarks>Persistent field.</remarks>
@@ -290,22 +292,25 @@ namespace KerbalFoundries
 				return;
 			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
 				tweakScaleCorrector = 1f;
-			//colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
-            colorBiome = _ModuleCameraShot._averageColour;
+            colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
+            colorCam = _ModuleCameraShot._averageColour;
+            colorAverage = (colorCam + colorBiome) /2;
+            //Color colorAverage = _ModuleCameraShot._averageColour;
+
 			if (Equals(colorBiome, null))
 				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
 			if (speed >= minScrapeSpeed)
 			{
-				if (!Equals(colorBiome, colorDust))
+				if (!Equals(colorAverage, colorDust))
 				{
 					Color[] colors = dustAnimator.colorAnimation;
-					colors[0] = colorBiome;
-					colors[1] = colorBiome;
-					colors[2] = colorBiome;
-					colors[3] = colorBiome;
-					colors[4] = colorBiome;
+                    colors[0] = colorAverage;
+                    colors[1] = colorAverage;
+                    colors[2] = colorAverage;
+                    colors[3] = colorAverage;
+                    colors[4] = colorAverage;
 					dustAnimator.colorAnimation = colors;
-					colorDust = colorBiome;
+                    colorDust = colorAverage;
 				}
 				kfdustFx.transform.position = contactPoint;
 				kfdustFx.particleEmitter.maxEnergy = Mathf.Clamp(((speed / maxDustEnergyDiv) * tweakScaleCorrector), minDustEnergy, maxDustEnergy);

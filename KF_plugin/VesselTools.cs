@@ -71,7 +71,6 @@ namespace KerbalFoundries
 
 	public class ModuleCameraShot : VesselModule
 	{
-		bool takeHiResShot = false;
 		const int resWidth = 6;
 		const int resHeight = 6;
 		public Color _averageColour = new Color(1, 1, 1, 0.025f);
@@ -92,20 +91,12 @@ namespace KerbalFoundries
 			cameraMask = 32784;	// Layers 4 and 15, or water and local scenery.
 								// Generated from the binary place value output of 4 and 15 added to each other.
 								// (1 << 4) | (1 << 15) = (16) | (32768) = 32784
-            if (KFConfigManager.KFConfig.isDustCameraEnabled)
+            bool dustCam = KFConfigManager.KFConfig.isDustCameraEnabled;
+            if (dustCam)
             {
+                Debug.LogWarning("Starting camera couroutine");
                 StartCoroutine("Camera");
             }
-		}
-
-		public static string ScreenShotName(int width, int height)
-		{
-			return string.Format("{0}/screen_{1}x{2}_{3}.png", Application.dataPath, width, height, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
-		}
-
-		public void TakeHiResShot()
-		{
-			takeHiResShot = true;
 		}
 
         IEnumerator Camera()
