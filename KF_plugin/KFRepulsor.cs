@@ -58,6 +58,8 @@ namespace KerbalFoundries
         public float repulsorCount = 0;
 
         KFRepulsorDustFX _dustFX;
+        float dir;
+
 
         //begin start
         public List<WheelCollider> wcList = new List<WheelCollider>();
@@ -214,6 +216,12 @@ namespace KerbalFoundries
                         
             //for (int i = 0; i < wcList.Count(); i++)
                // wcList[i].suspensionDistance = maxRepulsorHeight * rideHeight;
+            if (dir > 360)
+                dir = 0;
+            float sin = (float)Math.Sin(Mathf.Deg2Rad * dir);
+            float cos = (float)Math.Cos(Mathf.Deg2Rad * dir);
+            Vector3 emitDirection = new Vector3(0, 0, 0);
+           
             float hitForce = 0;
 
             if (deployed)
@@ -230,7 +238,7 @@ namespace KerbalFoundries
                     if (grounded)
                     {
                         hitForce += hit.force;
-                        _dustFX.RepulsorEmit(hit.point, hit.collider, hit.force);
+                        _dustFX.RepulsorEmit(hit.point, hit.collider, hit.force, hit.normal, emitDirection);
                     }
                 }
 
@@ -266,6 +274,8 @@ namespace KerbalFoundries
             //RepulsorSound();
             effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //print(effectPower);
+
+            dir++;
         }
 
 

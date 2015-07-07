@@ -184,8 +184,9 @@ namespace KerbalFoundries
 			kfrepdustFx.transform.parent = part.transform;
 			kfrepdustFx.transform.position = part.transform.position;
 			kfrepdustFx.particleEmitter.localVelocity = Vector3.zero;
-			kfrepdustFx.particleEmitter.useWorldSpace = true;
+			kfrepdustFx.particleEmitter.useWorldSpace = false;
 			kfrepdustFx.particleEmitter.emit = false;
+            
 			kfrepdustFx.particleEmitter.minEnergy = minDustEnergy;
 			kfrepdustFx.particleEmitter.minEmission = minDustEmission;
 			kfrepdustFx.particleEmitter.minSize = minDustSize;
@@ -208,7 +209,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void RepulsorEmit(Vector3 hitPoint, Collider col, float force)
+		public void RepulsorEmit(Vector3 hitPoint, Collider col, float force, Vector3 normal, Vector3 direction)
 		{
 			CollisionInfo cInfo;
 			isColorOverrideActive |= string.Equals("ModuleWaterSlider.Collider", col.gameObject.name);
@@ -216,8 +217,8 @@ namespace KerbalFoundries
 				return;
 			cInfo = KFRepulsorDustFX.GetClosestChild(part, hitPoint + part.rigidbody.velocity * Time.deltaTime);
 			if (!Equals(cInfo.KFRepDustFX, null))
-				cInfo.KFRepDustFX.Scrape(hitPoint, col, force);
-            Scrape(hitPoint, col, force);
+				cInfo.KFRepDustFX.Scrape(hitPoint, col, force, normal, direction);
+            Scrape(hitPoint, col, force, normal, direction);
 		}
 		
 		/// <summary>Searches child parts for the nearest instance of this class to the given point.</summary>
@@ -251,22 +252,22 @@ namespace KerbalFoundries
 		
 		/// <summary>Called when the part is scraping over a surface.</summary>
 		/// <param name="col">The collider being referenced.</param>
-        public void Scrape(Vector3 position, Collider col, float force)
+        public void Scrape(Vector3 position, Collider col, float force, Vector3 normal, Vector3 direction)
         {
             if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
                 return;
             //float fMagnitude = this.part.rigidbody.velocity.magnitude;
-            DustParticles(force, position + (part.rigidbody.velocity * Time.deltaTime), col);
+            DustParticles(force, position + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
         }
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
-		/// <param name="speed">Speed of the part which is scraping.</param>
+		/// <param name="force">Speed of the part which is scraping.</param>
 		/// <param name="contactPoint">The point at which the collider and the scraped surface make contact.</param>
 		/// <param name="col">The collider being referenced.</param>
-		void DustParticles(float speed, Vector3 contactPoint, Collider col)
+		void DustParticles(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
 		{
 			var WaterColor = new Color(0.65f, 0.65f, 0.65f, 0.025f);
-			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || Equals(rideHeight, 0))
+			if (!dustEffects || force < minScrapeSpeed || Equals(dustAnimator, null) || Equals(rideHeight, 0))
 				return;
 			float appliedRideHeight = Mathf.Clamp((rideHeight / 2), 1, 4);
 			colorBiome = !isColorOverrideActive ? KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
@@ -275,7 +276,7 @@ namespace KerbalFoundries
 				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
 				return;
 			}
-			if (speed >= minScrapeSpeed)
+			if (force >= minScrapeSpeed)
 			{
 				if (!Equals(colorBiome, colorDust))
 				{
@@ -289,9 +290,12 @@ namespace KerbalFoundries
 					colorDust = colorBiome;
 				}
 				kfrepdustFx.transform.position = contactPoint;
-				kfrepdustFx.particleEmitter.maxEnergy = Mathf.Clamp((speed / maxDustEnergyDiv), minDustEnergy, maxDustEnergy);
-				kfrepdustFx.particleEmitter.maxEmission = Mathf.Clamp((speed * maxDustEmissionMult), (minDustEmission * appliedRideHeight), (maxDustEmission * appliedRideHeight));
-				kfrepdustFx.particleEmitter.maxSize = Mathf.Clamp((speed / appliedRideHeight), minDustSize, maxDustSize);
+                //kfrepdustFx.transform.rotation = Quaternion.Euler(normal);
+                kfrepdustFx.particleEmitter.localVelocity = direction;
+                kfrepdustFx.particleEmitter.worldVelocity = Vector3.zero;
+				kfrepdustFx.particleEmitter.maxEnergy = Mathf.Clamp((force / maxDustEnergyDiv), minDustEnergy, maxDustEnergy);
+				kfrepdustFx.particleEmitter.maxEmission = Mathf.Clamp((force * maxDustEmissionMult), (minDustEmission * appliedRideHeight), (maxDustEmission * appliedRideHeight));
+				kfrepdustFx.particleEmitter.maxSize = Mathf.Clamp((force / appliedRideHeight), minDustSize, maxDustSize);
 				kfrepdustFx.particleEmitter.Emit();
 			}
 			return;
