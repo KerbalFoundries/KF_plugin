@@ -195,7 +195,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void OnCollisionEnter(Collision col)
+		public void OldCollisionEnter(Collision col)
 		{
 			CollisionInfo cInfo;
 			if (col.relativeVelocity.magnitude >= minVelocityMag)
@@ -208,16 +208,16 @@ namespace KerbalFoundries
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void OnCollisionStay(Collision col)
+		public void RepulsorEmit(Vector3 hitPoint, Collider col, float force)
 		{
 			CollisionInfo cInfo;
 			isColorOverrideActive |= string.Equals("ModuleWaterSlider.Collider", col.gameObject.name);
-			if (isPaused || Equals(col.contacts.Length, 0) || Equals(rideHeight, 0))
+			if (isPaused || Equals(rideHeight, 0))
 				return;
-			cInfo = KFRepulsorDustFX.GetClosestChild(part, col.contacts[0].point + part.rigidbody.velocity * Time.deltaTime);
+			cInfo = KFRepulsorDustFX.GetClosestChild(part, hitPoint + part.rigidbody.velocity * Time.deltaTime);
 			if (!Equals(cInfo.KFRepDustFX, null))
-				cInfo.KFRepDustFX.Scrape(col);
-			Scrape(col);
+				cInfo.KFRepDustFX.Scrape(hitPoint, col, force);
+            Scrape(hitPoint, col, force);
 		}
 		
 		/// <summary>Searches child parts for the nearest instance of this class to the given point.</summary>
@@ -251,13 +251,13 @@ namespace KerbalFoundries
 		
 		/// <summary>Called when the part is scraping over a surface.</summary>
 		/// <param name="col">The collider being referenced.</param>
-		public void Scrape(Collision col)
-		{
-			if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null) || Equals(col.contacts.Length, 0))
-				return;
-			float fMagnitude = col.relativeVelocity.magnitude;
-			DustParticles(fMagnitude, col.contacts[0].point + (part.rigidbody.velocity * Time.deltaTime), col.collider);
-		}
+        public void Scrape(Vector3 position, Collider col, float force)
+        {
+            if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
+                return;
+            //float fMagnitude = this.part.rigidbody.velocity.magnitude;
+            DustParticles(force, position + (part.rigidbody.velocity * Time.deltaTime), col);
+        }
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
 		/// <param name="speed">Speed of the part which is scraping.</param>

@@ -57,6 +57,8 @@ namespace KerbalFoundries
 
         public float repulsorCount = 0;
 
+        KFRepulsorDustFX _dustFX;
+
         //begin start
         public List<WheelCollider> wcList = new List<WheelCollider>();
         //public List<float> susDistList = new List<float>();
@@ -88,6 +90,17 @@ namespace KerbalFoundries
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             effectPowerMax = repulsorCount * resourceConsumptionRate * Time.fixedDeltaTime; // Previously it had "1 * blahblahblah" in it, which is kinda stupid since 1x of any value is equal to that value.  So I nuked the "1 *" part. - Gaalidas
 			print(string.Format("Max effect power is {0}.", effectPowerMax));
+
+            _dustFX = this.part.GetComponent<KFRepulsorDustFX>(); //see if it's been added by MM
+            if (Equals(_dustFX, null)) //add if not... sets some defaults.
+            {
+                this.part.AddModule("KFRepulsorDustFX");
+                _dustFX = this.part.GetComponent<KFRepulsorDustFX>();
+                //_dustFX.wheelImpact = true;
+                //_dustFX.wheelImpactSound = "KerbalFoundries/Sounds/TyreSqueal";
+                _dustFX.maxDustEmission = 28;
+                _dustFX.OnStart(state);
+            }
 
             if (HighLogic.LoadedSceneIsFlight)
             {
@@ -201,12 +214,26 @@ namespace KerbalFoundries
                         
             //for (int i = 0; i < wcList.Count(); i++)
                // wcList[i].suspensionDistance = maxRepulsorHeight * rideHeight;
+            float hitForce = 0;
 
             if (deployed)
             {
 				 // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
                 float requestRecource = ResourceConsumption();
+
+
+                for (int i = 0; i < wcList.Count(); i++)
+                {
+                    WheelHit hit;
+                    bool grounded = wcList[i].GetGroundHit(out hit);
+                    if (grounded)
+                    {
+                        hitForce += hit.force;
+                        _dustFX.RepulsorEmit(hit.point, hit.collider, hit.force);
+                    }
+                }
+
                 
                 //print(electricCharge);
                 // = Extensions.GetBattery(this.part);
