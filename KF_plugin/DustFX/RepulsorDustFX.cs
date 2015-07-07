@@ -26,6 +26,7 @@
 using System;
 using UnityEngine;
 using KerbalFoundries;
+using System.Reflection;
 
 namespace KerbalFoundries
 {
@@ -114,10 +115,13 @@ namespace KerbalFoundries
 		
 		bool isPaused;
 		bool isColorOverrideActive;
-		GameObject kfrepdustFx;
+		GameObject _kfRepDustFx;
+        GameObject _kfRepLight;
+        public Light _repLight;
 		ParticleAnimator dustAnimator;
 		Color colorDust;
 		Color colorBiome;
+        
 		
 		/// <summary>Loaded from the KFConfigManager class.</summary>
 		/// <remarks>Persistent field.</remarks>
@@ -180,18 +184,28 @@ namespace KerbalFoundries
 		{
 			if (!dustEffects)
 				return;
-			kfrepdustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectsObject));
-			kfrepdustFx.transform.parent = part.transform;
-			kfrepdustFx.transform.position = part.transform.position;
-			kfrepdustFx.particleEmitter.localVelocity = Vector3.zero;
-			kfrepdustFx.particleEmitter.useWorldSpace = false;
-			kfrepdustFx.particleEmitter.emit = false;
+			_kfRepDustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectsObject));
+			_kfRepDustFx.transform.parent = part.transform;
+			_kfRepDustFx.transform.position = part.transform.position;
+			_kfRepDustFx.particleEmitter.localVelocity = Vector3.zero;
+			_kfRepDustFx.particleEmitter.useWorldSpace = false;
+			_kfRepDustFx.particleEmitter.emit = false;
             
-			kfrepdustFx.particleEmitter.minEnergy = minDustEnergy;
-			kfrepdustFx.particleEmitter.minEmission = minDustEmission;
-			kfrepdustFx.particleEmitter.minSize = minDustSize;
-			dustAnimator = kfrepdustFx.particleEmitter.GetComponent<ParticleAnimator>();
+			_kfRepDustFx.particleEmitter.minEnergy = minDustEnergy;
+			_kfRepDustFx.particleEmitter.minEmission = minDustEmission;
+			_kfRepDustFx.particleEmitter.minSize = minDustSize;
+			dustAnimator = _kfRepDustFx.particleEmitter.GetComponent<ParticleAnimator>();
 			KFLog.Log("Particles have been set up.", strClassName);
+            _kfRepLight = new GameObject("Rep Light");
+            _kfRepLight.transform.parent = _kfRepDustFx.transform;
+            _kfRepLight.transform.position = Vector3.zero;
+            _repLight = _kfRepLight.AddComponent<Light>();
+            _repLight.type = LightType.Point;
+            _repLight.range = 2.0f;
+            _repLight.color = Color.green;
+            _repLight.intensity = 0.0f;
+
+
 		}
 		
 		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
@@ -289,14 +303,17 @@ namespace KerbalFoundries
 					dustAnimator.colorAnimation = colors;
 					colorDust = colorBiome;
 				}
-				kfrepdustFx.transform.position = contactPoint;
+				_kfRepDustFx.transform.position = contactPoint;
                 //kfrepdustFx.transform.rotation = Quaternion.Euler(normal);
-                kfrepdustFx.particleEmitter.localVelocity = direction;
-                kfrepdustFx.particleEmitter.worldVelocity = Vector3.zero;
-				kfrepdustFx.particleEmitter.maxEnergy = Mathf.Clamp((force / maxDustEnergyDiv), minDustEnergy, maxDustEnergy);
-				kfrepdustFx.particleEmitter.maxEmission = Mathf.Clamp((force * maxDustEmissionMult), (minDustEmission * appliedRideHeight), (maxDustEmission * appliedRideHeight));
-				kfrepdustFx.particleEmitter.maxSize = Mathf.Clamp((force / appliedRideHeight), minDustSize, maxDustSize);
-				kfrepdustFx.particleEmitter.Emit();
+                _kfRepDustFx.particleEmitter.localVelocity = direction;
+                _kfRepDustFx.particleEmitter.worldVelocity = Vector3.zero;
+				_kfRepDustFx.particleEmitter.maxEnergy = Mathf.Clamp((force / maxDustEnergyDiv), minDustEnergy, maxDustEnergy);
+				_kfRepDustFx.particleEmitter.maxEmission = Mathf.Clamp((force * maxDustEmissionMult), (minDustEmission * appliedRideHeight), (maxDustEmission * appliedRideHeight));
+				_kfRepDustFx.particleEmitter.maxSize = Mathf.Clamp((force / appliedRideHeight), minDustSize, maxDustSize);
+				_kfRepDustFx.particleEmitter.Emit();
+                _kfRepLight.transform.localPosition = Vector3.zero;
+                _repLight.intensity = 0.5f;
+                _repLight.enabled = true;
 			}
 			return;
 		}
@@ -305,14 +322,14 @@ namespace KerbalFoundries
 		void OnPause()
 		{
 			isPaused = true;
-			kfrepdustFx.particleEmitter.enabled = false;
+			_kfRepDustFx.particleEmitter.enabled = false;
 		}
 		
 		/// <summary>Called when the game leaves a "paused" state.</summary>
 		void OnUnpause()
 		{
 			isPaused = false;
-			kfrepdustFx.particleEmitter.enabled = true;
+			_kfRepDustFx.particleEmitter.enabled = true;
 		}
 		
 		/// <summary>Called when the object being referenced is destroyed, or when the module instance is deactivated.</summary>
