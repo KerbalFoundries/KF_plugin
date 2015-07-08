@@ -121,7 +121,6 @@ namespace KerbalFoundries
 		ParticleAnimator dustAnimator;
 		Color colorDust;
 		Color colorBiome;
-        
 		
 		/// <summary>Loaded from the KFConfigManager class.</summary>
 		/// <remarks>Persistent field.</remarks>
@@ -222,7 +221,9 @@ namespace KerbalFoundries
 		}
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
+		/// <param name="hitPoint">Point at which the collision takes place.</param>
 		/// <param name="col">The collider being referenced.</param>
+		/// <param name="force">Force of the hit.</param>
 		public void RepulsorEmit(Vector3 hitPoint, Collider col, float force, Vector3 normal, Vector3 direction)
 		{
 			CollisionInfo cInfo;
@@ -265,7 +266,9 @@ namespace KerbalFoundries
 		}
 		
 		/// <summary>Called when the part is scraping over a surface.</summary>
+		/// <param name="position">Position of the scrape.</param>
 		/// <param name="col">The collider being referenced.</param>
+		/// <param name="force">Scrape force.</param>
         public void Scrape(Vector3 position, Collider col, float force, Vector3 normal, Vector3 direction)
         {
             if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
@@ -275,7 +278,7 @@ namespace KerbalFoundries
         }
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
-		/// <param name="force">Speed of the part which is scraping.</param>
+		/// <param name="force">Force of the part which is scraping.</param>
 		/// <param name="contactPoint">The point at which the collider and the scraped surface make contact.</param>
 		/// <param name="col">The collider being referenced.</param>
 		void DustParticles(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)

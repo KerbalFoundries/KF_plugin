@@ -99,6 +99,7 @@ namespace KerbalFoundries
             }
 		}
 
+        // disable once FunctionNeverReturns
         IEnumerator Camera()
         {
             while (true)
