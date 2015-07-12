@@ -201,7 +201,7 @@ namespace KerbalFoundries
             _repLight = _kfRepLight.AddComponent<Light>();
             _repLight.type = LightType.Point;
             _repLight.range = 2.0f;
-            _repLight.color = Color.green;
+            _repLight.color = Color.blue;
             _repLight.intensity = 0.0f;
 
 
@@ -307,7 +307,7 @@ namespace KerbalFoundries
 					colorDust = colorBiome;
 				}
 				_kfRepDustFx.transform.position = contactPoint;
-                //kfrepdustFx.transform.rotation = Quaternion.Euler(normal);
+                _kfRepDustFx.transform.rotation = Quaternion.Euler(normal);
                 _kfRepDustFx.particleEmitter.localVelocity = direction;
                 _kfRepDustFx.particleEmitter.worldVelocity = Vector3.zero;
 				_kfRepDustFx.particleEmitter.maxEnergy = Mathf.Clamp((force / maxDustEnergyDiv), minDustEnergy, maxDustEnergy);

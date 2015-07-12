@@ -220,7 +220,7 @@ namespace KerbalFoundries
                 dir = 0;
             float sin = (float)Math.Sin(Mathf.Deg2Rad * dir);
             float cos = (float)Math.Cos(Mathf.Deg2Rad * dir);
-            Vector3 emitDirection = new Vector3(0, 0, 0);
+            Vector3 emitDirection = new Vector3(0, sin * 10, cos * 10);
            
             float hitForce = 0;
 
@@ -275,7 +275,7 @@ namespace KerbalFoundries
             effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //print(effectPower);
 
-            dir++;
+            dir += UnityEngine.Random.Range(20,60);
         }
 
 
@@ -339,17 +339,17 @@ namespace KerbalFoundries
         [KSPEvent(guiActive = true, guiName = "Apply Settings", active = true)]
         public void ApplySettings()
         {
-            appliedRideHeight = rideHeight;
+            //appliedRideHeight = rideHeight;
             foreach (KFRepulsor mt in this.vessel.FindPartModulesImplementing<KFRepulsor>())
             {
                 if (!Equals(groupNumber, 0) && Equals(groupNumber, mt.groupNumber))
                 {
                     mt.rideHeight = rideHeight;
-                    mt.appliedRideHeight = appliedRideHeight;
+                    mt.appliedRideHeight = rideHeight;
                     mt.StartCoroutine("UpdateHeight"); 
                 }
             }
-            StartCoroutine("UpdateHeight"); 
+            //StartCoroutine("UpdateHeight"); 
         }
 	}
 	// End class
