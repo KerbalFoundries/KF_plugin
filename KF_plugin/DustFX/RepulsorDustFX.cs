@@ -224,6 +224,8 @@ namespace KerbalFoundries
 		/// <param name="hitPoint">Point at which the collision takes place.</param>
 		/// <param name="col">The collider being referenced.</param>
 		/// <param name="force">Force of the hit.</param>
+		/// <param name="normal">No Clue.</param>
+		/// <param name="direction">No Clue.</param>
 		public void RepulsorEmit(Vector3 hitPoint, Collider col, float force, Vector3 normal, Vector3 direction)
 		{
 			CollisionInfo cInfo;
@@ -269,6 +271,8 @@ namespace KerbalFoundries
 		/// <param name="position">Position of the scrape.</param>
 		/// <param name="col">The collider being referenced.</param>
 		/// <param name="force">Scrape force.</param>
+		/// <param name="normal">No Clue.</param>
+		/// <param name="direction">No Clue.</param>
         public void Scrape(Vector3 position, Collider col, float force, Vector3 normal, Vector3 direction)
         {
             if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
@@ -281,6 +285,8 @@ namespace KerbalFoundries
 		/// <param name="force">Force of the part which is scraping.</param>
 		/// <param name="contactPoint">The point at which the collider and the scraped surface make contact.</param>
 		/// <param name="col">The collider being referenced.</param>
+		/// <param name="normal">No Clue.</param>
+		/// <param name="direction">No Clue.</param>
 		void DustParticles(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
 		{
 			var WaterColor = new Color(0.65f, 0.65f, 0.65f, 0.025f);

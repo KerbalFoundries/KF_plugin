@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Include="APUController.cs" />
     <Compile Include="ArmMagnet.cs" />
-    <Compile Include="KFConfigManager.cs" />
     <Compile Include="DozerBlade.cs" />
     <Compile Include="DustFX\BiomeDustColorInfo.cs" />
     <Compile Include="DustFX\DustColorDefinitions.cs" />
@@ -58,6 +57,7 @@
     <Compile Include="GoldenShower.cs" />
     <Compile Include="HeavyCrawler.cs" />
     <Compile Include="KEMeccanumWheel.cs" />
+    <Compile Include="KFConfigManager.cs" />
     <Compile Include="KFCouplingEye.cs" />
     <Compile Include="KFCouplingHitch.cs" />
     <Compile Include="KFLogUtils.cs" />
