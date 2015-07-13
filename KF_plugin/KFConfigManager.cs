@@ -211,19 +211,14 @@ namespace KerbalFoundries
 		public void OnGUI()
 		{
 			//KFLog.Log("OnGUI() method called.", strClassName);
-            //print(isGUIEnabled);
-                if (isGUIEnabled)
-                {
-                    //KFLog.Log("GUI Enabled", strClassName);
-                    //settingsRect = GUI.Window(GUI_ID, settingsRect, KFGUI, "");
-                    KFGUI(GUI_ID);
-                    //appButton.SetTexture(appTextureColor);
-                }
-                //else
-                    //appButton.SetTexture(appTextureGrey);
-                
 
-            
+            if (isGUIEnabled)
+            {
+                KFGUI(GUI_ID);
+                appButton.SetTexture(appTextureColor);
+            }
+            else
+                appButton.SetTexture(appTextureGrey);
 		}
 
         public void KFGUI()
@@ -234,7 +229,6 @@ namespace KerbalFoundries
 		public void KFGUI(int windowID)
 		{
 			//KFLog.Log("KFGUI() method called.", strClassName);
-			// disable ConvertToConstant.Local
 			const float width = 360;
 			const float height = 450;
 			float left = Screen.width / 2 - width / 2;
@@ -249,11 +243,6 @@ namespace KerbalFoundries
 
             GUI.Box(new Rect(left, top, width, height), "");
             GUI.Box(new Rect(left, top, width, height), "Kerbal Foundries Settings");
-
-			//GUI.DragWindow(new Rect(left, top, width, height));
-			//GUI.Label(new Rect(left, top, width, height), "Kerbal Foundries Settings", centerLabel);
-
-            //physicsRangeGui = GUI.TextField(new Rect(Screen.width / 2, top + line * spacer, width / 2 - spacer, spacer), physicsRangeGui);
 
 			isDustEnabled = GUI.Toggle(new Rect(leftMargin, top + line * spacer, width - 2 * spacer, spacer), isDustEnabled, "Enable Dust");
 			line++;
@@ -274,8 +263,6 @@ namespace KerbalFoundries
 				SaveConfigs(); 
 				isGUIEnabled = false;
 			}
-			
-			//settingsRect = new Rect(settingsRect.position.x, settingsRect.position.y, width, height);
            
 		}
 		
