@@ -240,7 +240,6 @@ namespace KerbalFoundries
                         _dustFX.RepulsorEmit(hit.point, hit.collider, hit.force, hit.normal, emitDirection);
                     }
                 }
-                //print(hitForce);
 
                 if (lowEnergy)
                 {

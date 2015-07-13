@@ -130,7 +130,7 @@ namespace KerbalFoundries
 //			else
 //			{
 //				KFLog.Error("Error loading global variables.", strClassName);
-//				settingsLoaded = false;
+//				settingsLoaded = false; 
 //			}
 		}
 		

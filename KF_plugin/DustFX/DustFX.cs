@@ -294,7 +294,9 @@ namespace KerbalFoundries
 				tweakScaleCorrector = 1f;
             colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
             colorCam = _ModuleCameraShot._averageColour;
-            colorAverage = (colorCam + colorBiome) /2;
+            //colorAverage = (colorCam + colorBiome) /2;
+            colorAverage = colorBiome;
+            
             //Color colorAverage = _ModuleCameraShot._averageColour;
 
 			if (Equals(colorBiome, null))
