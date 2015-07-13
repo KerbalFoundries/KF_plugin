@@ -211,14 +211,19 @@ namespace KerbalFoundries
 		public void OnGUI()
 		{
 			//KFLog.Log("OnGUI() method called.", strClassName);
+            //print(isGUIEnabled);
+                if (isGUIEnabled)
+                {
+                    //KFLog.Log("GUI Enabled", strClassName);
+                    //settingsRect = GUI.Window(GUI_ID, settingsRect, KFGUI, "");
+                    KFGUI(GUI_ID);
+                    //appButton.SetTexture(appTextureColor);
+                }
+                //else
+                    //appButton.SetTexture(appTextureGrey);
+                
 
-            if (isGUIEnabled)
-            {
-                KFGUI(GUI_ID);
-                appButton.SetTexture(appTextureColor);
-            }
-            else
-                appButton.SetTexture(appTextureGrey);
+            
 		}
 
         public void KFGUI()
@@ -229,6 +234,7 @@ namespace KerbalFoundries
 		public void KFGUI(int windowID)
 		{
 			//KFLog.Log("KFGUI() method called.", strClassName);
+			// disable ConvertToConstant.Local
 			const float width = 360;
 			const float height = 450;
 			float left = Screen.width / 2 - width / 2;

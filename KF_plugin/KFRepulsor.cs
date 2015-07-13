@@ -226,9 +226,9 @@ namespace KerbalFoundries
 
             if (deployed)
             {
-				 // Reset the height of the water collider that slips away every frame.
+                // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
-                float requestRecource = ResourceConsumption();
+                float requestResource = ResourceConsumption();
 
 
                 for (int i = 0; i < wcList.Count(); i++)
@@ -242,14 +242,15 @@ namespace KerbalFoundries
                     }
                 }
 
-                
+
                 //print(electricCharge);
                 // = Extensions.GetBattery(this.part);
-                /*
-                if (electricCharge < (chargeConsumption * 0.5f))
+
+                if (requestResource < (resourceConsumptionRate * 0.5f) && requestResource != 0)
                 {
                     print("Retracting due to low Electric Charge");
                     lowEnergy = true;
+                    appliedRideHeight = 0;
                     rideHeight = 0;
                     UpdateHeight();
                     status = "Low Charge";
@@ -259,17 +260,22 @@ namespace KerbalFoundries
                     lowEnergy = false;
                     status = "Nominal";
                 }
-
-                if (Equals(rideHeight, 0) || lowEnergy) //disable the colliders if there is not enough energy or height slips below the threshold
+                /*
+                if (lowEnergy) //disable the colliders if there is not enough energy or height slips below the threshold
                 {
                     deployed = false;
-                    DisableColliders();
+                    rideHeight = 0;
+                    appliedRideHeight = 0;
+                    UpdateHeight();
                     //print(appliedRideHeight);
                 }
-                 * */
+                */
             }
             else
+            {
                 effectPower = 0;
+                status = "Off";
+            }
 			
             //RepulsorSound();
             effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
