@@ -14,8 +14,6 @@ namespace KerbalFoundries
 {
     public class KFRepulsor : PartModule
     {
-        // disable RedundantDefaultFieldInitializer
-		// disable RedundantThisQualifier
 
         public JointSpring userspring;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Repulsor Settings")]
@@ -43,25 +41,22 @@ namespace KerbalFoundries
         [KSPField]
         public string gimbalName;
         bool isReady;
+ 
         Transform _grid;
         Transform _gimbal;
-
         Vector3 _gridScale;
         
         float effectPower; 
-        float effectPowerMax;
+        float effectPowerMax = 50f;
         float appliedRideHeight;
-        //float smoothedRideHeight;
         float currentRideHeight;
-        const float maxRepulsorHeight = 100;
-
-        public float repulsorCount = 0;
+        float repulsorCount = 0;
 
         KFRepulsorDustFX _dustFX;
         float dir;
 
 
-        //begin start
+        
         public List<WheelCollider> wcList = new List<WheelCollider>();
         //public List<float> susDistList = new List<float>();
         ModuleWaterSlider _MWS;
@@ -82,7 +77,8 @@ namespace KerbalFoundries
 		{
 			return strInfo;
 		}
-        
+
+        //begin start
         public override void OnStart(PartModule.StartState state)  //when started
         {
 			// debug only: print("onstart");
@@ -90,8 +86,9 @@ namespace KerbalFoundries
 				isReady = true; // Now it won't complain about not being used or initialized anywhere.
             base.OnStart(state);
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-            effectPowerMax = repulsorCount * resourceConsumptionRate * Time.fixedDeltaTime; // Previously it had "1 * blahblahblah" in it, which is kinda stupid since 1x of any value is equal to that value.  So I nuked the "1 *" part. - Gaalidas
-			print(string.Format("Max effect power is {0}.", effectPowerMax));
+            
+            //effectPowerMax = repulsorCount * resourceConsumptionRate * Time.fixedDeltaTime; // Previously it had "1 * blahblahblah" in it, which is kinda stupid since 1x of any value is equal to that value.  So I nuked the "1 *" part. - Gaalidas
+			
 
             _dustFX = this.part.GetComponent<KFRepulsorDustFX>(); //see if it's been added by MM
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
@@ -113,16 +110,18 @@ namespace KerbalFoundries
 
                 foreach (WheelCollider b in this.part.GetComponentsInChildren<WheelCollider>())
                 {
-                    repulsorCount += 1;
+                    repulsorCount ++;
                     userspring = b.suspensionSpring;
                     userspring.spring = SpringRate;
                     userspring.damper = DamperRate;
                     b.suspensionSpring = userspring;
-                    b.suspensionDistance = 1f; //default to low setting to save stupid shenanigans on takeoff
+                    b.suspensionDistance = 2.5f; //default to low setting to save stupid shenanigans on takeoff
                     wcList.Add(b);
                 }
 				this.part.force_activate(); // Force the part active or OnFixedUpate is not called.
-				
+                //effectPowerMax = repulsorCount * Time.fixedDeltaTime * resourceConsumptionRate / 4;
+
+                //print(string.Format("Max effect power is {0}.", effectPowerMax));
                 //print("water slider height is" + _MWS.colliderHeight);
                 if (pointDown && Equals(this.vessel, FlightGlobals.ActiveVessel))
                 {
@@ -191,9 +190,9 @@ namespace KerbalFoundries
             }
         }
 
-        public void RepulsorSound()
+        public void RepulsorSound(float power)
         {
-            part.Effect("RepulsorEffect", effectPower/ effectPowerMax);
+            part.Effect("RepulsorEffect", power / effectPowerMax);
         }
 
         public void UpdateWaterSlider()
@@ -203,19 +202,19 @@ namespace KerbalFoundries
 
         public float ResourceConsumption()
         {
-            float resourceConsumption = (appliedRideHeight / 100) * (1 + SpringRate) * repulsorCount * Time.deltaTime * resourceConsumptionRate / 4;
-            float requestResource = resourceConsumption / effectPowerMax;
-            float electricCharge = part.RequestResource(resourceName, requestResource);
-            return electricCharge;
+            float resValue = repulsorCount * Time.deltaTime * resourceConsumptionRate / 32;
+            float resConsumption = (appliedRideHeight / 100) * resValue; 
+            float resRequest = resConsumption / resValue;
+            float resDrain = part.RequestResource(resourceName, resRequest);
+            if (resDrain < resRequest)
+                lowEnergy = true;
+            else
+                lowEnergy = false;
+            return resDrain;
         }
 
         public override void OnFixedUpdate()
         {
-            //smoothedRideHeight = Mathf.Lerp(smoothedRideHeight, currentRideHeight, Time.deltaTime * 2);
-            //appliedRideHeight = smoothedRideHeight / 100;
-                        
-            //for (int i = 0; i < wcList.Count(); i++)
-               // wcList[i].suspensionDistance = maxRepulsorHeight * rideHeight;
             if (dir > 360)
                 dir = 0;
             float sin = (float)Math.Sin(Mathf.Deg2Rad * dir);
@@ -241,43 +240,32 @@ namespace KerbalFoundries
                         _dustFX.RepulsorEmit(hit.point, hit.collider, hit.force, hit.normal, emitDirection);
                     }
                 }
+                print(hitForce);
 
-
-                //print(electricCharge);
-                // = Extensions.GetBattery(this.part);
-
-                if (requestResource < (resourceConsumptionRate * 0.5f) && requestResource != 0)
+                if (lowEnergy)
                 {
                     print("Retracting due to low Electric Charge");
-                    lowEnergy = true;
                     appliedRideHeight = 0;
                     rideHeight = 0;
-                    UpdateHeight();
+                    StartCoroutine("UpdateHeight");
                     status = "Low Charge";
+                    deployed = false;
                 }
                 else
                 {
-                    lowEnergy = false;
                     status = "Nominal";
                 }
-                /*
-                if (lowEnergy) //disable the colliders if there is not enough energy or height slips below the threshold
-                {
-                    deployed = false;
-                    rideHeight = 0;
-                    appliedRideHeight = 0;
-                    UpdateHeight();
-                    //print(appliedRideHeight);
-                }
-                */
             }
             else
             {
                 effectPower = 0;
-                status = "Off";
+                if (lowEnergy)
+                    status = "Low Charge";
+                else
+                    status = "Off";
             }
 			
-            //RepulsorSound();
+            RepulsorSound(hitForce);
             effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //print(effectPower);
 
@@ -293,22 +281,22 @@ namespace KerbalFoundries
                 {
                     wcList[i].enabled = true;
                 }
+                deployed = true; // catches redeploy after low charge retract
+                StopCoroutine("Shrink");
                 StartCoroutine("Grow");
             }
-            //Debug.LogWarning("UpdateHeight Couroutine Start.");
 			while (!Equals(Mathf.Round(currentRideHeight), appliedRideHeight))
 			{
 				currentRideHeight = Mathf.Lerp(currentRideHeight, appliedRideHeight, Time.deltaTime * 2);
-				//Debug.LogWarning(currentRideHeight);
 				for (int i = 0; i < wcList.Count(); i++)
 					wcList[i].suspensionDistance = appliedRideHeight / 20f;
 				yield return new WaitForFixedUpdate();
 			}
             if (currentRideHeight < 1)
             {
-                //Debug.LogWarning("Disabling Colliders.");
 				for (int i = 0; i < wcList.Count(); i++)
 					wcList[i].enabled = false;
+                StopCoroutine("Grow");
                 StartCoroutine("Shrink");
             }
             //Debug.LogWarning("Finished height update.");
