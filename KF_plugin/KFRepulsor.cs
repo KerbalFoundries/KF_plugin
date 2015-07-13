@@ -289,7 +289,7 @@ namespace KerbalFoundries
                 }
                 StartCoroutine("Grow");
             }
-            Debug.LogWarning("UpdateHeight Couroutine Start.");
+            //Debug.LogWarning("UpdateHeight Couroutine Start.");
 			while (!Equals(Mathf.Round(currentRideHeight), appliedRideHeight))
 			{
 				currentRideHeight = Mathf.Lerp(currentRideHeight, appliedRideHeight, Time.deltaTime * 2);
@@ -300,12 +300,12 @@ namespace KerbalFoundries
 			}
             if (currentRideHeight < 1)
             {
-                Debug.LogWarning("Disabling Colliders.");
+                //Debug.LogWarning("Disabling Colliders.");
 				for (int i = 0; i < wcList.Count(); i++)
 					wcList[i].enabled = false;
                 StartCoroutine("Shrink");
             }
-            Debug.LogWarning("Finished height update.");
+            //Debug.LogWarning("Finished height update.");
         }
 
         [KSPAction("Retract")]
@@ -314,7 +314,7 @@ namespace KerbalFoundries
             if (rideHeight > 0)
             {
                 rideHeight -= 5f;
-                print("Retracting...");
+                //print("Retracting...");
                 StartCoroutine("UpdateHeight");
             }
 		}
@@ -325,7 +325,7 @@ namespace KerbalFoundries
             if (rideHeight < 100)
             {
                 rideHeight += 5f;
-                print("Extending...");
+                //print("Extending...");
                 StartCoroutine("UpdateHeight");
             }
 		}

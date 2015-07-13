@@ -41,9 +41,9 @@ namespace KerbalFoundries
 		//GUIStyle leftLabel;
 		
 		// Boolean for the visible states of GUI elements.
-		public bool isGUIEnabled;
-		public bool iconAdded;
-		public bool settingsLoaded;
+		public static bool isGUIEnabled = false;
+		public static bool iconAdded = false;
+		public static bool settingsLoaded = false;
 		
 		public static KFConfigManager KFConfig;
 		KFConfigManager()
@@ -59,28 +59,41 @@ namespace KerbalFoundries
 		#endregion Initialization
 		
 		#region Startup
-		
-		void Start()
+
+        public void Awake()
+        {
+            //RenderingManager.AddToPostDrawQueue(0, new Callback(KFGUI));
+            GameEvents.onGUIApplicationLauncherReady.Add(SetupAppButton);
+        }
+
+		public void Start()
 		{
-			InitGUIElements();
-			LoadConfigs();
+                //RenderingManager.AddToPostDrawQueue(0, new Callback());
+            //InitGUIElements();
+            LoadConfigs();
+
 		}
 		
 		/// <summary>Initializing all the GUI elements we are using.</summary>
 		void InitGUIElements()
 		{
+            
 			centerLabel = new GUIStyle();
+            
 			centerLabel.alignment = TextAnchor.UpperCenter;
+            
 			centerLabel.normal.textColor = Color.white;
 			
-			//leftLabel = new GUIStyle();
-			//leftLabel.alignment = TextAnchor.UpperLeft;
-			//leftLabel.normal.textColor = Color.white;
 			
 			appTextureGrey = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconGrey), false);
+            print("googleflungle");
 			appTextureColor = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconColor), false);
-			GameEvents.onGUIApplicationLauncherReady.Add(SetupAppButton);
-			settingsRect = GUI.Window(GUI_ID, settingsRect, KFGUI, string.Empty);
+            print("kadooglafla");
+			 
+            print("abrakadabra");
+			//settingsRect = GUI.Window(GUI_ID, settingsRect, KFGUI, string.Empty);
+            /// it Re-e-e-e-e-e-e-eeeeeeeeeally didn't like that line being there. Don't mess with GUI stuff outside OnGUI()
+            print("nomnomklakture");
 		}
 		
 		#endregion Startup
@@ -139,10 +152,18 @@ namespace KerbalFoundries
 		void SetupAppButton()
 		{
 			//KFLog.Log("SetupAppButton() method called.", strClassName);
-			if (Equals(appButton, null) && !iconAdded && settingsLoaded)
+            InitGUIElements();
+			if (Equals(appButton, null) && !iconAdded)
 			{
 				KFLog.Log("Adding button to AppLauncher.", strClassName);
-				appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, Dummy, Dummy, ApplicationLauncher.AppScenes.ALWAYS, appTextureGrey);
+                bool isThere;
+                ApplicationLauncher.Instance.Contains(appButton, out isThere);
+
+                if(isThere)
+                {
+                    ApplicationLauncher.Instance.RemoveModApplication(appButton);
+                }
+                appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.ALWAYS, appTextureGrey);
 				iconAdded = true;
 			}
 		}
@@ -150,17 +171,17 @@ namespace KerbalFoundries
 		/// <summary>Called when the button is put into a "true" state, or when it is activated.</summary>
 		void onTrue()
 		{
-			//KFLog.Log("onTrue() method called.", strClassName);
-			ToggleGUI();
+			KFLog.Log("onTrue() method called.", strClassName);
+            isGUIEnabled = true;
 			return;
 		}
 		
 		/// <summary>Called when the button is in a "false" state.</summary>
 		void onFalse()
 		{
-			//KFLog.Log("onFalse() method called.", strClassName);
+			KFLog.Log("onFalse() method called.", strClassName);
 			appButton.SetTexture(appTextureGrey);
-			ToggleGUI();
+            isGUIEnabled = false;
 			return;
 		}
 		
@@ -183,22 +204,6 @@ namespace KerbalFoundries
 			return;
 		}
 		
-		/// <summary>Toggles the GUI state on/off.</summary>
-		void ToggleGUI()
-		{
-			//KFLog.Log("ToggleGUI() method called.", strClassName);
-			isGUIEnabled = !isGUIEnabled;
-			return;
-		}
-		
-		/// <summary>An empty method, totally on purpose.</summary>
-		void Dummy()
-		{
-			//KFLog.Log("Dummy() method called.", strClassName);
-			// Totally empty, on purpose.
-			return;
-		}
-
 		#endregion AppLauncher Button
 		
 		#region GUI Setup
@@ -206,17 +211,27 @@ namespace KerbalFoundries
 		public void OnGUI()
 		{
 			//KFLog.Log("OnGUI() method called.", strClassName);
-			if (isGUIEnabled)
-			{
-				KFGUI(GUI_ID);
-				appButton.SetTexture(appTextureColor);
-			}
-			else
-				appButton.SetTexture(appTextureGrey);
-			return;
+            //print(isGUIEnabled);
+                if (isGUIEnabled)
+                {
+                    //KFLog.Log("GUI Enabled", strClassName);
+                    //settingsRect = GUI.Window(GUI_ID, settingsRect, KFGUI, "");
+                    KFGUI(GUI_ID);
+                    //appButton.SetTexture(appTextureColor);
+                }
+                //else
+                    //appButton.SetTexture(appTextureGrey);
+                
+
+            
 		}
+
+        public void KFGUI()
+        {
+            KFGUI(GUI_ID);
+        }
 		
-		void KFGUI(int windowID)
+		public void KFGUI(int windowID)
 		{
 			//KFLog.Log("KFGUI() method called.", strClassName);
 			// disable ConvertToConstant.Local
@@ -231,10 +246,15 @@ namespace KerbalFoundries
 			isDustEnabled = KFConfigManager.KFConfig.isDustEnabled;
 			isDustCameraEnabled = KFConfigManager.KFConfig.isDustCameraEnabled;
 			isMarkerEnabled = KFConfigManager.KFConfig.isMarkerEnabled;
-			
-			GUI.DragWindow(new Rect(left, top, width, height));
-			GUI.Label(new Rect(left, top, width, height), "Kerbal Foundries Settings", centerLabel);
-			
+
+            GUI.Box(new Rect(left, top, width, height), "");
+            GUI.Box(new Rect(left, top, width, height), "Kerbal Foundries Settings");
+
+			//GUI.DragWindow(new Rect(left, top, width, height));
+			//GUI.Label(new Rect(left, top, width, height), "Kerbal Foundries Settings", centerLabel);
+
+            //physicsRangeGui = GUI.TextField(new Rect(Screen.width / 2, top + line * spacer, width / 2 - spacer, spacer), physicsRangeGui);
+
 			isDustEnabled = GUI.Toggle(new Rect(leftMargin, top + line * spacer, width - 2 * spacer, spacer), isDustEnabled, "Enable Dust");
 			line++;
 			
@@ -251,13 +271,15 @@ namespace KerbalFoundries
 			
 			if (GUI.Button(new Rect(leftMargin, top + line * spacer + 26, width / 2 - 2 * spacer + 8, spacer), "Save and Close"))
 			{
-				SaveConfigs();
+				SaveConfigs(); 
 				isGUIEnabled = false;
 			}
 			
-			settingsRect = new Rect(settingsRect.position.x, settingsRect.position.y, width, height);
+			//settingsRect = new Rect(settingsRect.position.x, settingsRect.position.y, width, height);
+           
 		}
 		
 		#endregion GUI Setup
 	}
 }
+
