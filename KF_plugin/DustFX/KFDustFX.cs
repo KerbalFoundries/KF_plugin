@@ -182,8 +182,8 @@ namespace KerbalFoundries
 			colCount = _KFModuleWheel.wcList.Count;
 			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
 
-			isDustEnabledGlobally = KFConfigManager.KFConfig.isDustEnabled;
-			isDustCameraEnabled = KFConfigManager.KFConfig.isDustCameraEnabled;
+            isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
+            isDustCameraEnabled = KFPersistenceManager.isDustCameraEnabled;
 			
 			if (!isDustEnabledGlobally && isDustEnabledLocally)
 			{
@@ -291,11 +291,11 @@ namespace KerbalFoundries
 		/// <param name="col">The collider being referenced.</param>
 		public void DustParticles(float speed, Vector3 contactPoint, Collider col)
 		{
-			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null))
+			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || !KFPersistenceManager.isDustEnabled)
 				return;
 			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
 				tweakScaleCorrector = 1f;
-            colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
+            colorBiome = KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
             colorCam = _ModuleCameraShot._averageColour;
 			//Color colorAverage = _ModuleCameraShot._averageColour;
 			colorAverage = !isDustCameraEnabled ? colorBiome : (colorCam + colorBiome) / 2;

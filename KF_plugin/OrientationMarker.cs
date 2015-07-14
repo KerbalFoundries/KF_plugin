@@ -15,7 +15,7 @@ namespace KerbalFoundries
         {
             base.OnStart(state);
             marker = part.transform.Search(markerName);
-            isMarkerEnabled = KFConfigManager.KFConfig.isMarkerEnabled;
+            isMarkerEnabled = KFPersistenceManager.isMarkerEnabled;
 
             if (!Equals(markerName, null) && isMarkerEnabled)
                 UnityEngine.Object.Destroy(marker.gameObject);

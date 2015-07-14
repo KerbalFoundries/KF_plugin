@@ -4,21 +4,10 @@ using KerbalFoundries;
 
 namespace KerbalFoundries
 {
-	[KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
-	public class KFConfigManager : MonoBehaviour
+	[KSPAddon(KSPAddon.Startup.EveryScene, false)]
+	public class KFGUIManager : MonoBehaviour
 	{
 		#region Initialization
-		
-		[Persistent]
-		public bool isDustEnabled = true;
-		[Persistent]
-		public bool isDustCameraEnabled = true;
-		[Persistent]
-		public bool isMarkerEnabled = true;
-		
-		public ConfigNode configFile;
-		public ConfigNode configNode;
-		
 		// AppLauncher Elements.
 		ApplicationLauncherButton appButton;
 		Texture2D appTextureGrey;
@@ -40,19 +29,12 @@ namespace KerbalFoundries
 		
 		// Boolean for the visible states of GUI elements.
 		public static bool isGUIEnabled;
-		public static bool iconAdded;
 		public static bool settingsLoaded;
-		
-		public static KFConfigManager KFConfig;
-		KFConfigManager()
-		{
-			KFConfig = this;
-		}
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
 		readonly KFLogUtil KFLog = new KFLogUtil();
 		/// <summary>Name of the class for logging purposes.</summary>
-		public string strClassName = "KFConfigManager";
+		public string strClassName = "KFGUIManager";
 		
 		#endregion Initialization
 		
@@ -60,12 +42,16 @@ namespace KerbalFoundries
 		
 		void Awake()
 		{
-			GameEvents.onGUIApplicationLauncherReady.Add(SetupAppButton);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                GameEvents.onGUIApplicationLauncherReady.Add(SetupAppButton);
+                GameEvents.onGUIApplicationLauncherDestroyed.Add(DestroyAppButton);
+            }
 		}
 		
 		void Start()
 		{
-			LoadConfigs();
+			// LoadConfigs(); - Now handled by KFPersistenceManager
 		}
 		
 		/// <summary>Initializing all the GUI elements we are using.</summary>
@@ -80,35 +66,6 @@ namespace KerbalFoundries
 		}
 		
 		#endregion Startup
-			
-		#region Configs
-		
-		/// <summary>Loading the global varriables from the loaded config node.</summary>
-		void LoadConfigs()
-		{
-			configFile = ConfigNode.Load(string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath));
-			configNode = configFile.GetNode("KFGlobals");
-			
-			isDustEnabled = bool.Parse(configNode.GetValue("isDustEnabled"));
-			isDustCameraEnabled = bool.Parse(configNode.GetValue("isDustCameraEnabled"));
-			isMarkerEnabled = bool.Parse(configNode.GetValue("isMarkerEnabled"));
-			
-			KFLog.Log(string.Format("isDustEnabled = {0}", isDustEnabled), strClassName);
-			KFLog.Log(string.Format("isDustCameraEnabled = {0}", isDustCameraEnabled), strClassName);
-			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled), strClassName);
-		}
-		
-		/// <summary>A config node save method.</summary>
-		void SaveConfigs()
-		{
-			configNode.SetValue("isDustEnabled", string.Format("{0}", isDustEnabled), true);
-			configNode.SetValue("isDustCameraEnabled", string.Format("{0}", isDustCameraEnabled), true);
-			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
-			configFile.Save(string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath));
-			KFLog.Log("Settings Saved.", strClassName);
-		}
-		
-		#endregion Configs
 		
 		#region AppLauncher Button
 		
@@ -116,27 +73,32 @@ namespace KerbalFoundries
 		void SetupAppButton()
 		{
 			InitGUIElements();
-			if (Equals(appButton, null) && !iconAdded)
+			if (appButton == null)
 			{
 				KFLog.Log("Adding button to AppLauncher.", strClassName);
-				bool isThere;
-				ApplicationLauncher.Instance.Contains(appButton, out isThere);
 				
+                bool isThere;
+				ApplicationLauncher.Instance.Contains(appButton, out isThere);
 				if (isThere)
 					ApplicationLauncher.Instance.RemoveModApplication(appButton);
-				appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.ALWAYS, appTextureGrey);
-				iconAdded = true;
+
+				appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT, appTextureGrey);
 			}
 		}
+
+        void DestroyAppButton()
+        {
+            if (appButton != null)
+                ApplicationLauncher.Instance.RemoveModApplication(appButton);
+        }
 		
 		/// <summary>Called when the button is put into a "true" state, or when it is activated.</summary>
 		void onTrue()
 		{
-			//KFLog.Log("onTrue() method called.", strClassName);
+			KFLog.Log("onTrue() method called.", strClassName);
 			appButton.SetTexture(appTextureColor);
-			LoadConfigs();
+            // LoadConfigs(); - Now handled by KFPersistenceManager
 			isGUIEnabled = true;
-			return;
 		}
 		
 		/// <summary>Called when the button is in a "false" state.</summary>
@@ -145,8 +107,7 @@ namespace KerbalFoundries
 			//KFLog.Log("onFalse() method called.", strClassName);
 			appButton.SetTexture(appTextureGrey);
 			isGUIEnabled = false;
-			SaveConfigs();
-			return;
+            KFPersistenceManager.SaveConfig();
 		}
 		
 		/// <summary>Called when the cursor enters a hovered state over the button.</summary>
@@ -154,7 +115,6 @@ namespace KerbalFoundries
 		{
 			//KFLog.Log("onHover() method called.", strClassName);
 			appButton.SetTexture(appTextureColor);
-			return;
 		}
 		
 		/// <summary>Called when the cursor leaves the hovering state over the button.</summary>
@@ -163,34 +123,21 @@ namespace KerbalFoundries
 			//KFLog.Log("onNotHover() method called.", strClassName);
 			if (!isGUIEnabled)
 				appButton.SetTexture(appTextureGrey);
-			return;
-		}
-		
+		}		
 		#endregion AppLauncher Button
 		
 		#region GUI Setup
 		
 		void OnGUI()
 		{
-			if (isGUIEnabled)
-			{
-				KFGUI(GUI_ID);
-				appButton.SetTexture(appTextureColor);
-			}
-			else
-				appButton.SetTexture(appTextureGrey);
-			return;
+            if (isGUIEnabled)
+				DrawWindow(GUI_ID);
 		}
 		
-		//void KFGUI()
-		//{
-		//	KFGUI(GUI_ID);
-		//}
-		
 		// disable UnusedParameter
-		void KFGUI(int windowID)
+		void DrawWindow(int windowID)
 		{
-			//KFLog.Log("KFGUI() method called.", strClassName);
+			KFLog.Log("KFGUI() method called.", strClassName);
 			// disable ConvertToConstant.Local
 			const float width = 360;
 			const float height = 250;
@@ -200,31 +147,27 @@ namespace KerbalFoundries
 			float leftMargin = left + 18;
 			float line = 2;
 			
-			isDustEnabled = KFConfigManager.KFConfig.isDustEnabled;
-			isDustCameraEnabled = KFConfigManager.KFConfig.isDustCameraEnabled;
-			isMarkerEnabled = KFConfigManager.KFConfig.isMarkerEnabled;
-			
 			GUI.DragWindow(new Rect(left, top, width, height));
 			GUI.Box(new Rect(left, top, width, height), "");
 			GUI.Box(new Rect(left, top, width, height), "Kerbal Foundries Settings");
-			
-			isDustEnabled = GUI.Toggle(new Rect(leftMargin, top + line * spacer, width - 2 * spacer, spacer), isDustEnabled, "Dust Particles");
+
+            KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(leftMargin, top + line * spacer, width - 2 * spacer, spacer), KFPersistenceManager.isDustEnabled, "Dust Particles");
 			line++;
-			
-			if (isDustEnabled)
+
+            if (KFPersistenceManager.isDustEnabled)
 			{
-				isDustCameraEnabled = GUI.Toggle(new Rect(leftMargin, top + line * spacer, width - 2 * spacer, spacer), isDustCameraEnabled, "Dust Color Camera");
+                KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(leftMargin, top + line * spacer, width - 2 * spacer, spacer), KFPersistenceManager.isDustCameraEnabled, "Dust Color Camera");
 				line++;
 			}
 			else
-				isDustCameraEnabled = false;
-			
-			isMarkerEnabled = GUI.Toggle(new Rect(leftMargin, top + line * spacer, width - 2 * spacer, spacer), isMarkerEnabled, "Orientation Markers");
+                KFPersistenceManager.isDustCameraEnabled = false;
+
+            KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(leftMargin, top + line * spacer, width - 2 * spacer, spacer), KFPersistenceManager.isMarkerEnabled, "Orientation Markers");
 			line++;
 			
 			if (GUI.Button(new Rect(leftMargin, top + line * spacer + 26, width / 2 - 2 * spacer + 8, spacer), "Save and Close"))
 			{
-				SaveConfigs();
+                KFPersistenceManager.SaveConfig();
 				appButton.SetFalse();
 				isGUIEnabled = false;
 			}

@@ -91,7 +91,7 @@ namespace KerbalFoundries
 			cameraMask = 32784;	// Layers 4 and 15, or water and local scenery.
 								// Generated from the binary place value output of 4 and 15 added to each other.
 								// (1 << 4) | (1 << 15) = (16) | (32768) = 32784
-            bool dustCam = KFConfigManager.KFConfig.isDustCameraEnabled;
+            bool dustCam = KFPersistenceManager.isDustCameraEnabled;
             if (dustCam)
             {
                 Debug.LogWarning("Starting camera couroutine");

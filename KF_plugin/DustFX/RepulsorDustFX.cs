@@ -160,8 +160,8 @@ namespace KerbalFoundries
 			rideHeight = _KFRepulsor.rideHeight;
 			// Public variable is set to the value of the remote variable here.
 
-			isDustEnabledGlobally = KFConfigManager.KFConfig.isDustEnabled;
-			isDustCameraEnabled = KFConfigManager.KFConfig.isDustCameraEnabled;
+            isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
+            isDustCameraEnabled = KFPersistenceManager.isDustCameraEnabled;
 			
 			if (!isDustEnabledGlobally && isDustEnabledLocally)
 			{
@@ -303,7 +303,7 @@ namespace KerbalFoundries
 			if (!dustEffects || force < minScrapeSpeed || Equals(dustAnimator, null) || Equals(rideHeight, 0))
 				return;
 			float appliedRideHeight = Mathf.Clamp((rideHeight / 2), 1, 4);
-			colorBiome = !isColorOverrideActive ? KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
+			colorBiome = !isColorOverrideActive ? KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
 			colorCam = _ModuleCameraShot._averageColour;
 			colorAverage = !isDustCameraEnabled ? colorBiome : (colorCam + colorBiome) / 2;
 			

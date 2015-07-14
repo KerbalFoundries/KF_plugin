@@ -197,7 +197,7 @@ namespace KerbalFoundries
 			base.OnStart(state);
 
 			CustomResourceTextSetup(); // Calls a method to set up the statusLowResource text for resource alternatives.
-
+            
             _dustFX = this.part.GetComponent<KFDustFX>(); //see if it's been added by MM
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
             {
