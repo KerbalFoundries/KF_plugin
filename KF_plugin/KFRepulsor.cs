@@ -14,7 +14,6 @@ namespace KerbalFoundries
 {
     public class KFRepulsor : PartModule
     {
-
         public JointSpring userspring;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Repulsor Settings")]
         public string settings = string.Empty;
@@ -41,9 +40,9 @@ namespace KerbalFoundries
         [KSPField]
         public string gimbalName;
         bool isReady;
- 
         Transform _grid;
         Transform _gimbal;
+
         Vector3 _gridScale;
         
         float effectPower; 
@@ -54,8 +53,6 @@ namespace KerbalFoundries
 
         KFRepulsorDustFX _dustFX;
         float dir;
-
-
         
         public List<WheelCollider> wcList = new List<WheelCollider>();
         //public List<float> susDistList = new List<float>();
@@ -77,7 +74,7 @@ namespace KerbalFoundries
 		{
 			return strInfo;
 		}
-
+        
         //begin start
         public override void OnStart(PartModule.StartState state)  //when started
         {

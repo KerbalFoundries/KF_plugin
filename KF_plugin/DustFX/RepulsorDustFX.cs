@@ -26,7 +26,6 @@
 using System;
 using UnityEngine;
 using KerbalFoundries;
-using System.Reflection;
 
 namespace KerbalFoundries
 {
@@ -48,6 +47,9 @@ namespace KerbalFoundries
 		/// <remarks>Set to false in order to temporarily disable the effect on a specific part.  Default is "true"</remarks>
 		[KSPField]
 		public bool dustEffects = true;
+		
+		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
+        ModuleCameraShot _ModuleCameraShot;
 		
 		/// <summary>Minimum size value of the dust particles.</summary>
 		/// <remarks>Default is 0.1.  Represents the size of the particles themselves.</remarks>
@@ -115,12 +117,15 @@ namespace KerbalFoundries
 		
 		bool isPaused;
 		bool isColorOverrideActive;
+		bool isDustCameraEnabled;
 		GameObject _kfRepDustFx;
         GameObject _kfRepLight;
         public Light _repLight;
 		ParticleAnimator dustAnimator;
 		Color colorDust;
 		Color colorBiome;
+		Color colorAverage;
+		Color colorCam;
 		
 		/// <summary>Loaded from the KFConfigManager class.</summary>
 		/// <remarks>Persistent field.</remarks>
@@ -156,6 +161,7 @@ namespace KerbalFoundries
 			// Public variable is set to the value of the remote variable here.
 
 			isDustEnabledGlobally = KFConfigManager.KFConfig.isDustEnabled;
+			isDustCameraEnabled = KFConfigManager.KFConfig.isDustCameraEnabled;
 			
 			if (!isDustEnabledGlobally && isDustEnabledLocally)
 			{
@@ -168,10 +174,14 @@ namespace KerbalFoundries
 			if (isDustEnabledGlobally && !isDustEnabledLocally)
 				return;
 			
-			if (Equals(state, StartState.Editor) || Equals(state, StartState.None))
+			if (!HighLogic.LoadedSceneIsFlight)
 				return;
-			if (dustEffects)
-				SetupParticles();
+			if (HighLogic.LoadedSceneIsFlight)
+			{
+				_ModuleCameraShot = vessel.GetComponent<ModuleCameraShot>();
+				if (dustEffects)
+					SetupParticles();
+			}
 			
 			// Adding events to start and stop the emission on pause states.
 			GameEvents.onGamePause.Add(OnPause);
@@ -294,6 +304,9 @@ namespace KerbalFoundries
 				return;
 			float appliedRideHeight = Mathf.Clamp((rideHeight / 2), 1, 4);
 			colorBiome = !isColorOverrideActive ? KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
+			colorCam = _ModuleCameraShot._averageColour;
+			colorAverage = !isDustCameraEnabled ? colorBiome : (colorCam + colorBiome) / 2;
+			
 			if (Equals(colorBiome, null))
 			{
 				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
@@ -301,16 +314,16 @@ namespace KerbalFoundries
 			}
 			if (force >= minScrapeSpeed)
 			{
-				if (!Equals(colorBiome, colorDust))
+				if (!Equals(colorAverage, colorDust))
 				{
 					Color[] colors = dustAnimator.colorAnimation;
-					colors[0] = colorBiome;
-					colors[1] = colorBiome;
-					colors[2] = colorBiome;
-					colors[3] = colorBiome;
-					colors[4] = colorBiome;
+					colors[0] = colorAverage;
+					colors[1] = colorAverage;
+					colors[2] = colorAverage;
+					colors[3] = colorAverage;
+					colors[4] = colorAverage;
 					dustAnimator.colorAnimation = colors;
-					colorDust = colorBiome;
+					colorDust = colorAverage;
 				}
 				_kfRepDustFx.transform.position = contactPoint;
                 _kfRepDustFx.transform.rotation = Quaternion.Euler(normal);

@@ -32,7 +32,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Local definition of the KFModuleWheel class.</summary>
 		KFModuleWheel _KFModuleWheel;
-
+		
 		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
         ModuleCameraShot _ModuleCameraShot;
 		
@@ -151,6 +151,8 @@ namespace KerbalFoundries
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Dust Effects"), UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
 		public bool isDustEnabledLocally = true;
 		
+		public bool isDustCameraEnabled;
+		
 		/// <summary>CollisionInfo class for the DustFX module.</summary>
 		public class CollisionInfo
 		{
@@ -181,6 +183,7 @@ namespace KerbalFoundries
 			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
 
 			isDustEnabledGlobally = KFConfigManager.KFConfig.isDustEnabled;
+			isDustCameraEnabled = KFConfigManager.KFConfig.isDustCameraEnabled;
 			
 			if (!isDustEnabledGlobally && isDustEnabledLocally)
 			{
@@ -294,11 +297,9 @@ namespace KerbalFoundries
 				tweakScaleCorrector = 1f;
             colorBiome = KFDustFXController.DustColors.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
             colorCam = _ModuleCameraShot._averageColour;
-            //colorAverage = (colorCam + colorBiome) /2;
-            colorAverage = colorBiome;
-            
-            //Color colorAverage = _ModuleCameraShot._averageColour;
-
+			//Color colorAverage = _ModuleCameraShot._averageColour;
+			colorAverage = !isDustCameraEnabled ? colorBiome : (colorCam + colorBiome) / 2;
+			
 			if (Equals(colorBiome, null))
 				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
 			if (speed >= minScrapeSpeed)
