@@ -18,19 +18,17 @@ namespace KerbalFoundries
             base.OnStart(state);
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
 
-            foreach (SkinnedMeshRenderer Track in this.part.GetComponentsInChildren<SkinnedMeshRenderer>()) //this is the track
-            {
+			foreach (SkinnedMeshRenderer Track in this.part.GetComponentsInChildren<SkinnedMeshRenderer>()) //this is the track
                 _trackSurface = Track.gameObject;
-            }
             _track = this.part.GetComponentInChildren<KFModuleWheel>();
 
             if (HighLogic.LoadedSceneIsFlight)
             {
                 trackMaterial = _trackSurface.renderer.material;
                 Vector2 trackTiling = trackMaterial.mainTextureScale;
-                Debug.LogWarning("texture tiling is " + trackTiling);
+				Debug.LogWarning(string.Format("Texture tiling is: {0}", trackTiling));
                 trackTiling = new Vector2(trackTiling.x * _track.directionCorrector, trackTiling.y);
-                Debug.LogWarning("new texture tiling is " + trackTiling);
+				Debug.LogWarning(string.Format("New texture tiling is: {0}", trackTiling));
                 trackMaterial.SetTextureScale("_MainTex",  trackTiling);
                 trackMaterial.SetTextureScale("_BumpMap", trackTiling);
             }

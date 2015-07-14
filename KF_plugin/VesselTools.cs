@@ -9,7 +9,6 @@ using System.Linq;
 using UnityEngine;
 using System.Collections;
 
-
 namespace KerbalFoundries
 {
     public class ModuleWaterSlider : VesselModule

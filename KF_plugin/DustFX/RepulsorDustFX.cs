@@ -49,7 +49,7 @@ namespace KerbalFoundries
 		public bool dustEffects = true;
 		
 		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
-        ModuleCameraShot _ModuleCameraShot;
+		ModuleCameraShot _ModuleCameraShot;
 		
 		/// <summary>Minimum size value of the dust particles.</summary>
 		/// <remarks>Default is 0.1.  Represents the size of the particles themselves.</remarks>
@@ -119,8 +119,8 @@ namespace KerbalFoundries
 		bool isColorOverrideActive;
 		bool isDustCameraEnabled;
 		GameObject _kfRepDustFx;
-        GameObject _kfRepLight;
-        public Light _repLight;
+		GameObject _kfRepLight;
+		public Light _repLight;
 		ParticleAnimator dustAnimator;
 		Color colorDust;
 		Color colorBiome;
@@ -160,8 +160,8 @@ namespace KerbalFoundries
 			rideHeight = _KFRepulsor.rideHeight;
 			// Public variable is set to the value of the remote variable here.
 
-            isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
-            isDustCameraEnabled = KFPersistenceManager.isDustCameraEnabled;
+			isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
+			isDustCameraEnabled = KFPersistenceManager.isDustCameraEnabled;
 			
 			if (!isDustEnabledGlobally && isDustEnabledLocally)
 			{
@@ -205,14 +205,14 @@ namespace KerbalFoundries
 			_kfRepDustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = _kfRepDustFx.particleEmitter.GetComponent<ParticleAnimator>();
 			KFLog.Log("Particles have been set up.", strClassName);
-            _kfRepLight = new GameObject("Rep Light");
-            _kfRepLight.transform.parent = _kfRepDustFx.transform;
-            _kfRepLight.transform.position = Vector3.zero;
-            _repLight = _kfRepLight.AddComponent<Light>();
-            _repLight.type = LightType.Point;
-            _repLight.range = 2.0f;
-            _repLight.color = Color.blue;
-            _repLight.intensity = 0.0f;
+			_kfRepLight = new GameObject("Rep Light");
+			_kfRepLight.transform.parent = _kfRepDustFx.transform;
+			_kfRepLight.transform.position = Vector3.zero;
+			_repLight = _kfRepLight.AddComponent<Light>();
+			_repLight.type = LightType.Point;
+			_repLight.range = 2.0f;
+			_repLight.color = Color.blue;
+			_repLight.intensity = 0.0f;
 
 
 		}
@@ -245,7 +245,7 @@ namespace KerbalFoundries
 			cInfo = KFRepulsorDustFX.GetClosestChild(part, hitPoint + part.rigidbody.velocity * Time.deltaTime);
 			if (!Equals(cInfo.KFRepDustFX, null))
 				cInfo.KFRepDustFX.Scrape(hitPoint, col, force, normal, direction);
-            Scrape(hitPoint, col, force, normal, direction);
+			Scrape(hitPoint, col, force, normal, direction);
 		}
 		
 		/// <summary>Searches child parts for the nearest instance of this class to the given point.</summary>
@@ -283,13 +283,13 @@ namespace KerbalFoundries
 		/// <param name="force">Scrape force.</param>
 		/// <param name="normal">No Clue.</param>
 		/// <param name="direction">No Clue.</param>
-        public void Scrape(Vector3 position, Collider col, float force, Vector3 normal, Vector3 direction)
-        {
-            if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
-                return;
-            //float fMagnitude = this.part.rigidbody.velocity.magnitude;
-            DustParticles(force, position + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
-        }
+		public void Scrape(Vector3 position, Collider col, float force, Vector3 normal, Vector3 direction)
+		{
+			if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
+				return;
+			//float fMagnitude = this.part.rigidbody.velocity.magnitude;
+			DustParticles(force, position + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
+		}
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
 		/// <param name="force">Force of the part which is scraping.</param>
@@ -326,16 +326,16 @@ namespace KerbalFoundries
 					colorDust = colorAverage;
 				}
 				_kfRepDustFx.transform.position = contactPoint;
-                _kfRepDustFx.transform.rotation = Quaternion.Euler(normal);
-                _kfRepDustFx.particleEmitter.localVelocity = direction;
-                _kfRepDustFx.particleEmitter.worldVelocity = Vector3.zero;
+				_kfRepDustFx.transform.rotation = Quaternion.Euler(normal);
+				_kfRepDustFx.particleEmitter.localVelocity = direction;
+				_kfRepDustFx.particleEmitter.worldVelocity = Vector3.zero;
 				_kfRepDustFx.particleEmitter.maxEnergy = Mathf.Clamp((force / maxDustEnergyDiv), minDustEnergy, maxDustEnergy);
 				_kfRepDustFx.particleEmitter.maxEmission = Mathf.Clamp((force * maxDustEmissionMult), (minDustEmission * appliedRideHeight), (maxDustEmission * appliedRideHeight));
 				_kfRepDustFx.particleEmitter.maxSize = Mathf.Clamp((force / appliedRideHeight), minDustSize, maxDustSize);
 				_kfRepDustFx.particleEmitter.Emit();
-                _kfRepLight.transform.localPosition = Vector3.zero;
-                _repLight.intensity = 0.5f;
-                _repLight.enabled = true;
+				_kfRepLight.transform.localPosition = Vector3.zero;
+				_repLight.intensity = 0.5f;
+				_repLight.enabled = true;
 			}
 			return;
 		}

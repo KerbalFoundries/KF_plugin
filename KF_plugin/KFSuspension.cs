@@ -102,7 +102,7 @@ namespace KerbalFoundries
             MoveSuspension(susTravIndex, -frameTraverse, susTrav);
         }
 
-        public void MoveSuspension(int index, float movement, Transform movedObject) //susTrav Axis, amount to move, named object.
+        public static void MoveSuspension(int index, float movement, Transform movedObject) //susTrav Axis, amount to move, named object.
         {
             // Instead of reiterating "Vector3" we an use "var" in this instance. - Gaalidas
             var tempVector = new Vector3(0, 0, 0);

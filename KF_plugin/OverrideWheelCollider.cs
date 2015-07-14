@@ -64,21 +64,18 @@ namespace KerbalFoundries
                 if (wc.name.Equals(colliderName, StringComparison.Ordinal))
                     _wheelCollider = wc;
                 else
-                    Debug.LogError("wheel collider not found");
+                    Debug.LogError("Wheel collider not found.");
             }
 
-			if (HighLogic.LoadedSceneIsFlight)
-            {
-                if (moveCollider)
-                {
-                    _wheelCollider.transform.Translate(0, moveColliderBy, 0, Space.Self);
-                    // SharpDevelop suggested we use "var" instead of reiterating "Vector3" in this definition. - Gaalidas
-                    var tempVector = new Vector3(0, 0, 0);
-                    //Vector3 tempVector = new Vector3(0, 0, 0);
-                    tempVector[susTravIndex] = moveColliderBy;
-                    _susTrav.transform.Translate(tempVector, Space.Self);
-                }
-            }
+			if (HighLogic.LoadedSceneIsFlight && moveCollider)
+			{
+				_wheelCollider.transform.Translate(0, moveColliderBy, 0, Space.Self);
+				// SharpDevelop suggested we use "var" instead of reiterating "Vector3" in this definition. - Gaalidas
+				var tempVector = new Vector3(0, 0, 0);
+				//Vector3 tempVector = new Vector3(0, 0, 0);
+				tempVector[susTravIndex] = moveColliderBy;
+				_susTrav.transform.Translate(tempVector, Space.Self);
+			}
 
 			if (!Equals(_wheelCollider, null))
             {

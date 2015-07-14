@@ -11,7 +11,6 @@ namespace KerbalFoundries
 
         public static String[] SplitString(string ObjectNames)
         {
-            
             //rotators.Clear();
             String[] nameList = ObjectNames.Split(new[] { ',', ' ', '|' }, StringSplitOptions.RemoveEmptyEntries);
 

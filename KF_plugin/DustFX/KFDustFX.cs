@@ -34,7 +34,7 @@ namespace KerbalFoundries
 		KFModuleWheel _KFModuleWheel;
 		
 		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
-        ModuleCameraShot _ModuleCameraShot;
+		ModuleCameraShot _ModuleCameraShot;
 		
 		/// <summary>Local copy of the tweakScaleCorrector parameter in the KFModuleWheel module.</summary>
 		public float tweakScaleCorrector;
@@ -138,8 +138,8 @@ namespace KerbalFoundries
 		ParticleAnimator dustAnimator;
 		Color colorDust;
 		Color colorBiome;
-        Color colorAverage;
-        Color colorCam;
+		Color colorAverage;
+		Color colorCam;
 		
 		/// <summary>Loaded from the KFConfigManager class.</summary>
 		/// <remarks>Persistent field.</remarks>
@@ -182,8 +182,8 @@ namespace KerbalFoundries
 			colCount = _KFModuleWheel.wcList.Count;
 			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
 
-            isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
-            isDustCameraEnabled = KFPersistenceManager.isDustCameraEnabled;
+			isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
+			isDustCameraEnabled = KFPersistenceManager.isDustCameraEnabled;
 			
 			if (!isDustEnabledGlobally && isDustEnabledLocally)
 			{
@@ -295,8 +295,8 @@ namespace KerbalFoundries
 				return;
 			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
 				tweakScaleCorrector = 1f;
-            colorBiome = KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
-            colorCam = _ModuleCameraShot._averageColour;
+			colorBiome = KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
+			colorCam = _ModuleCameraShot._averageColour;
 			//Color colorAverage = _ModuleCameraShot._averageColour;
 			colorAverage = !isDustCameraEnabled ? colorBiome : (colorCam + colorBiome) / 2;
 			
@@ -307,13 +307,13 @@ namespace KerbalFoundries
 				if (!Equals(colorAverage, colorDust))
 				{
 					Color[] colors = dustAnimator.colorAnimation;
-                    colors[0] = colorAverage;
-                    colors[1] = colorAverage;
-                    colors[2] = colorAverage;
-                    colors[3] = colorAverage;
-                    colors[4] = colorAverage;
+					colors[0] = colorAverage;
+					colors[1] = colorAverage;
+					colors[2] = colorAverage;
+					colors[3] = colorAverage;
+					colors[4] = colorAverage;
 					dustAnimator.colorAnimation = colors;
-                    colorDust = colorAverage;
+					colorDust = colorAverage;
 				}
 				kfdustFx.transform.position = contactPoint;
 				kfdustFx.particleEmitter.maxEnergy = Mathf.Clamp(((speed / maxDustEnergyDiv) * tweakScaleCorrector), minDustEnergy, maxDustEnergy);
@@ -348,11 +348,11 @@ namespace KerbalFoundries
 		{
 			if (wheelImpact && !isImpactDataNull() && HighLogic.LoadedSceneIsFlight)
 				WheelImpactSound.audio.Stop();
-            //Debug.LogWarning(string.Format("{0}Stopped Audio.", logprefix));
+			//Debug.LogWarning(string.Format("{0}Stopped Audio.", logprefix));
 			GameEvents.onGamePause.Remove(OnPause);
-            //Debug.LogWarning(string.Format("{0}Removed OnPause hook.", logprefix));
+			//Debug.LogWarning(string.Format("{0}Removed OnPause hook.", logprefix));
 			GameEvents.onGameUnpause.Remove(OnUnpause);
-            //Debug.LogWarning(string.Format("{0}Removed OnUnPause hook.", logprefix));
+			//Debug.LogWarning(string.Format("{0}Removed OnUnPause hook.", logprefix));
 		}
 		
 		/// <summary>Gets the current volume setting for Ship sounds.</summary>

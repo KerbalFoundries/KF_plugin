@@ -46,7 +46,7 @@ namespace KerbalFoundries
         Vector3 _gridScale;
         
         float effectPower; 
-        float effectPowerMax = 50f;
+        const float effectPowerMax = 50f;
         float appliedRideHeight;
         float currentRideHeight;
         float repulsorCount = 0;
@@ -203,10 +203,7 @@ namespace KerbalFoundries
             float resConsumption = (appliedRideHeight / 100) * resValue; 
             float resRequest = resConsumption / resValue;
             float resDrain = part.RequestResource(resourceName, resRequest);
-            if (resDrain < resRequest)
-                lowEnergy = true;
-            else
-                lowEnergy = false;
+			lowEnergy = resDrain < resRequest ? true : false;
             return resDrain;
         }
 
@@ -216,7 +213,7 @@ namespace KerbalFoundries
                 dir = 0;
             float sin = (float)Math.Sin(Mathf.Deg2Rad * dir);
             float cos = (float)Math.Cos(Mathf.Deg2Rad * dir);
-            Vector3 emitDirection = new Vector3(0, sin * 10, cos * 10);
+            var emitDirection = new Vector3(0, sin * 10, cos * 10);
            
             float hitForce = 0;
 
@@ -255,10 +252,7 @@ namespace KerbalFoundries
             else
             {
                 effectPower = 0;
-                if (lowEnergy)
-                    status = "Low Charge";
-                else
-                    status = "Off";
+				status = lowEnergy ? "Low Charge" : "Off";
             }
 			
             RepulsorSound(hitForce);

@@ -23,12 +23,10 @@ namespace KerbalFoundries
             if (!Equals(markerName, null) && HighLogic.LoadedSceneIsFlight)
             {
                 UnityEngine.Object.Destroy(marker.gameObject);
-                Debug.LogWarning("Marker destroyed");
-
-
+                Debug.LogWarning("Marker destroyed.");
             }
             else
-                Debug.LogWarning("Marker not found");
+                Debug.LogWarning("Marker not found.");
         }
     }
 }

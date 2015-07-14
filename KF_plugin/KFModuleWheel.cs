@@ -217,14 +217,14 @@ namespace KerbalFoundries
 
             if (!string.Equals(orientationObjectName, "Default"))
             {
-                Debug.LogWarning("Transformed part orientation");
+                Debug.LogWarning("Transformed part orientation.");
                 partOrientationUp = transform.Search(orientationObjectName).up;
                 partOrientationForward = transform.Search(orientationObjectName).forward;
                 partOrientationRight = transform.Search(orientationObjectName).right;
             }
             else
             {
-                Debug.LogWarning("Default part orientation");
+                Debug.LogWarning("Default part orientation.");
                 partOrientationUp = this.part.transform.up;
                 partOrientationForward = this.part.transform.forward;
                 partOrientationRight = this.part.transform.right;
@@ -245,21 +245,21 @@ namespace KerbalFoundries
 
             if (disableTweakables)
             {
-                Debug.LogWarning("Disabling tweakables");
+                Debug.LogWarning("Disabling tweakables.");
                 foreach (BaseField k in this.Fields)
                 {
-					print(string.Format("found {0}", k.guiName));
+					print(string.Format("Found {0}", k.guiName));
                     k.guiActive = false;
                     k.guiActiveEditor = false;
                 }
                 foreach (BaseAction a in this.Actions)
                 {
-					print(string.Format("found {0}", a.guiName));
+					print(string.Format("Found {0}", a.guiName));
                     a.active = false;
                 }
                 foreach (BaseEvent e in this.Events)
                 {
-					print(string.Format("found {0}", e.guiName));
+					print(string.Format("Found {0}", e.guiName));
                     e.active = false;
                 }
             }
@@ -475,7 +475,7 @@ namespace KerbalFoundries
             commandId = this.vessel.referenceTransformId;
 			if (!Equals(commandId, lastCommandId))
             {
-                print("Control Axis Changed");
+                print("Control Axis Changed.");
                 GetControlAxis();
             }
             lastCommandId = commandId;

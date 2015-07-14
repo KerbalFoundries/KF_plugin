@@ -13,14 +13,14 @@ namespace KerbalFoundries
         {
             base.OnStart(state);
             Transform destroyedObject = transform.Search(objectName);
-            if (destroyedObject != null)
-            {
-                UnityEngine.Object.Destroy(destroyedObject.gameObject);
-                //boundsDestroyed = true; //remove the bounds object to let the wheel colliders take over
-				print(string.Format("destroying {0}", objectName));
-            }
-            else
-				Debug.LogWarning(string.Format("could not find object named {0}", objectName)); 
+			if (!Equals(destroyedObject, null))
+			{
+				UnityEngine.Object.Destroy(destroyedObject.gameObject);
+				//boundsDestroyed = true; //remove the bounds object to let the wheel colliders take over
+				print(string.Format("Destroying: {0}", objectName));
+			}
+			else
+				Debug.LogWarning(string.Format("Could not find object named {0}", objectName)); 
         }
     }
 }

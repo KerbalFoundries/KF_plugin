@@ -15,8 +15,8 @@ namespace KerbalFoundries
         [KSPField]
         public bool activeEditor = false;
 
-        List<Transform> rotators = new List<Transform>();
-        List<Transform> targets = new List<Transform>();
+        readonly List<Transform> rotators = new List<Transform>();
+        readonly List<Transform> targets = new List<Transform>();
 
         string[] rotatorList;
         string[] targetList;
@@ -52,13 +52,12 @@ namespace KerbalFoundries
 				print(string.Format("iterated targets {0}", targetList.Count()));
             }
             objectCount = rotators.Count();
-
 			countAgrees |= Equals(objectCount, targets.Count());
         }
 
         IEnumerator Setup()
         {
-			Debug.LogWarning(string.Format("Waiting a frame {0}", Time.frameCount));
+			Debug.LogWarning(string.Format("Waiting a frame {0}.", Time.frameCount));
             yield return null;
             //Wait a frame for GameObjects to be destroyed. This only happens at the end of a frame,
             //and will be handled by another module - usually KFPartMirror. If we don't wait
