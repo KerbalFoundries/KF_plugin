@@ -44,7 +44,7 @@ namespace KerbalFoundries
         [KSPField(isPersistant = true)]
         public bool savedHitchState;
         public bool hitchCooloff;
-        public bool inWarp = true;
+        private bool beginWarp = true;
 
         [KSPField(isPersistant = true)]
 		public Vector3 _trailerPosition = new Vector3(0, 0, 0);
@@ -58,6 +58,7 @@ namespace KerbalFoundries
         Part _targetPart;
         //KFCouplingEye _couplingEye;
         Vessel _targetVessel;
+        Vector3 trailerOffset = Vector3.zero;
         
         GameObject _hitchObject;
         GameObject _coupledObject;
@@ -86,6 +87,43 @@ namespace KerbalFoundries
             yield return new WaitForSeconds(10);
             print("Hitch Active");
             hitchCooloff = false;
+        }
+
+        void WarpMover()
+        {
+            if (TimeWarp.CurrentRate > 1 && TimeWarp.WarpMode == TimeWarp.Modes.HIGH)
+            {
+                Debug.LogWarning("time rate greater than one and warpmode is high");
+                if (beginWarp)
+                {
+                    Debug.LogWarning("beginWarp is true");
+                    beginWarp = false;
+
+                    trailerOffset = _targetVessel.transform.position - this.vessel.transform.position;
+                    print(trailerOffset);
+                }
+
+                _targetVessel.SetPosition(this.vessel.transform.position + trailerOffset);
+                _targetVessel.obt_velocity = this.vessel.obt_velocity;
+
+            }
+            else
+            {
+                if (!beginWarp)
+                {
+                    Debug.LogError("beginWarp is false");
+
+                    Vector3d newPosition = this.vessel.transform.position + trailerOffset;
+
+                    _targetVessel.SetPosition(this.vessel.transform.position + trailerOffset);
+                    _targetVessel.obt_velocity = this.vessel.obt_velocity;
+                    _targetVessel.SetWorldVelocity(this.vessel.obt_velocity);
+
+                    _targetVessel.orbit.UpdateFromStateVectors(newPosition.xzy, vessel.obt_velocity.xzy, vessel.mainBody, Planetarium.GetUniversalTime());
+
+                }
+                beginWarp = true;
+            }
         }
 
         public void VesselPack(Vessel vessel)
@@ -170,7 +208,7 @@ namespace KerbalFoundries
         {
             UnityEngine.Object.Destroy(_StaticJoint);
         }
-
+        /*
         public void OnWarpChange()
         {
             warpRate = TimeWarp.CurrentRate;
@@ -192,7 +230,7 @@ namespace KerbalFoundries
 
                 CreateStaticJoint(coupledPart);
                 print("created static joint");
-              */
+              
                 //_targetVessel.flightIntegrator.enabled = false;
 
                 //FlightGlobals.overrideOrbit = true;
@@ -218,7 +256,7 @@ namespace KerbalFoundries
                 //Hitch();
             }
         }
-
+        */
         //[KSPEvent(guiActive = true, guiName = "Hitch", active = true)]
         void Hitch()
         {
@@ -437,7 +475,7 @@ namespace KerbalFoundries
             GameEvents.onVesselGoOffRails.Add(VesselUnPack);
             GameEvents.onVesselGoOnRails.Add(VesselPack);
 
-            GameEvents.onTimeWarpRateChanged.Add(OnWarpChange);
+            //GameEvents.onTimeWarpRateChanged.Add(OnWarpChange);
             
             _hitchObject = transform.Search(hitchObjectName).gameObject;
             _Link = transform.Search(hitchLinkName).gameObject;
@@ -494,6 +532,15 @@ namespace KerbalFoundries
         //line.transform.localEulerAngles = Vector3.zero;
         // Make it render a red to yellow triangle, 1 meter wide and 2 meters long
 
+        public void Update()
+        {
+            if (isHitched)
+            {
+                WarpMover();
+            }
+        }
+
+
         public void FixedUpdate()
         {
             if (!isReady || hitchCooloff)
@@ -504,10 +551,11 @@ namespace KerbalFoundries
 			if (isHitched)
             {
                 _targetVessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, brakesOn);
-                _trailerPosition = _targetVessel.transform.position;
-                if (inWarp)
-                    _targetVessel.transform.position = _trailerFix.transform.position;
-                }
+                //_trailerPosition = _targetVessel.transform.position;
+                //if (beginWarp)
+                //    _targetVessel.transform.position = _trailerFix.transform.position;
+                //WarpMover();
+            }
                 
             if (!Equals(_targetObject, null) && !isHitched)
             {
