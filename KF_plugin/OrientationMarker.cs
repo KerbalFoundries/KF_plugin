@@ -17,10 +17,10 @@ namespace KerbalFoundries
             marker = part.transform.Search(markerName);
             isMarkerEnabled = KFPersistenceManager.isMarkerEnabled;
 
-            if (!Equals(markerName, null) && isMarkerEnabled)
+            if (!Equals(marker, null) && isMarkerEnabled)
                 UnityEngine.Object.Destroy(marker.gameObject);
 
-            if (!Equals(markerName, null) && HighLogic.LoadedSceneIsFlight)
+            if (!Equals(marker, null) && HighLogic.LoadedSceneIsFlight)
             {
                 UnityEngine.Object.Destroy(marker.gameObject);
                 Debug.LogWarning("Marker destroyed.");

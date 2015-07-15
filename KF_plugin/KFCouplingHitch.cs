@@ -430,42 +430,7 @@ namespace KerbalFoundries
             }
         }
 
-        void DebugLine(Vector3 position, Vector3 rotation)
-        {
-            var lineDebugX = new GameObject("lineDebug");
-            var lineDebugY = new GameObject("lineDebug");
-            var lineDebugZ = new GameObject("lineDebug");
-            lineDebugX.transform.position = position;
-            lineDebugY.transform.position = position;
-            lineDebugZ.transform.position = position;
-            LineRenderer lineX = lineDebugX.AddComponent<LineRenderer>();
-            LineRenderer lineY = lineDebugY.AddComponent<LineRenderer>();
-            LineRenderer lineZ = lineDebugZ.AddComponent<LineRenderer>();
-            //lineX.transform.parent = transform; // ...child to our part...
-            lineX.useWorldSpace = false; // ...and moving along with it (rather 
-            lineX.material = new Material(Shader.Find("Particles/Additive"));
-            lineX.SetColors(Color.red, Color.white);
-            lineX.SetWidth(0.1f, 0.1f);
-            lineX.SetVertexCount(2);
-            lineX.SetPosition(0, Vector3.zero);
-            lineX.SetPosition(1, Vector3.right * 10);
 
-            lineY.useWorldSpace = false; // ...and moving along with it (rather 
-            lineY.material = new Material(Shader.Find("Particles/Additive"));
-            lineY.SetColors(Color.green, Color.white);
-            lineY.SetWidth(0.1f, 0.1f);
-            lineY.SetVertexCount(2);
-            lineY.SetPosition(0, Vector3.zero);
-            lineY.SetPosition(1, Vector3.up * 10);
-
-            lineZ.useWorldSpace = false; // ...and moving along with it (rather 
-            lineZ.material = new Material(Shader.Find("Particles/Additive"));
-            lineZ.SetColors(Color.blue, Color.white);
-            lineZ.SetWidth(0.1f, 0.1f);
-            lineZ.SetVertexCount(2);
-            lineZ.SetPosition(0, Vector3.zero);
-            lineZ.SetPosition(1, Vector3.forward * 10);
-        }
         // than staying in fixed world coordinates)
         //line.transform.localPosition = Vector3.zero;
         //line.transform.localEulerAngles = Vector3.zero;

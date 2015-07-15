@@ -90,15 +90,15 @@ namespace KerbalFoundries
                 //float tempLastFrameTraverse = lastFrameTraverse; //we need the value, but will over-write shortly. Store it here.
                 if (grounded) //is it on the ground
                 {
-                    traverse = (-colliders[i].transform.InverseTransformPoint(hit.point).y - (colliders[i].radius * tweakScaleCorrector) ) * tweakScaleCorrector; //calculate suspension travel using the collider raycast.
+                    traverse = (-colliders[i].transform.InverseTransformPoint(hit.point).y - (colliders[i].radius) ) * tweakScaleCorrector; //calculate suspension travel using the collider raycast.
 
-                    if (traverse > (colliders[i].suspensionDistance)) //the raycast sometimes goes further than its max value. Catch and stop the mesh moving further
-                        traverse = colliders[i].suspensionDistance;
+                    if (traverse > (colliders[i].suspensionDistance * tweakScaleCorrector)) //the raycast sometimes goes further than its max value. Catch and stop the mesh moving further
+                        traverse = colliders[i].suspensionDistance * tweakScaleCorrector;
                     else if (traverse < -0.1) //the raycast can be negative (!); catch this too
                         traverse = 0;
                 }
                 else
-                    traverse = colliders[i].suspensionDistance; //movement defaults back to last position when the collider is not grounded. Ungrounded collider returns suspension travel of zero!
+                    traverse = colliders[i].suspensionDistance * tweakScaleCorrector; //movement defaults back to last position when the collider is not grounded. Ungrounded collider returns suspension travel of zero!
 
                 suspensionMovement += traverse; //debug only
             }

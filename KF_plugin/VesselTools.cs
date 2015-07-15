@@ -77,6 +77,8 @@ namespace KerbalFoundries
 		const int threshHold = 1;
 		Vessel _vessel;
 		GameObject _cameraObject;
+        Camera _camera;
+        Texture2D groundShot;
 		RenderTexture renderTexture;
         bool dustCam;
 
@@ -87,10 +89,20 @@ namespace KerbalFoundries
 		{
 			_vessel = GetComponent<Vessel>();
 			_cameraObject = new GameObject("ColourCam");
+            
 			_cameraObject.transform.parent = _vessel.transform;
-			cameraMask = 32784;	// Layers 4 and 15, or water and local scenery.
-								// Generated from the binary place value output of 4 and 15 added to each other.
-								// (1 << 4) | (1 << 15) = (16) | (32768) = 32784
+            _cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
+            _cameraObject.transform.Translate(new Vector3(0, 0, -10));
+            _camera = _cameraObject.AddComponent<Camera>();
+            _camera.targetTexture = renderTexture;
+            cameraMask = 32784;	// Layers 4 and 15, or water and local scenery.
+            // Generated from the binary place value output of 4 and 15 added to each other.
+            // (1 << 4) | (1 << 15) = (16) | (32768) = 32784
+            _camera.cullingMask = cameraMask;
+
+            _camera.enabled = false;
+            renderTexture = new RenderTexture(resWidth, resHeight, 24);
+            groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
             dustCam = KFPersistenceManager.isDustCameraEnabled;
 		}
 
@@ -100,25 +112,20 @@ namespace KerbalFoundries
             if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCam)
             {
                 frameCount = 0;
-                var _camera = _cameraObject.AddComponent<Camera>();
-                _cameraObject.transform.position = _vessel.transform.position;
-                _cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
-                _cameraObject.transform.Translate(new Vector3(0, 0, -10));
-                
 
-                renderTexture = new RenderTexture(resWidth, resHeight, 24);
+                //_cameraObject.transform.position = _vessel.transform.position;
+                _cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
                 _camera.targetTexture = renderTexture;
-                _camera.cullingMask = cameraMask;
-                var groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
+                //Extensions.DebugLine(_cameraObject.transform.position, _cameraObject.transform.eulerAngles);
+                _camera.enabled = true;
+                
                 _camera.Render();
                 //Debug.LogError("rendered something...");
                 RenderTexture.active = renderTexture;
                 groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
                 _camera.targetTexture = null;
+                _camera.enabled = false;
                 RenderTexture.active = null; // JC: added to avoid errors
-                Destroy(renderTexture);
-                Destroy(_camera);
-                //var rb = rt.colorBuffer;
 
                 Color[] texColors = groundShot.GetPixels();
                 int total = texColors.Length;
@@ -135,6 +142,7 @@ namespace KerbalFoundries
                     b += texColors[i].b;
                 }
                 _averageColour = new Color(r / divider, g / divider, b / divider, alpha);
+                print(_averageColour);
             }
             frameCount++;
         }
