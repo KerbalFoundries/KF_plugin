@@ -5,7 +5,8 @@ namespace KerbalFoundries
 {
 	/// <summary>This class loads, provides and saves global configuration.</summary>
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
-	public static class KFPersistenceManager : MonoBehaviour
+	// disable ConvertToStaticType
+	public class KFPersistenceManager : MonoBehaviour
 	{
 		#region Log
 		/// <summary>
