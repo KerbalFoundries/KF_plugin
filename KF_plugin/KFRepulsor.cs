@@ -45,7 +45,7 @@ namespace KerbalFoundries
 
         Vector3 _gridScale;
         
-        float effectPower; 
+        //float effectPower; 
         const float effectPowerMax = 50f;
         float appliedRideHeight;
         float currentRideHeight;
@@ -251,12 +251,12 @@ namespace KerbalFoundries
             }
             else
             {
-                effectPower = 0;
+                //effectPower = 0;
 				status = lowEnergy ? "Low Charge" : "Off";
             }
 			
             RepulsorSound(hitForce);
-            effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
+            //effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //print(effectPower);
 
             dir += UnityEngine.Random.Range(20,60);

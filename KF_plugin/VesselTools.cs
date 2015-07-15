@@ -78,6 +78,7 @@ namespace KerbalFoundries
 		Vessel _vessel;
 		GameObject _cameraObject;
 		RenderTexture renderTexture;
+        bool dustCam;
 
 		/// <summary>The layer or layers that the camera will render.</summary>
 		public int cameraMask;
@@ -90,81 +91,56 @@ namespace KerbalFoundries
 			cameraMask = 32784;	// Layers 4 and 15, or water and local scenery.
 								// Generated from the binary place value output of 4 and 15 added to each other.
 								// (1 << 4) | (1 << 15) = (16) | (32768) = 32784
-            bool dustCam = KFPersistenceManager.isDustCameraEnabled;
-            if (dustCam)
-            {
-                Debug.LogWarning("Starting camera couroutine");
-                StartCoroutine("Camera");
-            }
+            dustCam = KFPersistenceManager.isDustCameraEnabled;
 		}
 
-        // disable once FunctionNeverReturns
-        IEnumerator Camera()
+        public void Update()
         {
-            while (true)
+            dustCam = KFPersistenceManager.isDustCameraEnabled;
+            if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCam)
             {
-                if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel))
+                frameCount = 0;
+                var _camera = _cameraObject.AddComponent<Camera>();
+                _cameraObject.transform.position = _vessel.transform.position;
+                _cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
+                _cameraObject.transform.Translate(new Vector3(0, 0, -10));
+                
+
+                renderTexture = new RenderTexture(resWidth, resHeight, 24);
+                _camera.targetTexture = renderTexture;
+                _camera.cullingMask = cameraMask;
+                var groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
+                _camera.Render();
+                //Debug.LogError("rendered something...");
+                RenderTexture.active = renderTexture;
+                groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+                _camera.targetTexture = null;
+                RenderTexture.active = null; // JC: added to avoid errors
+                Destroy(renderTexture);
+                Destroy(_camera);
+                //var rb = rt.colorBuffer;
+
+                Color[] texColors = groundShot.GetPixels();
+                int total = texColors.Length;
+                float divider = total * 1.25f;
+                float r = 0;
+                float g = 0;
+                float b = 0;
+                const float alpha = 0.007f;
+
+                for (int i = 0; i < total; i++)
                 {
-                    frameCount = 0;
-                    var _camera = _cameraObject.AddComponent<Camera>();
-                    _cameraObject.transform.position = _vessel.transform.position;
-                    _cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
-                    _cameraObject.transform.Translate(new Vector3(0, 0, -10));
-                    //Debug.LogError("created camera");
-
-                    renderTexture = new RenderTexture(resWidth, resHeight, 24);
-                    _camera.targetTexture = renderTexture;
-                    _camera.cullingMask = cameraMask;
-                    var groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
-                    _camera.Render();
-                    //Debug.LogError("rendered something...");
-                    RenderTexture.active = renderTexture;
-                    groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
-                    _camera.targetTexture = null;
-                    RenderTexture.active = null; // JC: added to avoid errors
-                    Destroy(renderTexture);
-                    Destroy(_camera);
-                    //var rb = rt.colorBuffer;
-
-                    Color[] texColors = groundShot.GetPixels();
-                    int total = texColors.Length;
-                    float divider = total * 1.25f;
-                    float r = 0;
-                    float g = 0;
-                    float b = 0;
-                    const float alpha = 0.025f;
-
-                    for (int i = 0; i < total; i++)
-                    {
-                        r += texColors[i].r;
-                        g += texColors[i].g;
-                        b += texColors[i].b;
-                    }
-                    _averageColour = new Color(r / divider, g / divider, b / divider, alpha);
-                    //print(string.Format("fired this frame{0}", _averageColour));
-                    //takeHiResShot = false;
+                    r += texColors[i].r;
+                    g += texColors[i].g;
+                    b += texColors[i].b;
                 }
-                frameCount++;
-                yield return null;
+                _averageColour = new Color(r / divider, g / divider, b / divider, alpha);
+                //print(string.Format("fired this frame{0}", _averageColour));
+                //takeHiResShot = false;
             }
+            frameCount++;
         }
 
-		//[KSPEvent(active=true,guiActive=true,guiName="Take Shot",name="Take Shot")]
-		public void Update()
-		{
-            /*
-            takeHiResShot |= Input.GetKeyDown("k");
-            if (takeHiResShot && _vessel == FlightGlobals.ActiveVessel)
-            {
-             
-            var timer = new System.Diagnostics.Stopwatch();
-            timer.Start();
-             * */
-
-            
-			//timer.Stop();
-			//print(timer.Elapsed);
-		}
 	}
 }
 

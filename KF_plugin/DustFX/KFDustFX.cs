@@ -296,9 +296,16 @@ namespace KerbalFoundries
 			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
 				tweakScaleCorrector = 1f;
 			colorBiome = KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
-			colorCam = _ModuleCameraShot._averageColour;
+            if (KFPersistenceManager.isDustCameraEnabled)
+            {
+                colorCam = _ModuleCameraShot._averageColour;
+                colorAverage = colorCam + colorBiome / 2;
+            }
+            else
+                colorAverage = colorBiome;
+
 			//Color colorAverage = _ModuleCameraShot._averageColour;
-			colorAverage = !isDustCameraEnabled ? colorBiome : (colorCam + colorBiome) / 2;
+			//colorAverage = !isDustCameraEnabled ? colorBiome : (colorCam + colorBiome) / 2;
 			
 			if (Equals(colorBiome, null))
 				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);

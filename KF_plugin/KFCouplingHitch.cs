@@ -8,7 +8,7 @@ namespace KerbalFoundries
     public class KFCouplingHitch : PartModule
     {
         bool isReady;
-		bool sentOnRails;
+		
         //[KSPField(isPersistant = true)]
         public bool isHitched;
         [KSPField]
@@ -63,13 +63,13 @@ namespace KerbalFoundries
         GameObject _hitchObject;
         GameObject _coupledObject;
         GameObject _Link;
-        GameObject _trailerFix;
+        
         ConfigurableJoint _LinkJoint;
         ConfigurableJoint _HitchJoint;
-        FixedJoint _StaticJoint;
+        
         Rigidbody _rbLink;
         Vector3 _LinkRotation;
-		Vector3 tempPosition;
+		
 		// Reports that it is never used.
         [KSPField]
         public int layerMask = 0;
@@ -130,7 +130,7 @@ namespace KerbalFoundries
         {
 			if (Equals(vessel, this.vessel))
             {
-                sentOnRails = true;
+                
 				Debug.LogError(string.Format("hitch state is {0}", isHitched));
                 //_targetPart.rigidbody.isKinematic = true;
                 //_targetPart.transform.parent = this.part.transform;
@@ -193,70 +193,7 @@ namespace KerbalFoundries
             isReady = true;
         }
 
-        public void CreateStaticJoint(Part coupledPart)
-        {
-            UnityEngine.Object.Destroy(_LinkJoint);
-            UnityEngine.Object.Destroy(_HitchJoint);
-            UnityEngine.Object.Destroy(_rbLink);
-            _StaticJoint = coupledPart.gameObject.AddComponent<FixedJoint>();
-            _StaticJoint.breakForce = float.PositiveInfinity;
-            _StaticJoint.breakTorque = float.PositiveInfinity;
-            _StaticJoint.connectedBody = this.part.Rigidbody;
-        }
-
-        public void DestroyStaticJoint()
-        {
-            UnityEngine.Object.Destroy(_StaticJoint);
-        }
-        /*
-        public void OnWarpChange()
-        {
-            warpRate = TimeWarp.CurrentRate;
-            warpIndex = TimeWarp.CurrentRateIndex;
-			if (!Equals(TimeWarp.CurrentRateIndex, 0))
-            {/*
-                print("warp rate changed and greater than one");
-                //UnHitch();
-                Part coupledPart = _coupledObject.GetComponentInParent<Part>();
-                print("Refound target part");
-                this.part.attachMethod = AttachNodeMethod.FIXED_JOINT;
-                Vessel vessel = this.vessel;
-
-                coupledPart.Couple(this.part);
-
-                FlightGlobals.ForceSetActiveVessel(vessel);
-
-                vessel.MakeActive(); 
-
-                CreateStaticJoint(coupledPart);
-                print("created static joint");
-              
-                //_targetVessel.flightIntegrator.enabled = false;
-
-                //FlightGlobals.overrideOrbit = true;
-
-                if (isHitched)
-                {
-                    _trailerFix = new GameObject("_trailerFix");
-                    _trailerFix.transform.position = _targetVessel.transform.position;
-                    _trailerFix.transform.parent = this.part.transform;
-                    FlightGlobals.overrideOrbit = true;
-                    //_trailerPosition = _targetVessel.transform.position;
-					//Debug.LogError("Relative position " + _trailerPosition);
-                    DebugLine(_trailerFix.transform.position, _targetVessel.transform.right);
-                }
-                inWarp = true;
-            }
-            else if (Equals(TimeWarp.CurrentRateIndex, 0))
-            {
-                print("warp rate changed back to one");
-                inWarp = false;
-                FlightGlobals.overrideOrbit = false;
-                //DestroyStaticJoint();
-                //Hitch();
-            }
-        }
-        */
+      
         //[KSPEvent(guiActive = true, guiName = "Hitch", active = true)]
         void Hitch()
         {
@@ -367,10 +304,35 @@ namespace KerbalFoundries
                 Debug.LogWarning("No target");
         }
 
+        [KSPEvent(guiActive = true, guiName = "Un-Hitch", active = true, guiActiveUnfocused = true, unfocusedRange = 40f)]
+        void UnHitch()
+        {
+			if (isHitched)
+            {
+                Debug.LogWarning("Unhitching...");
+                //_joint.connectedBody = this.part.rigidbody;
+				UnityEngine.Object.Destroy(_LinkJoint);
+				UnityEngine.Object.Destroy(_rbLink);
+				UnityEngine.Object.Destroy(_HitchJoint);
+                _Link.transform.localEulerAngles = _LinkRotation;
+                isHitched = false;
+                //_couplingEye.isHitched = false;
+                savedHitchState = false;
+                hitchCooloff = true;
+                _coupledObject = null;
+                _targetVessel = null;
+                _targetPart = null;
+                _flightID = string.Empty;
+                StartCoroutine("HitchCooloffTimer");
+            }
+            else
+                Debug.LogWarning("Not hitched!!!!");
+        }
+
         [KSPEvent(guiActive = true, guiName = "Update Damper", active = true, guiActiveUnfocused = true, unfocusedRange = 40f)]
         void SetJointDamper()
         {
-			if (!Equals(_HitchJoint, null))
+            if (!Equals(_HitchJoint, null))
             {
                 _HitchJoint.rotationDriveMode = RotationDriveMode.XYAndZ;
                 JointDrive X = _HitchJoint.angularXDrive;
@@ -384,29 +346,6 @@ namespace KerbalFoundries
             }
             else
                 Debug.LogError("No joint to update!");
-            }
-
-        [KSPEvent(guiActive = true, guiName = "Un-Hitch", active = true, guiActiveUnfocused = true, unfocusedRange = 40f)]
-        void UnHitch()
-        {
-			if (!Equals(_LinkJoint, null))
-            {
-                Debug.LogWarning("Unhitching...");
-                //_joint.connectedBody = this.part.rigidbody;
-				UnityEngine.Object.Destroy(_LinkJoint);
-				UnityEngine.Object.Destroy(_rbLink);
-				UnityEngine.Object.Destroy(_HitchJoint);
-                _Link.transform.localEulerAngles = _LinkRotation;
-                isHitched = false;
-                //_couplingEye.isHitched = false;
-                savedHitchState = false;
-                hitchCooloff = true;
-                _coupledObject = null;
-                _flightID = string.Empty;
-                StartCoroutine("HitchCooloffTimer");
-            }
-            else
-                Debug.LogWarning("Not hitched!!!!");
         }
 
         //[KSPEvent(guiActive = true, guiName = "Show rotation", active = true)]
@@ -543,24 +482,29 @@ namespace KerbalFoundries
 
         public void FixedUpdate()
         {
+            RaycastHit hitUpdate;
             if (!isReady || hitchCooloff)
                 return;
-            RayCast(rayDistance);
+            
             bool brakesOn = FlightGlobals.ActiveVessel.ActionGroups[KSPActionGroup.Brakes];
 
-			if (isHitched)
+            if (isHitched)
             {
                 _targetVessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, brakesOn);
-                //_trailerPosition = _targetVessel.transform.position;
-                //if (beginWarp)
-                //    _targetVessel.transform.position = _trailerFix.transform.position;
-                //WarpMover();
+                return;
+            }
+            else
+            {
+                hitUpdate = RayCast(rayDistance);
             }
                 
             if (!Equals(_targetObject, null) && !isHitched)
             {
+
                 if (_targetObject.name.Equals("EyeTarget", StringComparison.Ordinal) || _targetObject.name.Equals("EyePoint", StringComparison.Ordinal))
                 {
+                    _targetPart = Part.FromGO(hitUpdate.rigidbody.gameObject);
+                    _rb = (hitUpdate.rigidbody);
                     Vector3 forceVector = -(_targetObject.transform.position - _hitchObject.transform.position).normalized;
                     Vector3 forcePlane = forceVector - (_hitchObject.transform.forward) * Vector3.Dot(forceVector, _hitchObject.transform.forward);
                     Vector3 force = forcePlane * forceMultiplier * Mathf.Clamp((1 / (_targetObject.transform.position - _hitchObject.transform.position).magnitude), -maxForce, maxForce); //(1 / (_targetObject.transform.position - _hitchObject.transform.position).magnitude) *
@@ -591,7 +535,7 @@ namespace KerbalFoundries
         }
 
         //[KSPEvent(guiActive = true, guiName = "Fire Ray", active = true)]
-        void RayCast(float rayLength)
+        RaycastHit RayCast(float rayLength)
         {
             var ray = new Ray(_hitchObject.transform.position, _hitchObject.transform.forward);
             RaycastHit hit;
@@ -603,25 +547,25 @@ namespace KerbalFoundries
             {
                 //targetObject = hit.collider.gameObject;
                 ravInfo = hit.collider.gameObject.name.ToString();
-                try
-                {
-                    _targetPart = Part.FromGO(hit.rigidbody.gameObject);
-                    _rb = (hit.rigidbody);
+                //try
+                //{
+                    
                     //if(p.vessel != this.vessel)
                     //{
                     _targetObject = hit.collider.gameObject;
                     //print("Hit " + hit.collider.gameObject.name);
                     //}
-                }
-				catch (NullReferenceException)
-				{
-				}
+                //}
+				//catch (NullReferenceException)
+				//{
+				//}
             }
             else
             {
                 ravInfo = "Nothing";
                 _targetObject = null;
             }
+            return hit;
         }
     }
 }

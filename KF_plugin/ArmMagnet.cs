@@ -17,9 +17,9 @@ namespace KerbalFoundries
 
 		GameObject _base;
 		GameObject _arm;
-		Rigidbody _rb;
+		//Rigidbody _rb;
 		// Reports that it is never used.
-		Rigidbody _targetRb;
+		//Rigidbody _targetRb;
 		// Reports "Field 'KerbalFoundries.ArmMagnet._targetRb' is never assigned to, and will always have its default value null.
 		ConfigurableJoint _joint;
 		bool isReady;
@@ -64,7 +64,7 @@ namespace KerbalFoundries
 				_joint.angularYMotion = ConfigurableJointMotion.Free;
 				_joint.angularZMotion = ConfigurableJointMotion.Free;
 
-				_joint.connectedBody = _targetRb;
+				//_joint.connectedBody = _targetRb;
 			}
 			else
 				Debug.LogError("\"GO\" not found.");
