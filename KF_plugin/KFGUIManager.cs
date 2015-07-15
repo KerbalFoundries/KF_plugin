@@ -143,11 +143,17 @@ namespace KerbalFoundries
 		void DrawWindow(int windowID)
 		{
 			GUI.skin = HighLogic.Skin;
-			KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable dustFX");
+
+            if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.SPACECENTER)
+            {
+                KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable dustFX");
+
+                if (KFPersistenceManager.isDustEnabled)
+                    KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable dustFX camera");
+            }
             
-			if (KFPersistenceManager.isDustEnabled)
-				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable dustFX camera");
-			KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isMarkerEnabled, "Enable part orientation markers");
+			if (HighLogic.LoadedSceneIsEditor || HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			    KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isMarkerEnabled, "Enable part orientation markers");
 		}
 		
 		#endregion GUI Setup
