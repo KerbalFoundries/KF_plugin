@@ -93,14 +93,14 @@ namespace KerbalFoundries
 					{
 						_wheelCollider = wc;
 						suspensionDistance = wc.suspensionDistance;
-						Debug.LogError(string.Format("SuspensionDistance is: {0}.", suspensionDistance));
+						//Debug.LogError(string.Format("SuspensionDistance is: {0}.", suspensionDistance));
 						isConfigured = true;
 					}
 				}
 			}
 			else
 			{
-				Debug.LogError("Already configured - skipping.");
+				//Debug.LogError("Already configured - skipping.");
 			}
             
 			if (HighLogic.LoadedSceneIsEditor)

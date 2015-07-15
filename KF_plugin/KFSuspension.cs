@@ -19,6 +19,8 @@ namespace KerbalFoundries
 
 		Vector3 initialPosition = new Vector3(0, 0, 0);
 
+        KFModuleWheel KFMW;
+
 		string[] colliderList;
 
 		int objectCount;
@@ -31,7 +33,7 @@ namespace KerbalFoundries
 		[KSPField(isPersistant = true)]
 		public float suspensionDistance;
 
-		const float tweakScaleCorrector = 1;
+		float tweakScaleCorrector = 1;
 
 		bool isReady;
 
@@ -42,6 +44,12 @@ namespace KerbalFoundries
 			{
 				//GameEvents.onGamePause.Add(new EventVoid.OnEvent(this.OnPause));
 				//GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(this.OnUnPause));
+                KFMW = this.part.GetComponentInChildren<KFModuleWheel>();
+                if (!Equals(KFMW, null))
+                {
+                    tweakScaleCorrector = KFMW.tweakScaleCorrector;
+                }
+                Debug.LogWarning("TS corrector " + tweakScaleCorrector);
 
 				colliderList = Extensions.SplitString(colliderNames);
                 
@@ -82,7 +90,7 @@ namespace KerbalFoundries
                 //float tempLastFrameTraverse = lastFrameTraverse; //we need the value, but will over-write shortly. Store it here.
                 if (grounded) //is it on the ground
                 {
-                    traverse = -colliders[i].transform.InverseTransformPoint(hit.point).y - colliders[i].radius; //calculate suspension travel using the collider raycast.
+                    traverse = (-colliders[i].transform.InverseTransformPoint(hit.point).y - (colliders[i].radius * tweakScaleCorrector) ) * tweakScaleCorrector; //calculate suspension travel using the collider raycast.
 
                     if (traverse > (colliders[i].suspensionDistance)) //the raycast sometimes goes further than its max value. Catch and stop the mesh moving further
                         traverse = colliders[i].suspensionDistance;
@@ -106,7 +114,7 @@ namespace KerbalFoundries
         {
             // Instead of reiterating "Vector3" we an use "var" in this instance. - Gaalidas
             var tempVector = new Vector3(0, 0, 0);
-            tempVector[index] = movement * tweakScaleCorrector;
+            tempVector[index] = movement;
             movedObject.transform.Translate(tempVector, Space.Self);
         }
 

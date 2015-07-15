@@ -130,7 +130,7 @@ namespace KerbalFoundries
 		public bool brakesApplied;
         [KSPField(isPersistant = true)]
         public bool isRetracted = false;
-        [KSPField(isPersistant = true, guiActive = false, guiName = "TS", guiFormat = "F1")] //debug only.
+        [KSPField(isPersistant = true, guiActive = true, guiName = "TS", guiFormat = "F1")] //debug only.
         public float tweakScaleCorrector = 1;
 
 		// Global variables
@@ -355,7 +355,7 @@ namespace KerbalFoundries
             vesselMass = this.vessel.GetTotalMass();
             if (!Equals(Math.Round(vesselMass, 1),Math.Round(lastVesselMass, 1) ))
             {
-                print("Vessel mass changed.");
+                //print("Vessel mass changed.");
                 _colliderMass = ChangeColliderMass();
                 lastPartCount = this.vessel.Parts.Count();
                 ApplySteeringSettings();
@@ -502,7 +502,7 @@ namespace KerbalFoundries
                 if (!Equals(KFMW, null) )
                 {
                     KFMWList.Add(KFMW);
-					print(string.Format("Found KFModuleWheel in {0}.", this.vessel.parts[i].partInfo.name));
+					//print(string.Format("Found KFModuleWheel in {0}.", this.vessel.parts[i].partInfo.name));
                     
                     colliderCount += KFMW.wcList.Count();
                 }
@@ -513,7 +513,7 @@ namespace KerbalFoundries
             // set all this up in the other wheels to prevent them having to do so themselves. First part has the honour.
             for (int i = 0; i < KFMWList.Count(); i++)
             {
-				print(string.Format("Setting collidermass in other wheel {0}.", KFMWList[i].part.partInfo.name));
+				//print(string.Format("Setting collidermass in other wheel {0}.", KFMWList[i].part.partInfo.name));
 				KFMWList[i]._colliderMass = colliderMass;
 				KFMWList[i].lastVesselMass = this.vesselMass; //this should mean that the method does not get triggered for subsequent wheels.
                 KFMWList[i].vesselMass = this.vesselMass;

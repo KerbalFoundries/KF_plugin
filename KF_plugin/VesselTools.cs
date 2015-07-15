@@ -135,27 +135,9 @@ namespace KerbalFoundries
                     b += texColors[i].b;
                 }
                 _averageColour = new Color(r / divider, g / divider, b / divider, alpha);
-                //print(string.Format("fired this frame{0}", _averageColour));
-                //takeHiResShot = false;
             }
             frameCount++;
         }
 
 	}
 }
-
-/*
-var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                visible.transform.parent = _cameraObject.transform;
-                visible.transform.localScale = new Vector3(0.1f,0.1f,0.5f);
-                visible.renderer.enabled = false;
-*/
-
-/*
-byte[] bytes = groundShot.EncodeToPNG();
-string filename = ScreenShotName(resWidth, resHeight);
-Debug.LogError("about to write screenshot");
-System.IO.File.WriteAllBytes(filename, bytes);
-//KSP.IO.File.WriteAllBytes<RenderTexture>(bytes, filename, _vessel);
-Debug.Log(string.Format("Took screenshot to: {0}", filename));
- * */

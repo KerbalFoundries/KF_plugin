@@ -115,7 +115,7 @@ namespace KerbalFoundries
                     b.suspensionDistance = 2.5f; //default to low setting to save stupid shenanigans on takeoff
                     wcList.Add(b);
                 }
-				this.part.force_activate(); // Force the part active or OnFixedUpate is not called.
+				this.part.force_activate(); // Force the part active or OnFixedUpate is not called. 
                 //effectPowerMax = repulsorCount * Time.fixedDeltaTime * resourceConsumptionRate / 4;
 
                 //print(string.Format("Max effect power is {0}.", effectPowerMax));

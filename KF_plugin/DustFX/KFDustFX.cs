@@ -303,9 +303,6 @@ namespace KerbalFoundries
             }
             else
                 colorAverage = colorBiome;
-
-			//Color colorAverage = _ModuleCameraShot._averageColour;
-			//colorAverage = !isDustCameraEnabled ? colorBiome : (colorCam + colorBiome) / 2;
 			
 			if (Equals(colorBiome, null))
 				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);

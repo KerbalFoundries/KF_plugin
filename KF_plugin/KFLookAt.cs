@@ -38,18 +38,18 @@ namespace KerbalFoundries
 
         public void SetupObjects()
         {
-            print("setup objects");
+            //print("setup objects");
             rotators.Clear();
             targets.Clear();
             for (int i = 0; i < rotatorList.Count(); i++)
             {
                 rotators.Add(transform.SearchStartsWith(rotatorList[i]));
-				print(string.Format("iterated rotators {0}", rotatorList.Count()));
+				//print(string.Format("iterated rotators {0}", rotatorList.Count()));
             }
             for (int i = 0; i < targetList.Count(); i++)
             {
                 targets.Add(transform.SearchStartsWith(targetList[i]));
-				print(string.Format("iterated targets {0}", targetList.Count()));
+				//print(string.Format("iterated targets {0}", targetList.Count()));
             }
             objectCount = rotators.Count();
 			countAgrees |= Equals(objectCount, targets.Count());
@@ -57,7 +57,7 @@ namespace KerbalFoundries
 
         IEnumerator Setup()
         {
-			Debug.LogWarning(string.Format("Waiting a frame {0}.", Time.frameCount));
+			//Debug.LogWarning(string.Format("Waiting a frame {0}.", Time.frameCount));
             yield return null;
             //Wait a frame for GameObjects to be destroyed. This only happens at the end of a frame,
             //and will be handled by another module - usually KFPartMirror. If we don't wait
@@ -96,59 +96,3 @@ namespace KerbalFoundries
         }
     }
 }
-
-/*
- * 
-                     Vector3 hitchProjectX = rotators[i].transform.right - (rotators[i].transform.forward) * Vector3.Dot(rotators[i].transform.right, rotators[i].transform.forward);
-                    Vector3 attachProjectX = vectorBetween - (rotators[i].transform.forward) * Vector3.Dot(vectorBetween, rotators[i].transform.forward);
- Vector3 hitchProjectZ = rotators[i].transform.forward - (rotators[i].transform.up) * Vector3.Dot(rotators[i].transform.forward, rotators[i].transform.up);
-                    Vector3 attachProjectZ = vectorBetween - (rotators[i].transform.up) * Vector3.Dot(vectorBetween, rotators[i].transform.up);
- * 
- * float angleX = Mathf.Acos(Vector3.Dot(hitchProjectX, attachProjectX) / Mathf.Sqrt(Mathf.Pow(hitchProjectX.magnitude, 2) * Mathf.Pow(attachProjectX.magnitude, 2))) * Mathf.Rad2Deg;
- * float angleZ = Mathf.Acos(Vector3.Dot(hitchProjectZ, attachProjectZ) / Mathf.Sqrt(Mathf.Pow(hitchProjectZ.magnitude, 2) * Mathf.Pow(attachProjectZ.magnitude, 2))) * Mathf.Rad2Deg;
- * 
- * 
- * 
- * */
-
-// old code
-
-//Vector3 tempRotation = rotators[i].transform.transform.localEulerAngles;
-//rotators[i].LookAt(targets[i], rotators[i].transform.up);
-//tempRotation.x = rotators[i].transform.localEulerAngles.x;
-//rotators[i].transform.localEulerAngles = tempRotation;
-
-//Vector3 new_WayPointPos = new Vector3(rotators[i].position.x, targets[i].position.y, targets[i].position.z);
-//Quaternion RotateTo = Quaternion.LookRotation(new_WayPointPos - rotators[i].position);
-//rotators[i].rotation = RotateTo;
-/*
-Vector3 localPlanarPos = new Vector3(targets[i].InverseTransformPoint(rotators[i].position).x, targets[i].localPosition.y, targets[i].localPosition.z);
-
-Vector3 planarPos = targets[i].TransformPoint(localPlanarPos);
-
-Vector3 relativePos = planarPos - rotators[i].position;
-                    
-rotators[i].rotation = Quaternion.LookRotation(relativePos);
-
-                    
-Quaternion tmpRotation = rotators[i].localRotation; //preserves the local rotation since we only want to rotate on local Y axis
-//Vector3 leadTargetPosition = FirstOrderIntercept(transform.position, Vector3.zero, laserParticleLeft.particleEmitter.localVelocity.z, target.transform.position, target.rigidbody.velocity);
-Vector3 targetPointTurret = (targets[i].position - rotators[i].position).normalized; //get normalized vector toward target
-Quaternion targetRotationTurret = Quaternion.LookRotation(targetPointTurret, targets[i].parent.transform.up); //get a rotation for the turret that looks toward the target
-rotators[i].rotation =  targetRotationTurret; //gradually turn towards the target at the specified turnSpeed
-rotators[i].localRotation = Quaternion.Euler(rotators[i].eulerAngles.x, tmpRotation.eulerAngles.y, tmpRotation.eulerAngles.z); //reset x and z rotations and only rotates the y on its local axis
-                     
-
-Vector3 ProjectX = rotators[i].transform.right - (rotators[i].transform.forward) * Vector3.Dot(rotators[i].transform.right, rotators[i].transform.forward);
-//Vector3 attachProjectX = coupling.transform.right - (rotators[i].transform.forward) * Vector3.Dot(coupling.transform.right, rotators[i].transform.forward);
-
-
-Vector3 targetDir = new Vector3(rotators[i].localPosition.x, rotators[i].InverseTransformPoint(targets[i].position).y, rotators[i].InverseTransformPoint(targets[i].position).z) - rotators[i].position;
-Vector3 forward = rotators[i].forward;
-float angle = Vector3.Angle(targetDir, forward);
-
-
-//float angleX = Mathf.Acos(Vector3.Dot(hitchProjectX, attachProjectX) / Mathf.Sqrt(Mathf.Pow(hitchProjectX.magnitude, 2) * Mathf.Pow(attachProjectX.magnitude, 2))) * Mathf.Rad2Deg;
- * 
- * */
-//this projects vectors onto chosen 2D planes. planes are defined by their normals, in this case hitchObject.transform.forward.
