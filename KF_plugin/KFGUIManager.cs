@@ -36,12 +36,22 @@ namespace KerbalFoundries
 		/// <summary>Called when the Behavior wakes up.</summary>
 		void Awake()
 		{
-			if (HighLogic.LoadedSceneIsFlight)
+			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || HighLogic.LoadedScene == GameScenes.SPACECENTER)
 			{
 				GameEvents.onGUIApplicationLauncherReady.Add(SetupAppButton);
-				GameEvents.onGUIApplicationLauncherDestroyed.Add(DestroyAppButton);
+                GameEvents.onGameSceneSwitchRequested.Add(OnSwitchScene);
 			}
 		}
+
+        void OnSwitchScene(GameEvents.FromToAction<GameScenes, GameScenes> action)
+        {
+            KFLog.Log("Scene switch requested", strClassName);
+
+            GameEvents.onGUIApplicationLauncherReady.Remove(SetupAppButton);
+            GameEvents.onGameSceneSwitchRequested.Remove(OnSwitchScene);
+
+            DestroyAppButton();
+        }
 		
 		/// <summary>Retrieves button textures.</summary>
 		void InitGUIElements()
@@ -62,9 +72,15 @@ namespace KerbalFoundries
 			{
 				bool isThere;
 				ApplicationLauncher.Instance.Contains(appButton, out isThere);
-				if (isThere)
-					ApplicationLauncher.Instance.RemoveModApplication(appButton);
-				appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT, appTextureGrey);
+                if (isThere)
+                {
+                    ApplicationLauncher.Instance.RemoveModApplication(appButton);
+                    KFLog.Log("Removed leftover app button", strClassName);
+                }
+					
+
+				appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.VAB, appTextureGrey);
+                KFLog.Log("App button added", strClassName);
 			}
 		}
 
@@ -72,7 +88,12 @@ namespace KerbalFoundries
 		void DestroyAppButton()
 		{
 			if (!Equals(appButton, null))
-				ApplicationLauncher.Instance.RemoveModApplication(appButton);
+            {
+                ApplicationLauncher.Instance.RemoveModApplication(appButton);
+                isGUIEnabled = false;
+                KFLog.Log("App button destroyed", strClassName);
+            }
+                
 		}
 		
 		/// <summary>Called when the button is put into a "true" state, or when it is activated.</summary>
@@ -130,5 +151,5 @@ namespace KerbalFoundries
 		}
 		
 		#endregion GUI Setup
-	}
+    }
 }
