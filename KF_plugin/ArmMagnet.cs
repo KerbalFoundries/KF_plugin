@@ -23,7 +23,12 @@ namespace KerbalFoundries
 		// Reports "Field 'KerbalFoundries.ArmMagnet._targetRb' is never assigned to, and will always have its default value null.
 		ConfigurableJoint _joint;
 		bool isReady;
-
+		
+		/// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil();
+		public string strClassName = "ArmMagnet";
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
@@ -33,7 +38,7 @@ namespace KerbalFoundries
 				_base = transform.Search(fixedName).gameObject;
 				_arm = transform.Search(armName).gameObject;
 				isReady = true;
-				Debug.LogError("Test Arm started");
+				KFLog.Error("Test Arm started.", strClassName);
 			}
 		}
 
@@ -67,7 +72,7 @@ namespace KerbalFoundries
 				//_joint.connectedBody = _targetRb;
 			}
 			else
-				Debug.LogError("\"GO\" not found.");
+				KFLog.Error("\"GO\" not found.", strClassName);
 		}
 	}
 }
