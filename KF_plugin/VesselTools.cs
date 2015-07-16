@@ -18,10 +18,15 @@ namespace KerbalFoundries
 		bool isActive;
 		Vessel _vessel;
 		public float colliderHeight = -2.5f;
+		
+		/// <summary>Local name of the KFLogUtil class.</summary>
+		readonly KFLogUtil KFLog = new KFLogUtil();
+		/// <summary>Name of the class for logging purposes.</summary>
+		public string strClassName = "ModuleWaterSlider";
 
 		void Start()
 		{
-			print("WaterSlider start.");
+			KFLog.Log("WaterSlider start.", strClassName);
 			_vessel = GetComponent<Vessel>();
 
 			float repulsorCount = 0;
@@ -81,6 +86,11 @@ namespace KerbalFoundries
         Texture2D groundShot;
 		RenderTexture renderTexture;
         bool dustCam;
+
+		/// <summary>Local name of the KFLogUtil class.</summary>
+		readonly KFLogUtil KFLog = new KFLogUtil();
+		/// <summary>Name of the class for logging purposes.</summary>
+		public string strClassName = "ModuleCameraShot";
 
 		/// <summary>The layer or layers that the camera will render.</summary>
 		public int cameraMask;
@@ -142,7 +152,7 @@ namespace KerbalFoundries
                     b += texColors[i].b;
                 }
                 _averageColour = new Color(r / divider, g / divider, b / divider, alpha);
-                print(_averageColour);
+                KFLog.Log(string.Format("\"_averageColour\" = ", _averageColour), strClassName);
             }
             frameCount++;
         }

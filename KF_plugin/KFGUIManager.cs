@@ -43,15 +43,16 @@ namespace KerbalFoundries
 			}
 		}
 
-        void OnSwitchScene(GameEvents.FromToAction<GameScenes, GameScenes> action)
-        {
-            KFLog.Log("Scene switch requested", strClassName);
+		void OnSwitchScene(GameEvents.FromToAction<GameScenes, GameScenes> action)
+		{
+			KFLog.Log("Scene switch requested.", strClassName);
+			KFPersistenceManager.SaveConfig();
+			
+			GameEvents.onGUIApplicationLauncherReady.Remove(SetupAppButton);
+			GameEvents.onGameSceneSwitchRequested.Remove(OnSwitchScene);
 
-            GameEvents.onGUIApplicationLauncherReady.Remove(SetupAppButton);
-            GameEvents.onGameSceneSwitchRequested.Remove(OnSwitchScene);
-
-            DestroyAppButton();
-        }
+			DestroyAppButton();
+		}
 		
 		/// <summary>Retrieves button textures.</summary>
 		void InitGUIElements()
@@ -72,15 +73,14 @@ namespace KerbalFoundries
 			{
 				bool isThere;
 				ApplicationLauncher.Instance.Contains(appButton, out isThere);
-                if (isThere)
-                {
-                    ApplicationLauncher.Instance.RemoveModApplication(appButton);
-                    KFLog.Log("Removed leftover app button", strClassName);
-                }
-					
-
+				if (isThere)
+				{
+					ApplicationLauncher.Instance.RemoveModApplication(appButton);
+					KFLog.Log("Removed leftover app button.", strClassName);
+				}
+				
 				appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.VAB, appTextureGrey);
-                KFLog.Log("App button added", strClassName);
+				KFLog.Log("App button added.", strClassName);
 			}
 		}
 
@@ -88,12 +88,11 @@ namespace KerbalFoundries
 		void DestroyAppButton()
 		{
 			if (!Equals(appButton, null))
-            {
-                ApplicationLauncher.Instance.RemoveModApplication(appButton);
-                isGUIEnabled = false;
-                KFLog.Log("App button destroyed", strClassName);
-            }
-                
+			{
+				ApplicationLauncher.Instance.RemoveModApplication(appButton);
+				isGUIEnabled = false;
+				KFLog.Log("App button destroyed.", strClassName);
+			}
 		}
 		
 		/// <summary>Called when the button is put into a "true" state, or when it is activated.</summary>
@@ -133,7 +132,7 @@ namespace KerbalFoundries
 		{
 			if (isGUIEnabled)
 			{
-				settingsRect = new Rect(Screen.width - 258f, 42f, 256f, 128f);
+				settingsRect = new Rect(Screen.width - 258f, 42f, 256f, 160f);
 				GUI.Window(GUI_ID, settingsRect, DrawWindow, "Kerbal Foundries Settings");
 			}
 		}
@@ -143,19 +142,21 @@ namespace KerbalFoundries
 		void DrawWindow(int windowID)
 		{
 			GUI.skin = HighLogic.Skin;
-
-            if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.SPACECENTER)
-            {
-                KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable dustFX");
-
-                if (KFPersistenceManager.isDustEnabled)
-                    KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable dustFX camera");
-            }
+			
+			if (HighLogic.LoadedSceneIsFlight || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
+			{
+				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
+				if (KFPersistenceManager.isDustEnabled)
+					KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+			}
             
-			if (HighLogic.LoadedSceneIsEditor || HighLogic.LoadedScene == GameScenes.SPACECENTER)
-			    KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isMarkerEnabled, "Enable part orientation markers");
+			if (HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
+				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
+			
+			if (GUI.Button(new Rect(8f, 120f, 240f, 24f), "Save & Close"))
+				onFalse();
 		}
 		
 		#endregion GUI Setup
-    }
+	}
 }
