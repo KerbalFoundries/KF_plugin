@@ -42,7 +42,7 @@ namespace KerbalFoundries
                 GameEvents.onGameSceneSwitchRequested.Add(OnSwitchScene);
 			}
 		}
-
+		
 		void OnSwitchScene(GameEvents.FromToAction<GameScenes, GameScenes> action)
 		{
 			KFLog.Log("Scene switch requested.", strClassName);
@@ -83,7 +83,7 @@ namespace KerbalFoundries
 				KFLog.Log("App button added.", strClassName);
 			}
 		}
-
+		
 		/// <summary>Called when the ApplicationLauncher gets destroyed.</summary>
 		void DestroyAppButton()
 		{
@@ -138,7 +138,7 @@ namespace KerbalFoundries
 		}
 		
 		/// <summary>Creates the GUI content.</summary>
-		/// <param name="windowID"> ID of the window to create the content for </param>
+		/// <param name="windowID">ID of the window to create the content for.</param>
 		void DrawWindow(int windowID)
 		{
 			GUI.skin = HighLogic.Skin;
@@ -153,8 +153,14 @@ namespace KerbalFoundries
 			if (HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
 				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
 			
-			if (GUI.Button(new Rect(8f, 120f, 240f, 24f), "Save & Close"))
-				onFalse();
+			// The following button refuses to work no matter what I do.  It it exactly like the button in the BDArmory settings GUI, except for the rect postition and the commands it's told to execute.
+			// There is absolutely NO reason for a Nullref when clicking it, but that's all I get!  It won't even execute the commands under the "if" statement.
+			// It just appears and then refuses to do anything.
+			//if (GUI.Button(new Rect(8f, 120f, 240f, 24f), "Save and Close"))
+			//{
+			//	appButton.SetFalse();
+			//	KFLog.Debug("Save-button clicked, called \"appButton.SetFalse()\"", strClassName);
+			//}
 		}
 		
 		#endregion GUI Setup
