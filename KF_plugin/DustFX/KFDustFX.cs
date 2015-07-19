@@ -122,11 +122,6 @@ namespace KerbalFoundries
 		[KSPField]
 		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
 		
-		/// <summary>Part Info that will be displayed when part details are shown.</summary>
-		/// <remarks>Can be overridden in the module config on a per-part basis.</remarks>
-		[KSPField]
-		public string partInfoString = "This part will throw up dust when rolling over the terrain.";
-		
 		/// <summary>FXGroup for the wheel impact sound effect.</summary>
 		FXGroup WheelImpactSound;
 		
@@ -163,10 +158,15 @@ namespace KerbalFoundries
 			}
 		}
 		
+		/// <summary>Part Info that will be displayed when part details are shown.</summary>
+		/// <remarks>Can be overridden in the module config on a per-part basis.</remarks>
+		[KSPField]
+		public string strPartInfo = "This part will throw up dust when rolling over the terrain.";
+		
 		// Basic override for the info class.  Already has its own XML documentation.
 		public override string GetInfo()
 		{
-			return partInfoString;
+			return strPartInfo;
 		}
 		
 		/// <summary>Checks if the impact sound data or the object has null or empty information in it.</summary>

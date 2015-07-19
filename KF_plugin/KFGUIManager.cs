@@ -8,7 +8,9 @@ namespace KerbalFoundries
 	{
 		#region Initialization
 		// AppLauncher Elements.
-		ApplicationLauncherButton appButton;
+		// Found in another mod that making appButton static could keep it
+		//  from loading multiple instances of itself.
+		static ApplicationLauncherButton appButton;
 		Texture2D appTextureGrey;
 		Texture2D appTextureColor;
 		
@@ -20,8 +22,8 @@ namespace KerbalFoundries
 		// GUI Constants
 		public Rect settingsRect;
 		const int GUI_ID = 1200;
-				
-		// Boolean for the visible states of GUI elements.
+		
+		// Boolean for the visible state of the settings GUI.
 		public static bool isGUIEnabled;
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
@@ -36,7 +38,7 @@ namespace KerbalFoundries
 		/// <summary>Called when the Behavior wakes up.</summary>
 		void Awake()
 		{
-			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
 			{
 				GameEvents.onGUIApplicationLauncherReady.Add(SetupAppButton);
                 GameEvents.onGameSceneSwitchRequested.Add(OnSwitchScene);
@@ -45,13 +47,10 @@ namespace KerbalFoundries
 		
 		void OnSwitchScene(GameEvents.FromToAction<GameScenes, GameScenes> action)
 		{
-			KFLog.Log("Scene switch requested.", strClassName);
+			DestroyAppButton();
 			KFPersistenceManager.SaveConfig();
-			
 			GameEvents.onGUIApplicationLauncherReady.Remove(SetupAppButton);
 			GameEvents.onGameSceneSwitchRequested.Remove(OnSwitchScene);
-
-			DestroyAppButton();
 		}
 		
 		/// <summary>Retrieves button textures.</summary>
@@ -74,13 +73,8 @@ namespace KerbalFoundries
 				bool isThere;
 				ApplicationLauncher.Instance.Contains(appButton, out isThere);
 				if (isThere)
-				{
 					ApplicationLauncher.Instance.RemoveModApplication(appButton);
-					KFLog.Log("Removed leftover app button.", strClassName);
-				}
-				
 				appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.VAB, appTextureGrey);
-				KFLog.Log("App button added.", strClassName);
 			}
 		}
 		
@@ -91,7 +85,7 @@ namespace KerbalFoundries
 			{
 				ApplicationLauncher.Instance.RemoveModApplication(appButton);
 				isGUIEnabled = false;
-				KFLog.Log("App button destroyed.", strClassName);
+				KFPersistenceManager.SaveConfig();
 			}
 		}
 		
@@ -105,9 +99,9 @@ namespace KerbalFoundries
 		/// <summary>Called when the button is in a "false" state.  Saves configuration.</summary>
 		void onFalse()
 		{
+			KFPersistenceManager.SaveConfig();
 			appButton.SetTexture(appTextureGrey);
 			isGUIEnabled = false;
-			KFPersistenceManager.SaveConfig();
 		}
 		
 		/// <summary>Called when the cursor enters a hovered state over the button.</summary>
@@ -119,8 +113,7 @@ namespace KerbalFoundries
 		/// <summary>Called when the cursor leaves the hovering state over the button.</summary>
 		void onNotHover()
 		{
-			if (!isGUIEnabled)
-				appButton.SetTexture(appTextureGrey);
+			appButton.SetTexture(appTextureGrey);
 		}
 		
 		#endregion AppLauncher Button
@@ -132,7 +125,7 @@ namespace KerbalFoundries
 		{
 			if (isGUIEnabled)
 			{
-				settingsRect = new Rect(Screen.width - 258f, 42f, 256f, 160f);
+				settingsRect = new Rect(Screen.width - 258f, 42f, 256f, 138f);
 				GUI.Window(GUI_ID, settingsRect, DrawWindow, "Kerbal Foundries Settings");
 			}
 		}
@@ -146,21 +139,15 @@ namespace KerbalFoundries
 			if (HighLogic.LoadedSceneIsFlight || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
 			{
 				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
-				if (KFPersistenceManager.isDustEnabled)
-					KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+				// Removed the "if" for the state of "isDustEnabled" because it shows that option no matter what state the referenced option is in.
 			}
             
 			if (HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
 				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
 			
-			// The following button refuses to work no matter what I do.  It it exactly like the button in the BDArmory settings GUI, except for the rect postition and the commands it's told to execute.
-			// There is absolutely NO reason for a Nullref when clicking it, but that's all I get!  It won't even execute the commands under the "if" statement.
-			// It just appears and then refuses to do anything.
-			//if (GUI.Button(new Rect(8f, 120f, 240f, 24f), "Save and Close"))
-			//{
-			//	appButton.SetFalse();
-			//	KFLog.Debug("Save-button clicked, called \"appButton.SetFalse()\"", strClassName);
-			//}
+			// In theory, this should allow the window to be dragged.
+            GUI.DragWindow();
 		}
 		
 		#endregion GUI Setup
