@@ -30,11 +30,16 @@ namespace KerbalFoundries
 		
 		readonly KFLogUtil KFLog = new KFLogUtil();
 
+<<<<<<< HEAD:KF_plugin/DustFX/KFDustFX.cs
         /// <summary>Part instance of KFModuleWheel</summary>
         KFModuleWheel _KFModuleWheel;
 	
 		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
 		ModuleCameraShot _ModuleCameraShot;
+=======
+		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
+        ModuleCameraShot _ModuleCameraShot;
+>>>>>>> origin/master:KF_plugin/DustFX/DustFX.cs
 		
 		/// <summary>Local copy of the tweakScaleCorrector parameter in the KFModuleWheel module.</summary>
 		public float tweakScaleCorrector;
@@ -149,8 +154,13 @@ namespace KerbalFoundries
             _KFModuleWheel = this.part.GetComponent<KFModuleWheel>();
 			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
 
+<<<<<<< HEAD:KF_plugin/DustFX/KFDustFX.cs
 			isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
 			isDustCameraEnabled = KFPersistenceManager.isDustCameraEnabled;
+=======
+
+			isDustEnabledGlobally = KFConfigManager.KFConfig.isDustEnabled;
+>>>>>>> origin/master:KF_plugin/DustFX/DustFX.cs
 			
 			if (!isDustEnabledGlobally && isDustEnabledLocally)
 			{
@@ -191,7 +201,18 @@ namespace KerbalFoundries
 			dustAnimator = kfdustFx.particleEmitter.GetComponent<ParticleAnimator>();
 		}
 		
+<<<<<<< HEAD:KF_plugin/DustFX/KFDustFX.cs
 
+=======
+		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
+		/// <param name="col">The collider being referenced.</param>
+		public void CollisionImpact(Vector3 col)
+		{
+			CollisionInfo cInfo = GetClosestChild(part, col + (part.rigidbody.velocity * Time.deltaTime));
+			if (!Equals(cInfo.KFDustFX, null))
+				cInfo.KFDustFX.DustImpact();
+		}
+>>>>>>> origin/master:KF_plugin/DustFX/DustFX.cs
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
 		/// <param name="position">The position of the collision.</param>
