@@ -95,23 +95,16 @@ namespace KerbalFoundries
 		[KSPField]
 		public float minVelocityMag = 2f;
 		
-		
 		/// <summary>KSP path to the effect being used here.  Made into a field so that it can be customized in the future.</summary>
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
 		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
-		
-<<<<<<< HEAD
+
 		/// <summary>Part Info that will be displayed when part details are shown.</summary>
 		/// <remarks>Can be overridden in the module config on a per-part basis.</remarks>
 		[KSPField]
 		public string partInfoString = "This part will throw up dust when rolling over the terrain.";
-			
-=======
-		/// <summary>FXGroup for the wheel impact sound effect.</summary>
-		FXGroup WheelImpactSound;
-		
->>>>>>> 7ad8a03e2b2f132d7d82d51ef646b570316a0dfb
+	
 		/// <summary>Prefix the logs with this to identify it.</summary>
 		public string strClassName = "KFDustFX";
 		

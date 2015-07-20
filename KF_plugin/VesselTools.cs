@@ -18,15 +18,12 @@ namespace KerbalFoundries
 		bool isActive;
 		Vessel _vessel;
 		public float colliderHeight = -2.5f;
-<<<<<<< HEAD
         bool isReady;
-=======
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
 		readonly KFLogUtil KFLog = new KFLogUtil();
 		/// <summary>Name of the class for logging purposes.</summary>
 		public string strClassName = "ModuleWaterSlider";
->>>>>>> 7ad8a03e2b2f132d7d82d51ef646b570316a0dfb
 
 		void Start()
 		{
@@ -166,20 +163,8 @@ namespace KerbalFoundries
                     b += texColors[i].b;
                 }
                 _averageColour = new Color(r / divider, g / divider, b / divider, alpha);
-<<<<<<< HEAD
-                //print(_averageColour);
-=======
-                KFLog.Log(string.Format("\"_averageColour\" = ", _averageColour), strClassName);
->>>>>>> 7ad8a03e2b2f132d7d82d51ef646b570316a0dfb
             }
             frameCount++;
         }
-
-		public static string ScreenShotName(int width, int height)
-		{
-			return string.Format("{0}/screen_{1}x{2}_{3}.png", Application.dataPath, width, height, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
-		}
-
-		
 	}
 }
