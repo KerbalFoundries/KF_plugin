@@ -197,11 +197,8 @@ namespace KerbalFoundries
         {
 			base.OnStart(state);
 
-<<<<<<< HEAD
 			CustomResourceTextSetup(); // Calls a method to set up the statusLowResource text for resource alternatives.
             
-=======
->>>>>>> origin/master
             _dustFX = this.part.GetComponent<KFDustFX>(); //see if it's been added by MM
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
             {
@@ -211,11 +208,6 @@ namespace KerbalFoundries
                 _dustFX.OnStart(state);
             }
 
-<<<<<<< HEAD
-=======
-			CustomResourceTextSetup(); // Calls a method to set up the statusLowResource text for resource alternatives.
-            
->>>>>>> origin/master
             _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
             
             var partOrientationForward = new Vector3(0,0,0);

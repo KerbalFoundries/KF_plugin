@@ -11,13 +11,8 @@ using System.Collections;
 
 namespace KerbalFoundries
 {
-<<<<<<< HEAD
-    public class ModuleWaterSlider : VesselModule
-    {
-=======
 	public class ModuleWaterSlider : VesselModule
 	{
->>>>>>> origin/master
 		readonly GameObject _collider = new GameObject("ModuleWaterSlider.Collider", typeof(BoxCollider), typeof(Rigidbody));
 		const float triggerDistance = 25f;
 		bool isActive;
@@ -68,10 +63,6 @@ namespace KerbalFoundries
 		{
 			Vector3d oceanNormal = _vessel.mainBody.GetSurfaceNVector(_vessel.latitude, _vessel.longitude);
 			Vector3 newPosition = (_vessel.ReferenceTransform.position - oceanNormal * (FlightGlobals.getAltitudeAtPos(_vessel.ReferenceTransform.position) - colliderHeight));
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
 			_collider.rigidbody.position = newPosition;
 			_collider.rigidbody.rotation = Quaternion.LookRotation(oceanNormal) * Quaternion.AngleAxis(90f, Vector3.right);
 		}
@@ -126,7 +117,6 @@ namespace KerbalFoundries
             dustCam = KFPersistenceManager.isDustCameraEnabled;
 		}
 
-<<<<<<< HEAD
         public void Update()
         {
             dustCam = KFPersistenceManager.isDustCameraEnabled;
@@ -167,76 +157,12 @@ namespace KerbalFoundries
             }
             frameCount++;
         }
-=======
+
 		public static string ScreenShotName(int width, int height)
 		{
 			return string.Format("{0}/screen_{1}x{2}_{3}.png", Application.dataPath, width, height, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
 		}
 
-		public void TakeHiResShot()
-		{
-			takeHiResShot = true;
-		}
-
-		//[KSPEvent(active=true,guiActive=true,guiName="Take Shot",name="Take Shot")]
-		public void Update()
-		{
-			/*
-            takeHiResShot |= Input.GetKeyDown("k");
-            if (takeHiResShot && _vessel == FlightGlobals.ActiveVessel)
-            {
-             */
-			var timer = new System.Diagnostics.Stopwatch();
-			timer.Start();
-
-			if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel))
-			{
-				frameCount = 0;
-				var _camera = _cameraObject.AddComponent<Camera>();
-				_cameraObject.transform.position = _vessel.transform.position;
-				_cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
-				_cameraObject.transform.Translate(new Vector3(0, 0, -10));
-				//Debug.LogError("created camera");
-
-				renderTexture = new RenderTexture(resWidth, resHeight, 24);
-				_camera.targetTexture = renderTexture;
-				_camera.cullingMask = cameraMask;
-				var groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
-				_camera.Render();
-				//Debug.LogError("rendered something...");
-				RenderTexture.active = renderTexture;
-				groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
-				_camera.targetTexture = null;
-				RenderTexture.active = null; // JC: added to avoid errors
-				Destroy(renderTexture);
-				Destroy(_camera);
-				//var rb = rt.colorBuffer;
-
-				Color[] texColors = groundShot.GetPixels();
-				int total = texColors.Length;
-				float divider = total * 1.25f;
-				float r = 0;
-				float g = 0;
-				float b = 0;
-				const float alpha = 0.025f;
-
-				for (int i = 0; i < total; i++)
-				{
-					r += texColors[i].r;
-					g += texColors[i].g;
-					b += texColors[i].b;
-				}
-				_averageColour = new Color(r / divider, g / divider, b / divider, alpha);
-				//print(string.Format("fired this frame{0}", _averageColour));
-				//takeHiResShot = false;
-			}
-			frameCount++;
-			timer.Stop();
-			//print(timer.Elapsed);
-		}
-	}
-}
->>>>>>> origin/master
-
+		
 	}
 }
