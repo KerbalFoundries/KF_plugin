@@ -3,28 +3,27 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	// disable ConvertToStaticType
 	/// <summary>This class loads, provides and saves global configuration.</summary>
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
-	// disable ConvertToStaticType
 	public class KFPersistenceManager : MonoBehaviour
 	{
 		#region Log
-		/// <summary>
-		/// Local name of the KFLogUtil class.
-		/// </summary>
+		
+		/// <summary>Local name of the KFLogUtil class.</summary>
 		static readonly KFLogUtil KFLog = new KFLogUtil();
-
 		/// <summary>Name of the class for logging purposes.</summary>
 		static readonly string strClassName = "KFPersistenceManager";
-		#endregion
-
+		
+		#endregion Log
+		
 		/// <summary>Makes sure the global configuration is good to go.</summary>
 		/// <remarks>This is a static constructor. It's called once when the class is loaded by Mono.</remarks>
 		static KFPersistenceManager()
 		{
 			ReadConfig();
 		}
-
+		
 		#region Read & write
 		/// <summary>Retrieves the settings which are stored in the configuration file and are auto-loaded by KSP.</summary>
 		static void ReadConfig()
@@ -32,27 +31,27 @@ namespace KerbalFoundries
 			// KFGlobals.cfg
 			ConfigNode configFile = ConfigNode.Load(string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath));
 			ConfigNode configNode = configFile.GetNode("KFGlobals");
-
+			
 			bool _isDustEnabled = false;
 			if (bool.TryParse(configNode.GetValue("isDustEnabled"), out _isDustEnabled))
 				isDustEnabled = _isDustEnabled;
-
+			
 			bool _isDustCameraEnabled = false;
 			if (bool.TryParse(configNode.GetValue("isDustCameraEnabled"), out _isDustCameraEnabled))
 				isDustCameraEnabled = _isDustCameraEnabled;
-
+			
 			bool _isMarkerEnabled = false;
 			if (bool.TryParse(configNode.GetValue("isMarkerEnabled"), out _isMarkerEnabled))
 				isMarkerEnabled = _isMarkerEnabled;
-
-			KFLog.Log(string.Format("isDustEnabled = {0}", isDustEnabled), strClassName);
-			KFLog.Log(string.Format("isDustCameraEnabled = {0}", isDustCameraEnabled), strClassName);
-			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled), strClassName);
-
-			// dust colors
+			
+			KFLog.Log(string.Format("isDustEnabled = {0}", isDustEnabled));
+			KFLog.Log(string.Format("isDustCameraEnabled = {0}", isDustCameraEnabled));
+			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled));
+			
+			// DustColors.cfg
 			configFile = ConfigNode.Load(string.Format("{0}GameData/KerbalFoundries/DustColors.cfg", KSPUtil.ApplicationRootPath));
 			configNode = configFile.GetNode("DustColorDefinitions");
-
+			
 			DustColors = new Dictionary<string, Dictionary<string, Color>>();
 			foreach (ConfigNode celestialNode in configNode.GetNodes()) // for each celestial
 			{
@@ -69,7 +68,7 @@ namespace KerbalFoundries
 					float.TryParse(biomeNode.GetValue("Color").Split(',')[3], out a);
 					biomes.Add(biomeNode.name, new Color(r, g, b, a));
 				}
-
+				
 				DustColors.Add(celestialNode.name, biomes);
 				if (Equals(biomes.Count, 0))
 					KFLog.Error(string.Format("No biome colors found for {0}!", celestialNode.name), strClassName);
@@ -77,22 +76,23 @@ namespace KerbalFoundries
 					KFLog.Log(string.Format("Found {0} biome color definitions for {1}.", biomes.Count, celestialNode.name), strClassName);
 			}
 		}
-
+		
 		/// <summary>Saves the settings to the configuration file.</summary>
 		internal static void SaveConfig()
 		{
+			// KFGlobals.cfg
 			ConfigNode configFile = ConfigNode.Load(string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath));
 			ConfigNode configNode = configFile.GetNode("KFGlobals");
-
+			
 			configNode.SetValue("isDustEnabled", string.Format("{0}", isDustEnabled), true);
 			configNode.SetValue("isDustCameraEnabled", string.Format("{0}", isDustCameraEnabled), true);
 			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
 			configFile.Save(string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath));
-
-			KFLog.Log("Settings Saved.", strClassName);
+			
+			KFLog.Log("Global Settings Saved.");
 		}
 		#endregion
-
+		
 		#region Global configuration properties
 		/// <summary>If dust is displayed.</summary>
 		public static bool isDustEnabled
@@ -100,14 +100,14 @@ namespace KerbalFoundries
 			get;
 			set;
 		}
-
+		
 		/// <summary>If a camera is used to identify ground color for setting the correct dust color.</summary>
 		public static bool isDustCameraEnabled
 		{
 			get;
 			set;
 		}
-
+		
 		/// <summary>If orientation markers on wheels are displayed in the VAB/SPH.</summary>
 		public static bool isMarkerEnabled
 		{
@@ -115,17 +115,15 @@ namespace KerbalFoundries
 			set;
 		}
 		#endregion
-
+		
 		/// <summary>Dust colors for each biome.</summary>
-		/// <remarks>
-		/// Key = celestial name, Value(s) = { Key = biome_name Value = color }
-		/// </remarks>
+		/// <remarks>Key = celestial name, Value(s) = { Key = biome_name Value = color }</remarks>
 		public static Dictionary<string, Dictionary<string, Color>> DustColors
 		{
 			get;
 			set;
 		}
-
+		
 		/// <summary>Use this color of there's no biome dust color defined.</summary>
 		public static readonly Color DefaultDustColor = new Color(0.75f, 0.75f, 0.75f, 0.007f);
 	}

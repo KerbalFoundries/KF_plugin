@@ -101,11 +101,17 @@ namespace KerbalFoundries
 		[KSPField]
 		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
 		
+<<<<<<< HEAD
 		/// <summary>Part Info that will be displayed when part details are shown.</summary>
 		/// <remarks>Can be overridden in the module config on a per-part basis.</remarks>
 		[KSPField]
 		public string partInfoString = "This part will throw up dust when rolling over the terrain.";
 			
+=======
+		/// <summary>FXGroup for the wheel impact sound effect.</summary>
+		FXGroup WheelImpactSound;
+		
+>>>>>>> 7ad8a03e2b2f132d7d82d51ef646b570316a0dfb
 		/// <summary>Prefix the logs with this to identify it.</summary>
 		public string strClassName = "KFDustFX";
 		
@@ -139,10 +145,15 @@ namespace KerbalFoundries
 			}
 		}
 		
+		/// <summary>Part Info that will be displayed when part details are shown.</summary>
+		/// <remarks>Can be overridden in the module config on a per-part basis.</remarks>
+		[KSPField]
+		public string strPartInfo = "This part will throw up dust when rolling over the terrain.";
+		
 		// Basic override for the info class.  Already has its own XML documentation.
 		public override string GetInfo()
 		{
-			return partInfoString;
+			return strPartInfo;
 		}
 			
 		public override void OnStart(StartState state)
