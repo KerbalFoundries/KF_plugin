@@ -11,13 +11,14 @@ using System.Collections;
 
 namespace KerbalFoundries
 {
-    public class ModuleWaterSlider : VesselModule
-    {
+	public class ModuleWaterSlider : VesselModule
+	{
 		readonly GameObject _collider = new GameObject("ModuleWaterSlider.Collider", typeof(BoxCollider), typeof(Rigidbody));
 		const float triggerDistance = 25f;
 		bool isActive;
 		Vessel _vessel;
 		public float colliderHeight = -2.5f;
+        bool isReady;
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
 		readonly KFLogUtil KFLog = new KFLogUtil();
@@ -28,6 +29,9 @@ namespace KerbalFoundries
 		{
 			KFLog.Log("WaterSlider start.", strClassName);
 			_vessel = GetComponent<Vessel>();
+            Debug.LogWarning(_vessel.IsControllable + " is cont");
+            Debug.LogWarning(_vessel.isCommandable + " is comm");
+            Debug.LogWarning(_vessel.vesselType.ToString() + " Vesseltype");
 
 			float repulsorCount = 0;
 			foreach (Part PA in _vessel.parts)
@@ -41,6 +45,8 @@ namespace KerbalFoundries
 			isActive |= repulsorCount > 0;
 			if (!isActive)
 				return;
+            if (!_vessel.isCommandable)
+                return;
 
 			var box = _collider.collider as BoxCollider;
 			box.size = new Vector3(300f, .5f, 300f); // Probably should encapsulate other colliders in real code
@@ -53,8 +59,9 @@ namespace KerbalFoundries
 			var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			visible.transform.parent = _collider.transform;
 			visible.transform.localScale = box.size;
-			visible.renderer.enabled = false; // enable to see collider
+			visible.renderer.enabled = true; // enable to see collider
 			UpdatePosition();
+            isReady = true;
 		}
 
 		void UpdatePosition()
@@ -65,9 +72,13 @@ namespace KerbalFoundries
 			_collider.rigidbody.rotation = Quaternion.LookRotation(oceanNormal) * Quaternion.AngleAxis(90f, Vector3.right);
 		}
 
+
 		void FixedUpdate()
 		{
-			if (Vector3.Distance(_collider.transform.position, _vessel.transform.position) > triggerDistance)
+            if (!isReady)
+                return;
+			if (Vector3.Distance(_collider.transform.position, _vessel.transform.position) > triggerDistance && isReady)
+
 				UpdatePosition();
 			colliderHeight = Mathf.Clamp((colliderHeight -= 0.1f), -10, 2.5f);
 		}
@@ -152,10 +163,8 @@ namespace KerbalFoundries
                     b += texColors[i].b;
                 }
                 _averageColour = new Color(r / divider, g / divider, b / divider, alpha);
-                KFLog.Log(string.Format("\"_averageColour\" = ", _averageColour), strClassName);
             }
             frameCount++;
         }
-
 	}
 }

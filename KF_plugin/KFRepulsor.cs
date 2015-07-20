@@ -78,9 +78,8 @@ namespace KerbalFoundries
         //begin start
         public override void OnStart(PartModule.StartState state)  //when started
         {
-			// debug only: print("onstart");
-			if (!isReady)
-				isReady = true; // Now it won't complain about not being used or initialized anywhere.
+
+				
             base.OnStart(state);
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             
@@ -115,11 +114,7 @@ namespace KerbalFoundries
                     b.suspensionDistance = 2.5f; //default to low setting to save stupid shenanigans on takeoff
                     wcList.Add(b);
                 }
-				this.part.force_activate(); // Force the part active or OnFixedUpate is not called. 
-                //effectPowerMax = repulsorCount * Time.fixedDeltaTime * resourceConsumptionRate / 4;
-
-                //print(string.Format("Max effect power is {0}.", effectPowerMax));
-                //print("water slider height is" + _MWS.colliderHeight);
+				
                 if (pointDown && Equals(this.vessel, FlightGlobals.ActiveVessel))
                 {
                     StopAllCoroutines();
@@ -127,8 +122,10 @@ namespace KerbalFoundries
                 }
                 appliedRideHeight = rideHeight;
                 StartCoroutine("UpdateHeight"); //start updating to height set before launch
+                isReady = true;
             }
             DestroyBounds();
+            
 		}
 		// End start
 
@@ -197,6 +194,7 @@ namespace KerbalFoundries
             _MWS.colliderHeight = -2.5f;
         }
 
+
         public float ResourceConsumption()
         {
             float resValue = repulsorCount * Time.deltaTime * resourceConsumptionRate / 32;
@@ -207,8 +205,10 @@ namespace KerbalFoundries
             return resDrain;
         }
 
-        public override void OnFixedUpdate()
+        public void FixedUpdate()
         {
+            if (!isReady)
+                return;
             if (dir > 360)
                 dir = 0;
             float sin = (float)Math.Sin(Mathf.Deg2Rad * dir);
@@ -217,7 +217,7 @@ namespace KerbalFoundries
            
             float hitForce = 0;
 
-            if (deployed)
+            if (deployed && this.vessel.IsControllable)
             {
                 // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
@@ -260,6 +260,7 @@ namespace KerbalFoundries
             //print(effectPower);
 
             dir += UnityEngine.Random.Range(20,60);
+
         }
 
 

@@ -130,8 +130,7 @@ namespace KerbalFoundries
 		public bool brakesApplied;
         [KSPField(isPersistant = true)]
         public bool isRetracted = false;
-        [KSPField(isPersistant = true, guiActive = true, guiName = "TS", guiFormat = "F1")] //debug only.
-        public float tweakScaleCorrector = 1;
+        
 
 		// Global variables
         int rootIndexLong;      
@@ -163,20 +162,22 @@ namespace KerbalFoundries
         public float currentRideHeight;
         public float smoothedRideHeight;
 
-        //Visible fields
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Last Vessel Mass", guiFormat = "F1")]
+        //Visible fields (debug)
+        [KSPField(isPersistant = true, guiActive = false, guiName = "TS", guiFormat = "F1")] //debug only.
+        public float tweakScaleCorrector = 1;
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Last Vessel Mass", guiFormat = "F1")]
         public float lastVesselMass;
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Vessel Mass", guiFormat = "F1")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Vessel Mass", guiFormat = "F1")]
         public float vesselMass;
-        [KSPField(isPersistant = false, guiActive = true, guiName = "RPM", guiFormat = "F1")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "RPM", guiFormat = "F1")]
         public float averageTrackRPM;
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Colliders", guiFormat = "F0")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Colliders", guiFormat = "F0")]
         public int _colliderCount = 0;
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Collider Mass", guiFormat = "F2")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Collider Mass", guiFormat = "F2")]
         public float _colliderMass = 0;
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Collider load", guiFormat = "F3")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Collider load", guiFormat = "F3")]
         public float colliderLoad = 0;
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Rolling Friction", guiFormat = "F3")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Rolling Friction", guiFormat = "F3")]
         public float rollingFriction;
 
         public List<WheelCollider> wcList = new List<WheelCollider>();
@@ -203,8 +204,6 @@ namespace KerbalFoundries
             {
                 this.part.AddModule("KFDustFX");
                 _dustFX = this.part.GetComponent<KFDustFX>();
-                _dustFX.wheelImpact = true;
-                _dustFX.wheelImpactSound = "KerbalFoundries/Sounds/TyreSqueal";
                 _dustFX.maxDustEmission = 28;
                 _dustFX.OnStart(state);
             }
@@ -332,7 +331,8 @@ namespace KerbalFoundries
 
         public Vector3 GetModuleSize(Vector3 defaultSize) //to do with theIPartSizeModifier stupid jiggery.
         {
-            return new Vector3(1,1,1);
+            print(defaultSize);
+            return defaultSize;
         }
 
         public void WheelSound()
@@ -397,19 +397,20 @@ namespace KerbalFoundries
                 float resourceConsumption = Time.deltaTime * resourceConsumptionRate * (Math.Abs(motorTorque) / 100);
                 requestedResource = part.RequestResource(resourceName, resourceConsumption);
                 float freeWheelRPM = 0;
-
-                if (!Equals(requestedResource, resourceConsumption))
+                //print(requestedResource +" " + resourceConsumption);
+                if (requestedResource < resourceConsumption - 0.1f)// && resourceConsumption != 0)
                 {
                     motorTorque = 0;
                     status = statusLowResource;
                 }
-                else if (Math.Abs(averageTrackRPM) >= maxRPM)
+                else
+                    status = "Nominal";
+                if (Math.Abs(averageTrackRPM) >= maxRPM)
                 {
                     motorTorque = 0;
                     status = "Rev Limit";
                 }
-                else
-                    status = "Nominal";
+                
                 colliderLoad = 0;
 				for (int i = 0; i < wcList.Count(); i++)
                 {
