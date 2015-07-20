@@ -130,7 +130,6 @@ namespace KerbalFoundries
 		public bool brakesApplied;
         [KSPField(isPersistant = true)]
         public bool isRetracted = false;
-        
 
 		// Global variables
         int rootIndexLong;      

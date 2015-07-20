@@ -19,14 +19,11 @@ namespace KerbalFoundries
 				if (IsColliding(col)) // are we touching the ground?
 				{
 					Dictionary<string, Color> biomeColors = KFPersistenceManager.DustColors[body.name];
-
 					if (biomeColors.Count > 0) // do we have biome color definitions for that body?
 					{
-						string biomeName = GetCurrentBiomeName(lat, lon); // get biome name 
-
+						string biomeName = GetCurrentBiomeName(lat, lon); // get biome name
 						if (string.IsNullOrEmpty(biomeName)) // do we have a color for that biome?
                             biomeName = "default"; // no -> use default color of body
-
 						return biomeColors[biomeName];
 					}
 				}

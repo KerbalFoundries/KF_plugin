@@ -116,6 +116,5 @@ namespace KerbalFoundries
             tempVector[index] = movement;
             _movedObject.transform.Translate(tempVector, Space.Self);
         }
-
     }
 }

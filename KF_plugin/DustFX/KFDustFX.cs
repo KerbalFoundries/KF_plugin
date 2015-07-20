@@ -29,13 +29,12 @@ namespace KerbalFoundries
 		// disable RedundantDefaultFieldInitializer
 		
 		readonly KFLogUtil KFLog = new KFLogUtil();
-
-        /// <summary>Part instance of KFModuleWheel</summary>
-        KFModuleWheel _KFModuleWheel;
-	
+		
+		/// <summary>Part instance of KFModuleWheel</summary>
+		KFModuleWheel _KFModuleWheel;
+		
 		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
 		ModuleCameraShot _ModuleCameraShot;
-
 		
 		/// <summary>Local copy of the tweakScaleCorrector parameter in the KFModuleWheel module.</summary>
 		public float tweakScaleCorrector;
@@ -86,10 +85,10 @@ namespace KerbalFoundries
 		public float maxDustEnergyDiv = 2f;
 		
 		/// <summary>Maximum emission multiplier.</summary>
-		/// <remarks>Default is 2.  Multiplies the </remarks>
+		/// <remarks>Default is 2.</remarks>
 		[KSPField]
 		public float maxDustEmissionMult = 2f;
-			
+		
 		/// <summary>Used in the OnCollisionEnter/Stay methods to define the minimum velocity magnitude to check against.</summary>
 		/// <remarks>Default is 2.  Would set very low for repulsors.</remarks>
 		[KSPField]
@@ -99,12 +98,7 @@ namespace KerbalFoundries
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
 		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
-
-		/// <summary>Part Info that will be displayed when part details are shown.</summary>
-		/// <remarks>Can be overridden in the module config on a per-part basis.</remarks>
-		[KSPField]
-		public string partInfoString = "This part will throw up dust when rolling over the terrain.";
-	
+		
 		/// <summary>Prefix the logs with this to identify it.</summary>
 		public string strClassName = "KFDustFX";
 		
@@ -148,22 +142,20 @@ namespace KerbalFoundries
 		{
 			return strPartInfo;
 		}
-			
+		
 		public override void OnStart(StartState state)
 		{
-            _KFModuleWheel = this.part.GetComponent<KFModuleWheel>();
+			_KFModuleWheel = this.part.GetComponent<KFModuleWheel>();
 			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
-
-
+			
 			isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
 			isDustCameraEnabled = KFPersistenceManager.isDustCameraEnabled;
-
-		
+			
 			if (!isDustEnabledGlobally && isDustEnabledLocally)
 			{
 				isDustEnabledLocally = isDustEnabledGlobally;
-				Fields["localDisabledDust"].guiActive = false;
-				Fields["localdisabledDust"].guiActiveEditor = false;
+				Fields["isDustEnabledLocally"].guiActive = false;
+				Fields["isDustEnabledLocally"].guiActiveEditor = false;
 				return;
 			}
 			
@@ -198,7 +190,6 @@ namespace KerbalFoundries
 			dustAnimator = kfdustFx.particleEmitter.GetComponent<ParticleAnimator>();
 		}
 		
-
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
 		/// <param name="position">The position of the collision.</param>
 		/// <param name="col">The collider being referenced.</param>
@@ -208,7 +199,6 @@ namespace KerbalFoundries
 				return;
 			Scrape(position, col);
 		}
-		
 		
 		/// <summary>Called when the part is scraping over a surface.</summary>
 		/// <param name="col">The collider being referenced.</param>
@@ -232,14 +222,14 @@ namespace KerbalFoundries
 			if (Equals(tweakScaleCorrector, 0) || tweakScaleCorrector < 0)
 				tweakScaleCorrector = 1f;
 			colorBiome = KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
-            //colorBiome = _ModuleCameraShot._averageColour; //debug only. Forces camera colour only.
-            if (KFPersistenceManager.isDustCameraEnabled)
-            {
-                colorCam = _ModuleCameraShot._averageColour;
-                colorAverage = colorCam + colorBiome / 2;
-            }
-            else
-                colorAverage = colorBiome;
+			//colorBiome = _ModuleCameraShot._averageColour; //debug only. Forces camera colour only.
+			if (KFPersistenceManager.isDustCameraEnabled)
+			{
+				colorCam = _ModuleCameraShot._averageColour;
+				colorAverage = colorCam + colorBiome / 2;
+			}
+			else
+				colorAverage = colorBiome;
 			
 			if (Equals(colorBiome, null))
 				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
@@ -298,7 +288,5 @@ namespace KerbalFoundries
 		{
 			return GameSettings.SHIP_VOLUME;
 		}
-		
-
 	}
 }

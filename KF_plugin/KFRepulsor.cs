@@ -78,13 +78,10 @@ namespace KerbalFoundries
         //begin start
         public override void OnStart(PartModule.StartState state)  //when started
         {
-
-				
             base.OnStart(state);
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
             
             //effectPowerMax = repulsorCount * resourceConsumptionRate * Time.fixedDeltaTime; // Previously it had "1 * blahblahblah" in it, which is kinda stupid since 1x of any value is equal to that value.  So I nuked the "1 *" part. - Gaalidas
-			
 
             _dustFX = this.part.GetComponent<KFRepulsorDustFX>(); //see if it's been added by MM
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
@@ -125,7 +122,6 @@ namespace KerbalFoundries
                 isReady = true;
             }
             DestroyBounds();
-            
 		}
 		// End start
 
@@ -194,7 +190,6 @@ namespace KerbalFoundries
             _MWS.colliderHeight = -2.5f;
         }
 
-
         public float ResourceConsumption()
         {
             float resValue = repulsorCount * Time.deltaTime * resourceConsumptionRate / 32;
@@ -260,9 +255,7 @@ namespace KerbalFoundries
             //print(effectPower);
 
             dir += UnityEngine.Random.Range(20,60);
-
         }
-
 
         IEnumerator UpdateHeight()
         {
