@@ -3,7 +3,7 @@
 namespace KerbalFoundries
 {
 	/// <summary>This class adds a button to the stock toolbar and displays a configuration window.</summary>
-	[KSPAddon(KSPAddon.Startup.EveryScene, false)]
+	[KSPAddon(KSPAddon.Startup.Instantly, true)]
 	public class KFGUIManager : MonoBehaviour
 	{
 		#region Initialization
@@ -11,8 +11,8 @@ namespace KerbalFoundries
 		// Found in another mod that making appButton static could keep it
 		//  from loading multiple instances of itself.
 		static ApplicationLauncherButton appButton;
-		Texture2D appTextureGrey;
-		Texture2D appTextureColor;
+		static Texture2D appTextureGrey;
+		static Texture2D appTextureColor;
 		
 		// Icon Constants
 		const string strIconBasePath = "KerbalFoundries/Assets";
@@ -33,60 +33,73 @@ namespace KerbalFoundries
 		
 		#endregion Initialization
 		
-		#region Startup
-		
-		/// <summary>Called when the Behavior wakes up.</summary>
+		#region MonoBehavior life cycle events
+
+		/// <summary>Called when the Behavior gets waked.</summary>
+        /// <remarks>
+        /// The MonoBehavior is only waked during the loading scene at the start of the game.
+        /// And this only happens once per game start!
+        /// </remarks>
 		void Awake()
 		{
-			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
-			{
-				GameEvents.onGUIApplicationLauncherReady.Add(SetupAppButton);
-                GameEvents.onGameSceneSwitchRequested.Add(OnSwitchScene);
-			}
+            KFLog.Log("Awake()", strClassName);
+
+            DontDestroyOnLoad(this); // makes sure this MonoBehavior doesn't get destroyed on game scene switch
+
+            GameEvents.onGUIApplicationLauncherReady.Add(OnGUIReady);
+            GameEvents.onGUIApplicationLauncherUnreadifying.Add(OnGUIUnready);
 		}
+
+        /// <summary>
+        /// Called when the ApplicationLauncher is unreadifying, just before a scene switch.
+        /// </summary>
+        /// <param name="data"></param>
+        private void OnGUIUnready(GameScenes data)
+        {
+            KFLog.Log("OnGUIUnready()", strClassName);
+            
+            DestroyAppButton();
+        }
+
+        /// <summary>
+        /// Called when the ApplicationLauncher is ready, just after a scene switch.
+        /// </summary>
+        private void OnGUIReady()
+        {
+            KFLog.Log("OnGUIReady()", strClassName);
+
+            if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || HighLogic.LoadedScene == GameScenes.SPACECENTER)
+                SetupAppButton();
+        }
 		
-		void OnSwitchScene(GameEvents.FromToAction<GameScenes, GameScenes> action)
-		{
-			DestroyAppButton();
-			KFPersistenceManager.SaveConfig();
-			GameEvents.onGUIApplicationLauncherReady.Remove(SetupAppButton);
-			GameEvents.onGameSceneSwitchRequested.Remove(OnSwitchScene);
-		}
-		
-		/// <summary>Retrieves button textures.</summary>
-		void InitGUIElements()
-		{
-			appTextureGrey = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconGrey), false);
-			appTextureColor = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconColor), false);
-		}
-		
-		#endregion Startup
+		#endregion MonoBehavior life cycle events
 		
 		#region AppLauncher Button
 		
 		/// <summary>Called when the AppLauncher reports that it is awake.</summary>
 		void SetupAppButton()
 		{
-			InitGUIElements();
-			if (Equals(appButton, null))
-			{
-				bool isThere;
-				ApplicationLauncher.Instance.Contains(appButton, out isThere);
-				if (isThere)
-					ApplicationLauncher.Instance.RemoveModApplication(appButton);
-				appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.VAB, appTextureGrey);
-			}
+            // we only need to retrieve the textures once
+            if (appTextureGrey == null)
+                appTextureGrey = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconGrey), false);
+
+            if (appTextureColor == null)
+                appTextureColor = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconColor), false);
+
+			appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.VAB, appTextureGrey);
+            KFLog.Log("App button created", strClassName);
 		}
 		
 		/// <summary>Called when the ApplicationLauncher gets destroyed.</summary>
 		void DestroyAppButton()
 		{
-			if (!Equals(appButton, null))
-			{
-				ApplicationLauncher.Instance.RemoveModApplication(appButton);
-				isGUIEnabled = false;
-				KFPersistenceManager.SaveConfig();
-			}
+            if (appButton != null)
+            {
+                ApplicationLauncher.Instance.RemoveModApplication(appButton); // removing appButton from toolbar
+                appButton = null; // notifying garbage collector to delete this object
+                isGUIEnabled = false; // close the cfg window if it's still open
+                KFPersistenceManager.SaveConfig();
+            }
 		}
 		
 		/// <summary>Called when the button is put into a "true" state, or when it is activated.</summary>
@@ -123,9 +136,49 @@ namespace KerbalFoundries
 		/// <summary>Called by Unity when it's time to draw the GUI.</summary>
 		void OnGUI()
 		{
+            //KFLog.Log("OnGUI(), enabled = " + this.enabled, strClassName);
+
 			if (isGUIEnabled)
 			{
-				settingsRect = new Rect(Screen.width - 258f, 42f, 256f, 138f);
+                /*
+                 * Depending on the scene the cfg window displays 1, 2 or all 3 toggles.
+                 * Each toggle needs a height of 24 units (= pixels?) and there needs to
+                 * be a space of 8 units between the toogles.
+                 * 
+                 * window height calculates like this:
+                 *   24 units - space for title bar (automatically drawn)
+                 *   24 units - space for first toggle
+                 * (+ 8 units - space between two toggles
+                 *  +24 units - space for second toggle)
+                 * (+ 8 units - space between two toggles
+                 *  +24 units - space for third toggle)
+                 *  16 units - space till end of window
+                 * 
+                 * =>
+                 *   Window height (1 toogle) :  64
+                 *   Window height (2 toogles):  96
+                 *   Window height (3 toogles): 128
+                 */
+
+                float windowTop = 42f;
+                float windowLeft = -260f;
+                float windowHeight = 128f; // assume 3 toggles will be displayed
+
+                if (HighLogic.LoadedSceneIsFlight)
+                    windowHeight -= 32f; // remove the space of 1 toggle, because only 2 toggles need to be displayed
+
+                if (HighLogic.LoadedSceneIsEditor)
+                {
+                    windowHeight -= 64f; // remove the space of 2 toggles, because only 1 toggle needs to be displayed
+
+                    // in the editor the toolbar is at the bottom of the screen, so let's move it down
+                    windowTop = Screen.height - 42f - windowHeight; // 42f is the height of the toolbar buttons + 2 units of space
+                }
+
+                // shift the window to the left until the left window border has the same x value as the button sprite or at least so far it won't clip out the edge of the monitor
+                windowLeft = Screen.width + Mathf.Min(appButton.sprite.TopLeft.x - 260, windowLeft);
+
+                settingsRect = new Rect(windowLeft, windowTop, 256f, windowHeight);
 				GUI.Window(GUI_ID, settingsRect, DrawWindow, "Kerbal Foundries Settings");
 			}
 		}
@@ -135,19 +188,21 @@ namespace KerbalFoundries
 		void DrawWindow(int windowID)
 		{
 			GUI.skin = HighLogic.Skin;
-			
-			if (HighLogic.LoadedSceneIsFlight || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
+
+            if (HighLogic.LoadedSceneIsEditor || HighLogic.LoadedScene == GameScenes.SPACECENTER)
+                KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
+
+			if (HighLogic.LoadedSceneIsFlight)
 			{
 				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
 				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
-				// Removed the "if" for the state of "isDustEnabled" because it shows that option no matter what state the referenced option is in.
 			}
-            
-			if (HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
-				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
-			
-			// In theory, this should allow the window to be dragged.
-            GUI.DragWindow();
+
+            if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+            {
+                KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
+                KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+            }
 		}
 		
 		#endregion GUI Setup
