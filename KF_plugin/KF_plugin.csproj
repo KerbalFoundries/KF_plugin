@@ -53,6 +53,7 @@
     <Compile Include="DustFX\KFDustFX.cs" />
     <Compile Include="DustFX\RepulsorDustFX.cs" />
     <Compile Include="DustFX\KFDustFXUtils.cs" />
+    <Compile Include="TestStuff.cs" />
     <Compile Include="GoldenShower.cs" />
     <Compile Include="HeavyCrawler.cs" />
     <Compile Include="KEMeccanumWheel.cs" />

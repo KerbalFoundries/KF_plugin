@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-    public class KFModuleWheel : PartModule, IPartSizeModifier
+    public class KFModuleWheel : PartModule
     {
 		// disable RedundantDefaultFieldInitializer
 		// disable RedundantThisQualifier
@@ -327,12 +327,6 @@ namespace KerbalFoundries
 			DestroyBounds();
 		}
 		//end OnStart
-
-        public Vector3 GetModuleSize(Vector3 defaultSize) //to do with theIPartSizeModifier stupid jiggery.
-        {
-            print(defaultSize);
-            return defaultSize;
-        }
 
         public void WheelSound()
         {

@@ -4,14 +4,53 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
-    public class KFTrackSurface : PartModule
+    public class KFTrackSurface : PartModule, IPartSizeModifier
     {
         GameObject _trackSurface;
         KFModuleWheel _track;
         Material trackMaterial = new Material(Shader.Find("Diffuse"));
+        //[KSPField(isPersistant = true)]
+        public static Vector3 initialCraftSize = Vector3.zero;
+        
+        Vector3 attachedCraftSize = Vector3.zero;
 
         [KSPField]
         public float trackLength = 10;
+
+        public override void OnAwake()
+        {
+            base.OnAwake();
+            Debug.Log("Track Surface Awake");
+            if (HighLogic.LoadedSceneIsEditor)
+            {
+                Debug.Log("Awake and in editor");
+                Vector3 size = ShipConstruction.CalculateCraftSize(EditorLogic.fetch.ship);
+                Debug.LogError(size);
+            }
+        }
+
+        public Vector3 GetInitialSize()
+        {
+            return initialCraftSize;
+        }
+
+        public void Update()
+        {
+            //print(initialCraftSize);
+        }
+
+
+        public Vector3 GetModuleSize(Vector3 defaultSize) //to do with theIPartSizeModifier stupid jiggery.
+        {
+            Vector3 sizeDoesMatter = GetInitialSize();
+            Debug.LogError(sizeDoesMatter + " initial");
+            if (defaultSize.magnitude > attachedCraftSize.magnitude)
+                attachedCraftSize = defaultSize;
+            Debug.LogError(attachedCraftSize + " attach size");
+            Vector3 returnCraftSize = -attachedCraftSize + sizeDoesMatter;
+            Debug.LogError(returnCraftSize + " return");
+            return Vector3.zero;
+        }
 
         public override void OnStart(PartModule.StartState state)
         {
@@ -21,6 +60,8 @@ namespace KerbalFoundries
 			foreach (SkinnedMeshRenderer Track in this.part.GetComponentsInChildren<SkinnedMeshRenderer>()) //this is the track
                 _trackSurface = Track.gameObject;
             _track = this.part.GetComponentInChildren<KFModuleWheel>();
+
+            
 
             if (HighLogic.LoadedSceneIsFlight)
             {
