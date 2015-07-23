@@ -115,8 +115,9 @@ namespace KerbalFoundries
 			set;
 		}
 		#endregion
-		
-		/// <summary>Dust colors for each biome.</summary>
+
+        #region DustFX
+        /// <summary>Dust colors for each biome.</summary>
 		/// <remarks>Key = celestial name, Value(s) = { Key = biome_name Value = color }</remarks>
 		public static Dictionary<string, Dictionary<string, Color>> DustColors
 		{
@@ -126,5 +127,203 @@ namespace KerbalFoundries
 		
 		/// <summary>Use this color of there's no biome dust color defined.</summary>
 		public static readonly Color DefaultDustColor = new Color(0.75f, 0.75f, 0.75f, 0.007f);
-	}
+        #endregion DustFX
+
+        #region Part sizes fix
+        void OnDestroy() // last possible point before the loading scene switches to main menu
+        {
+            FindKFPartsToFix().ForEach(FixPartIcon);
+        }
+
+        /// <summary>Finds all KF parts which part icons need to be fixed</summary>
+        /// <returns>list of parts with IconOverride configNode</returns>
+        static List<AvailablePart> FindKFPartsToFix()
+        {
+            List<AvailablePart> KFPartsList = PartLoader.LoadedPartsList.FindAll(IsAKFPart);
+            //KFLog.Log("\nAll KF parts:", strClassName);
+            //KFPartsList.ForEach(part => KFLog.Log(part.name, strClassName));
+
+            List<AvailablePart> KFPartsToFixList = KFPartsList.FindAll(HasIconOverrideModule);
+            //KFLog.Log("\nKF parts which need a fix:", strClassName);
+            //KFPartsToFixList.ForEach(part => KFLog.Log(part.name, strClassName));
+
+            return KFPartsToFixList;
+        }
+
+        /// <summary>Fixes incorrect part icon in the editor's parts list panel for every part which has a IconOverride node.
+        /// The node can have several attributes.
+        /// Example:
+        /// IconOverride
+        /// {
+        ///     Multiplier = 1.0
+        ///     Pivot = transformName
+        ///     Rotation = vector
+        /// }
+        /// All parameters are optional. The existence of an IconOverride node is enough to fix the icon.
+        /// Example:
+        /// IconOverride {}
+        /// </summary>
+        /// <param name="partToFix">part to fix</param>
+        /// <remarks>This method uses code from xEvilReepersx's PartIconFixer.
+        /// See https://bitbucket.org/xEvilReeperx/ksp_particonfixer/src/7f2ac4094c19?at=master for original code and license.</remarks>
+        static void FixPartIcon(AvailablePart partToFix)
+        {
+            KFLog.Log("Fixing icon of " + partToFix.name, strClassName);
+
+            // preparations
+            GameObject partToFixIconPrefab = partToFix.iconPrefab;
+            Bounds bounds = CalculateBounds(partToFixIconPrefab);
+            
+
+            // retrieve icon fixes from cfg and calculate max part size
+            float max = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+
+            float multiplier = 1f;
+            if (HasIconOverrideMultiplier(partToFix))
+                float.TryParse(partToFix.partConfig.GetNode("IconOverride").GetValue("Multiplier"), out multiplier);
+
+            float factor = 40f / (max * multiplier) / 40f;
+
+
+            string pivot = string.Empty;
+            if (HasIconOverridePivot(partToFix))
+                pivot = partToFix.partConfig.GetNode("IconOverride").GetValue("Pivot");
+
+            Vector3 rotation = Vector3.zero; 
+            if (HasIconOverrideRotation(partToFix))
+                rotation = KSPUtil.ParseVector3( partToFix.partConfig.GetNode("IconOverride").GetValue("Rotation"));
+
+            
+            // apply icon fixes
+            partToFixIconPrefab.transform.GetChild(0).localScale *= factor;
+            partToFix.iconScale = 1f / max;
+            partToFixIconPrefab.transform.GetChild(0).Rotate(rotation, Space.Self);
+
+            
+            // after applying the fixes the part could be off-center, correct this now
+            if (string.IsNullOrEmpty(pivot))
+            {
+                Transform model = partToFixIconPrefab.transform.GetChild(0).Find("model");
+                if (model == null)
+                    model = partToFixIconPrefab.transform.GetChild(0);
+
+                Transform target = model.Find(pivot);
+                if (target != null)
+                {
+                    partToFixIconPrefab.transform.GetChild(0).position -= target.position;
+                }
+            }
+            else
+                partToFixIconPrefab.transform.GetChild(0).localPosition = Vector3.zero;
+
+        }
+
+        /// <summary>Checks if a part velongs to Kerbal Foundries.</summary>
+        /// <param name="part">part to check</param>
+        /// <returns>true if the part's name starts with "KF."</returns>
+        /// <remarks>KSP converts underscores in part names to a dot ("_" -> ".").</remarks>
+        static bool IsAKFPart(AvailablePart part)
+        {
+            //KFLog.Log(part.name +
+            //          "  configFileFullName: " + part.configFileFullName +
+            //          "  partPath: " + part.partPath +
+            //          "  partUrl: " + part.partUrl,
+            //          strClassName);
+            //
+            // example output:
+            // [LOG 15:43:15.760] [Kerbal Foundries - KFPersistenceManager()]: KF.TrackLong  configFileFullName: D:\KerbalFoundries\Kerbal Space Program\GameData\KerbalFoundries\Parts\TrackLong.cfg  partPath:   partUrl: KerbalFoundries/Parts/TrackLong/KF_TrackLong
+            // Yes, partPath is empty for all parts. Deprecated attribute?
+
+            return part.name.StartsWith("KF.");
+        }
+
+        /// <summary>Checks if a part has an IconOverride node in it's config.</summary>
+        /// <param name="part">part to check</param>
+        /// <returns>true if an IconOverride node is there</returns>
+        static bool HasIconOverrideModule(AvailablePart part)
+        {
+            //string nodes = string.Empty;
+            //foreach(ConfigNode node in part.partConfig.GetNodes())
+            //    nodes += " " + node.name;
+            //KFLog.Log(part.name + "  nodes:" + nodes, strClassName);
+            //
+            // example output:
+            // [LOG 15:59:08.239] [Kerbal Foundries - KFPersistenceManager()]: KF.TrackLong  nodes: MODEL MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE EFFECTS IconOverride MODULE
+            
+            return part.partConfig.HasNode("IconOverride");
+        }
+
+        /// <summary>Checks if there's a Multiplier node in IconOverride</summary>
+        /// <param name="part">part to check</param>
+        /// <returns>true if IconOverride->Multiplier exists</returns>
+        static bool HasIconOverrideMultiplier(AvailablePart part)
+        {
+            return part.partConfig.GetNode("IconOverride").HasNode("Multiplier");
+        }
+
+        /// <summary>Checks if there's a Pivot node in IconOverride</summary>
+        /// <param name="part">part to check</param>
+        /// <returns>true if IconOverride->Pivot exists</returns>
+        static bool HasIconOverridePivot(AvailablePart part)
+        {
+            return part.partConfig.GetNode("IconOverride").HasNode("Pivot");
+        }
+
+        /// <summary>Checks if there's a Rotation node in IconOverride</summary>
+        /// <param name="part">part to check</param>
+        /// <returns>true if IconOverride->Rotation exists</returns>
+        static bool HasIconOverrideRotation(AvailablePart part)
+        {
+            return part.partConfig.GetNode("IconOverride").HasNode("Rotation");
+        }
+
+        /// <summary>Calculates the bounds of a game object.</summary>
+        /// <param name="partGO">part which bounds have to be calculated</param>
+        /// <returns>bounds</returns>
+        /// <remarks>This code is copied from xEvilReepersx's PartIconFixer and is slightly modified.
+        /// See https://bitbucket.org/xEvilReeperx/ksp_particonfixer/src/7f2ac4094c19?at=master for original code and license.</remarks>
+        static Bounds CalculateBounds(GameObject partGO)
+        {
+            var renderers = new List<Renderer>(partGO.GetComponentsInChildren<Renderer>(true));
+
+            if (renderers.Count == 0)
+                return default(Bounds);
+
+            var boundsList = new List<Bounds>();
+
+            renderers.ForEach(r =>
+            {
+                if (r is SkinnedMeshRenderer)
+                {
+                    var smr = r as SkinnedMeshRenderer;
+                    Mesh mesh = new Mesh();
+                    smr.BakeMesh(mesh);
+
+                    Matrix4x4 m = Matrix4x4.TRS(smr.transform.position, smr.transform.rotation, Vector3.one);
+                    var vertices = mesh.vertices;
+                    Bounds smrBounds = new Bounds(m.MultiplyPoint3x4(vertices[0]), Vector3.zero);
+
+                    for (int i = 1; i < vertices.Length; ++i)
+                        smrBounds.Encapsulate(m.MultiplyPoint3x4(vertices[i]));
+
+                    Destroy(mesh);
+                    boundsList.Add(smrBounds);
+                }
+                else if (r is MeshRenderer)
+                {
+                    r.gameObject.GetComponent<MeshFilter>().sharedMesh.RecalculateBounds();
+                    boundsList.Add(r.bounds);
+                }
+            });
+
+
+            Bounds bounds = boundsList[0];
+            boundsList.RemoveAt(0);
+            boundsList.ForEach(b => bounds.Encapsulate(b));
+
+            return bounds;
+
+        }
+        #endregion Part sizes fix
+    }
 }
