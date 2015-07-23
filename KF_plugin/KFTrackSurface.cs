@@ -24,8 +24,8 @@ namespace KerbalFoundries
             if (HighLogic.LoadedSceneIsEditor)
             {
                 Debug.Log("Awake and in editor");
-                Vector3 size = ShipConstruction.CalculateCraftSize(EditorLogic.fetch.ship);
-                Debug.LogError(size);
+                initialCraftSize = ShipConstruction.CalculateCraftSize(EditorLogic.fetch.ship);
+                Debug.LogError(initialCraftSize);
             }
         }
 
@@ -34,11 +34,21 @@ namespace KerbalFoundries
             return initialCraftSize;
         }
 
+        public void OnEditorAttach()
+        {
+            //initialCraftSize = ShipConstruction.CalculateCraftSize(EditorLogic.fetch.ship);
+            print("editor attach");
+        }
+
         public void Update()
         {
             //print(initialCraftSize);
         }
 
+        public void onPartAttach()
+        {
+            print("part attach");
+        }
 
         public Vector3 GetModuleSize(Vector3 defaultSize) //to do with theIPartSizeModifier stupid jiggery.
         {
@@ -49,7 +59,7 @@ namespace KerbalFoundries
             Debug.LogError(attachedCraftSize + " attach size");
             Vector3 returnCraftSize = -attachedCraftSize + sizeDoesMatter;
             Debug.LogError(returnCraftSize + " return");
-            return Vector3.zero;
+            return returnCraftSize;
         }
 
         public override void OnStart(PartModule.StartState state)
@@ -72,6 +82,11 @@ namespace KerbalFoundries
 				Debug.LogWarning(string.Format("New texture tiling is: {0}", trackTiling));
                 trackMaterial.SetTextureScale("_MainTex",  trackTiling);
                 trackMaterial.SetTextureScale("_BumpMap", trackTiling);
+            }
+
+            if (HighLogic.LoadedSceneIsEditor)
+            {
+                part.OnEditorAttach += OnEditorAttach;
             }
         }
 
