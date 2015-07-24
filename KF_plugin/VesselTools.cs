@@ -17,6 +17,7 @@ namespace KerbalFoundries
 		const float triggerDistance = 25f;
 		bool isActive;
 		Vessel _vessel;
+        Vector3 boxSize = new Vector3(300f, .5f, 300f);
 		public float colliderHeight = -2.5f;
         bool isReady;
 		
@@ -29,9 +30,9 @@ namespace KerbalFoundries
 		{
 			KFLog.Log("WaterSlider start.", strClassName);
 			_vessel = GetComponent<Vessel>();
-            Debug.LogWarning(_vessel.IsControllable + " is cont");
-            Debug.LogWarning(_vessel.isCommandable + " is comm");
-            Debug.LogWarning(_vessel.vesselType.ToString() + " Vesseltype");
+            //Debug.LogWarning(_vessel.IsControllable + " is cont");
+            //Debug.LogWarning(_vessel.isCommandable + " is comm");
+            //Debug.LogWarning(_vessel.vesselType.ToString() + " Vesseltype");
 
 			float repulsorCount = 0;
 			foreach (Part PA in _vessel.parts)
@@ -42,24 +43,31 @@ namespace KerbalFoundries
 					repulsorCount++;
 			}
 
+            var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            visible.transform.parent = _collider.transform;
+            visible.transform.localScale = boxSize;
+            visible.renderer.enabled = true; // enable to see collider
+
 			isActive |= repulsorCount > 0;
-			if (!isActive)
-				return;
-            if (!_vessel.isCommandable)
+            if (!isActive || !_vessel.isCommandable)
+            {
+                _collider.transform.localScale = Vector3.zero;
+
+                Debug.Log("setting size to zero and returning");
                 return;
+            }
+            else
+                Debug.LogError("Continuing...");
 
 			var box = _collider.collider as BoxCollider;
-			box.size = new Vector3(300f, .5f, 300f); // Probably should encapsulate other colliders in real code
+			box.size = boxSize; // Probably should encapsulate other colliders in real code
 
 			var rb = _collider.rigidbody;
 			rb.isKinematic = true;
 
 			_collider.SetActive(true);
 
-			var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			visible.transform.parent = _collider.transform;
-			visible.transform.localScale = box.size;
-			visible.renderer.enabled = true; // enable to see collider
+			
 			UpdatePosition();
             isReady = true;
 		}

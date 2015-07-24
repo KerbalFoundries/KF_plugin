@@ -357,7 +357,7 @@ namespace KerbalFoundries
 			// User input
             float requestedResource;
             float unitLoad = 0;
-			float forwardTorque = torqueCurve.Evaluate((float)this.vessel.srfSpeed / tweakScaleCorrector) * torque; //this is used a lot, so may as well calculate once
+			float forwardTorque = torqueCurve.Evaluate((float)this.vessel.srfSpeed / tweakScaleCorrector) * torque * tweakScaleCorrector; //this is used a lot, so may as well calculate once
             float steeringTorque;
             float brakeSteeringTorque;
 
@@ -371,8 +371,8 @@ namespace KerbalFoundries
 
             if (!steeringDisabled)
             {
-                steeringTorque = torqueSteeringCurve.Evaluate((float)this.vessel.srfSpeed / tweakScaleCorrector) * torque * steeringInvert; //low speed steering mode. Differential motor torque
-                brakeSteering = brakeSteeringCurve.Evaluate(travelDirection) / tweakScaleCorrector * steeringInvert * torque; //high speed steering. Brake on inside track because Unity seems to weight reverse motor torque less at high speed.
+                steeringTorque = torqueSteeringCurve.Evaluate((float)this.vessel.srfSpeed * tweakScaleCorrector) * torque * steeringInvert; //low speed steering mode. Differential motor torque
+                brakeSteering = brakeSteeringCurve.Evaluate(travelDirection) * tweakScaleCorrector * steeringInvert * torque; //high speed steering. Brake on inside track because Unity seems to weight reverse motor torque less at high speed.
                 steeringAngle = (steeringCurve.Evaluate((float)this.vessel.srfSpeed)) * -steeringInputSmoothed * steeringRatio * steeringCorrector * steeringInvert; //low speed steering mode. Differential motor torque
             }
             else
@@ -435,7 +435,7 @@ namespace KerbalFoundries
                 {
                     averageTrackRPM = trackRPM / groundedWheels;
                     colliderLoad /= groundedWheels;
-                    rollingFriction = rollingResistance.Evaluate((float)this.vessel.srfSpeed) + loadCoefficient.Evaluate((float)colliderLoad) * tweakScaleCorrector;
+                    rollingFriction = (rollingResistance.Evaluate((float)this.vessel.srfSpeed) * tweakScaleCorrector) + (loadCoefficient.Evaluate((float)colliderLoad) / tweakScaleCorrector);
                 }
                 else
                     averageTrackRPM = freeWheelRPM / wheelCount;
