@@ -384,7 +384,8 @@ namespace KerbalFoundries
     
             if (!isRetracted)
             {
-                motorTorque = (forwardTorque * directionCorrector * throttleInputSmoothed) - (steeringTorque * steeringInputSmoothed); //forward and low speed steering torque. Direction controlled by precalulated directioncorrector
+                //float maxForwardTorque = forwardTorque * throttleInputSmoothed;
+                motorTorque = Mathf.Clamp((forwardTorque * directionCorrector * throttleInputSmoothed) - (steeringTorque * steeringInputSmoothed), -forwardTorque, forwardTorque); //forward and low speed steering torque. Direction controlled by precalulated directioncorrector
                 brakeSteeringTorque = Mathf.Clamp(brakeSteering * steeringInputSmoothed, 0, 1000); //if the calculated value is negative, disregard: Only brake on inside track. no need to direction correct as we are using the velocity or the part not the vessel.
 
                 float resourceConsumption = Time.deltaTime * resourceConsumptionRate * (Math.Abs(motorTorque) / 100);
@@ -434,7 +435,7 @@ namespace KerbalFoundries
                 {
                     averageTrackRPM = trackRPM / groundedWheels;
                     colliderLoad /= groundedWheels;
-                    rollingFriction = rollingResistance.Evaluate((float)this.vessel.srfSpeed) + loadCoefficient.Evaluate((float)colliderLoad);
+                    rollingFriction = rollingResistance.Evaluate((float)this.vessel.srfSpeed) + loadCoefficient.Evaluate((float)colliderLoad) * tweakScaleCorrector;
                 }
                 else
                     averageTrackRPM = freeWheelRPM / wheelCount;
