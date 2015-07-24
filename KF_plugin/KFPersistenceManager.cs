@@ -155,9 +155,9 @@ namespace KerbalFoundries
         /// Example:
         /// IconOverride
         /// {
-        ///     Multiplier = 1.0
-        ///     Pivot = transformName
-        ///     Rotation = vector
+        ///     Multiplier = 1.0      // for finetuning icon zoom
+        ///     Pivot = transformName // transform to rotate around; rotates around CoM if not specified
+        ///     Rotation = vector     // offset to rotation point
         /// }
         /// All parameters are optional. The existence of an IconOverride node is enough to fix the icon.
         /// Example:
@@ -182,8 +182,8 @@ namespace KerbalFoundries
             if (HasIconOverrideMultiplier(partToFix))
                 float.TryParse(partToFix.partConfig.GetNode("IconOverride").GetValue("Multiplier"), out multiplier);
 
-            float factor = 40f / (max * multiplier) / 40f;
-
+            float factor = 40f / max * multiplier;
+            factor /= 40f;
 
             string pivot = string.Empty;
             if (HasIconOverridePivot(partToFix))
@@ -195,8 +195,9 @@ namespace KerbalFoundries
 
             
             // apply icon fixes
+            partToFix.iconScale = max; // affects only the meter scale in the tooltip
+            
             partToFixIconPrefab.transform.GetChild(0).localScale *= factor;
-            partToFix.iconScale = 1f / max;
             partToFixIconPrefab.transform.GetChild(0).Rotate(rotation, Space.Self);
 
             
