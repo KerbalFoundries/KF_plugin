@@ -79,10 +79,7 @@ namespace KerbalFoundries
         public override void OnStart(PartModule.StartState state)  //when started
         {
             base.OnStart(state);
-            print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-            
-            //effectPowerMax = repulsorCount * resourceConsumptionRate * Time.fixedDeltaTime; // Previously it had "1 * blahblahblah" in it, which is kinda stupid since 1x of any value is equal to that value.  So I nuked the "1 *" part. - Gaalidas
-
+           
             _dustFX = this.part.GetComponent<KFRepulsorDustFX>(); //see if it's been added by MM
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
             {
@@ -128,10 +125,6 @@ namespace KerbalFoundries
 		void SetupWaterSlider()
 		{
 			_MWS = this.vessel.GetComponent<ModuleWaterSlider>();
-			if (!Equals(_MWS, null))
-				Debug.LogError("Found MWS.");
-			else
-				Debug.LogError("Did not find MWS.");
 		}
 
         /// <summary>A "Shrink" coroutine for steering.</summary>
@@ -143,7 +136,7 @@ namespace KerbalFoundries
                 yield return null;
             }
             _grid.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-            Debug.LogWarning("Finished shrinking");
+            //Debug.LogWarning("Finished shrinking");
         }
 
         /// <summary>A "grow" coroutine for steering.</summary>
@@ -154,9 +147,9 @@ namespace KerbalFoundries
                 _grid.transform.localScale += (_gridScale / 50);
                 yield return null;
             }
-            print(_gridScale);
+            //print(_gridScale);
             _grid.transform.localScale = _gridScale;
-            Debug.LogWarning("Finished growing");
+            //Debug.LogWarning("Finished growing");
         }
 
         // disable once FunctionNeverReturns

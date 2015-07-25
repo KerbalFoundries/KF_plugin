@@ -166,9 +166,12 @@ namespace KerbalFoundries
 					StartCoroutine("TrackedWheel");
 				else
 					StartCoroutine("IndividualWheel");
-				
-				if (hasSuspension)
-					StartCoroutine("Suspension");
+
+                if (hasSuspension)
+                {
+                    Debug.LogError("WARNING: KFWheel suspension module is deprecated. Please use KFSuspension");
+                    StartCoroutine("Suspension");
+                }
 				
 				this.part.force_activate();
 			}//end flight

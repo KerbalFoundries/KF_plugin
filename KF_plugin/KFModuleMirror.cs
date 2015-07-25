@@ -65,30 +65,7 @@ namespace KerbalFoundries
             }
             */
 
-            if (HighLogic.LoadedSceneIsFlight)
-            {
-                //SetSide(flightSide); 
-                //print("Loaded scene is flight");
-				if (Equals(flightSide, left))
-                {
-                    for (int i = 0; i < rightObject.Count(); i++)
-                    {
-						print(string.Format("Destroying Right object {0}", rightList[i]));
-                        leftObject[i].gameObject.SetActive(true);
-						UnityEngine.Object.Destroy(rightObject[i].gameObject);
-                    }
-                }
-				if (Equals(flightSide, right))
-                {
-                    
-                    for (int i = 0; i < leftObject.Count(); i++)
-                    {
-						print(string.Format("Destroying left object {0}", leftList[i]));
-                        rightObject[i].gameObject.SetActive(true);
-						UnityEngine.Object.Destroy(leftObject[i].gameObject);
-                    }
-                }
-            }
+            
 
             print("Loaded scene is editor");
             print(flightSide);
@@ -111,6 +88,31 @@ namespace KerbalFoundries
             {
                 print("Setting value from persistence");
                 SetSide(flightSide);
+            }
+            
+            if (HighLogic.LoadedSceneIsFlight) // do this last.
+            {
+                //SetSide(flightSide); 
+                //print("Loaded scene is flight");
+                if (Equals(flightSide, left))
+                {
+                    for (int i = 0; i < rightObject.Count(); i++)
+                    {
+                        print(string.Format("Destroying Right object {0}", rightList[i]));
+                        leftObject[i].gameObject.SetActive(true);
+                        UnityEngine.Object.DestroyImmediate(rightObject[i].gameObject);
+                    }
+                }
+                if (Equals(flightSide, right))
+                {
+
+                    for (int i = 0; i < leftObject.Count(); i++)
+                    {
+                        print(string.Format("Destroying left object {0}", leftList[i]));
+                        rightObject[i].gameObject.SetActive(true);
+                        UnityEngine.Object.DestroyImmediate(leftObject[i].gameObject);
+                    }
+                }
             }
 		}
 		// End OnStart
