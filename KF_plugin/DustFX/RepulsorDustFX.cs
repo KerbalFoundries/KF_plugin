@@ -39,6 +39,8 @@ namespace KerbalFoundries
 		/// <remarks>Maximum value this will ever be is 8, which is the constant maximum for the parameter in the repulsor module.</remarks>
 		public float rideHeight;
 		
+		readonly KFLogUtil KFLog = new KFLogUtil();
+		
 		// Class-wide disabled warnings in SharpDevelop
 		// disable AccessToStaticMemberViaDerivedType
 		// disable RedundantDefaultFieldInitializer
@@ -109,8 +111,6 @@ namespace KerbalFoundries
 		/// <remarks>Can be overridden in the module config on a per-part basis.</remarks>
 		[KSPField]
 		public string partInfoString = "This part will throw up dust when the repulsion field is actively repulsing.";
-		
-		readonly KFLogUtil KFLog = new KFLogUtil();
 		
 		/// <summary>Prefix the logs with this to identify it.</summary>
 		public string strClassName = "KFRepulsorDustFX";
@@ -204,7 +204,7 @@ namespace KerbalFoundries
 			_kfRepDustFx.particleEmitter.minEmission = minDustEmission;
 			_kfRepDustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = _kfRepDustFx.particleEmitter.GetComponent<ParticleAnimator>();
-			KFLog.Log("Particles have been set up.", strClassName);
+			//KFLog.Log("Particles have been set up.", strClassName);
 			_kfRepLight = new GameObject("Rep Light");
 			_kfRepLight.transform.parent = _kfRepDustFx.transform;
 			_kfRepLight.transform.position = Vector3.zero;
@@ -213,29 +213,14 @@ namespace KerbalFoundries
 			_repLight.range = 2.0f;
 			_repLight.color = Color.blue;
 			_repLight.intensity = 0.0f;
-
-
-		}
-		
-		/// <summary>Contains information about what to do when the part enters a collided state.</summary>
-		/// <param name="col">The collider being referenced.</param>
-		public void OldCollisionEnter(Collision col)
-		{
-			CollisionInfo cInfo;
-			if (col.relativeVelocity.magnitude >= minVelocityMag)
-			{
-				if (Equals(col.contacts.Length, 0))
-					return;
-				cInfo = GetClosestChild(part, col.contacts[0].point + (part.rigidbody.velocity * Time.deltaTime));
-			}
 		}
 		
 		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
 		/// <param name="hitPoint">Point at which the collision takes place.</param>
 		/// <param name="col">The collider being referenced.</param>
 		/// <param name="force">Force of the hit.</param>
-		/// <param name="normal">No Clue.</param>
-		/// <param name="direction">No Clue.</param>
+		/// <param name="normal">I got nothing here.</param>
+		/// <param name="direction">Emission direction..</param>
 		public void RepulsorEmit(Vector3 hitPoint, Collider col, float force, Vector3 normal, Vector3 direction)
 		{
 			CollisionInfo cInfo;
@@ -281,8 +266,8 @@ namespace KerbalFoundries
 		/// <param name="position">Position of the scrape.</param>
 		/// <param name="col">The collider being referenced.</param>
 		/// <param name="force">Scrape force.</param>
-		/// <param name="normal">No Clue.</param>
-		/// <param name="direction">No Clue.</param>
+		/// <param name="normal">Nothing comes to mind to explain this.</param>
+		/// <param name="direction">Emission direction.</param>
 		public void Scrape(Vector3 position, Collider col, float force, Vector3 normal, Vector3 direction)
 		{
 			if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
@@ -295,8 +280,8 @@ namespace KerbalFoundries
 		/// <param name="force">Force of the part which is scraping.</param>
 		/// <param name="contactPoint">The point at which the collider and the scraped surface make contact.</param>
 		/// <param name="col">The collider being referenced.</param>
-		/// <param name="normal">No Clue.</param>
-		/// <param name="direction">No Clue.</param>
+		/// <param name="normal">In the end, I can only say "whaaa?"</param>
+		/// <param name="direction">Emission direction.</param>
 		void DustParticles(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
 		{
 			var WaterColor = new Color(0.65f, 0.65f, 0.65f, 0.025f);
@@ -304,8 +289,14 @@ namespace KerbalFoundries
 				return;
 			float appliedRideHeight = Mathf.Clamp((rideHeight / 2), 1, 4);
 			colorBiome = !isColorOverrideActive ? KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
-			colorCam = _ModuleCameraShot._averageColour;
-			colorAverage = !isDustCameraEnabled ? colorBiome : (colorCam + colorBiome) / 2;
+			
+			if (KFPersistenceManager.isDustCameraEnabled)
+			{
+				colorCam = _ModuleCameraShot._averageColour;
+				colorAverage = (colorCam + colorBiome) / 2;
+			}
+			else
+				colorAverage = colorBiome;
 			
 			if (Equals(colorBiome, null))
 			{
