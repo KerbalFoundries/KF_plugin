@@ -69,10 +69,10 @@ namespace KerbalFoundries
         /// <summary>This is the info string that will display when the part info is shown.</summary>
 		/// <remarks>This can be overridden in the part config for this module.</remarks>
 		[KSPField]
-		public string strInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.";
+		public string strPartInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.";
         public override string GetInfo()
 		{
-			return strInfo;
+			return strPartInfo;
 		}
         
         //begin start
@@ -83,7 +83,7 @@ namespace KerbalFoundries
             _dustFX = this.part.GetComponent<KFRepulsorDustFX>(); //see if it's been added by MM
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
             {
-                this.part.AddModule("KFRepulsorDustFX");
+                part.AddModule("KFRepulsorDustFX");
                 _dustFX = this.part.GetComponent<KFRepulsorDustFX>();
                 //_dustFX.wheelImpact = true;
                 //_dustFX.wheelImpactSound = "KerbalFoundries/Sounds/TyreSqueal";
@@ -205,7 +205,7 @@ namespace KerbalFoundries
            
             float hitForce = 0;
 
-            if (deployed && this.vessel.IsControllable)
+            if (deployed && vessel.IsControllable)
             {
                 // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
@@ -254,10 +254,8 @@ namespace KerbalFoundries
         {
             if (appliedRideHeight > 0)
             {
-                for (int i = 0; i < wcList.Count(); i++)
-                {
-                    wcList[i].enabled = true;
-                }
+				for (int i = 0; i < wcList.Count(); i++)
+					wcList[i].enabled = true;
                 deployed = true; // catches redeploy after low charge retract
                 StopCoroutine("Shrink");
                 StartCoroutine("Grow");
@@ -311,7 +309,7 @@ namespace KerbalFoundries
         public void ApplySettings()
         {
             //appliedRideHeight = rideHeight;
-            foreach (KFRepulsor mt in this.vessel.FindPartModulesImplementing<KFRepulsor>())
+            foreach (KFRepulsor mt in vessel.FindPartModulesImplementing<KFRepulsor>())
             {
                 if (!Equals(groupNumber, 0) && Equals(groupNumber, mt.groupNumber))
                 {

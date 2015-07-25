@@ -186,10 +186,10 @@ namespace KerbalFoundries
 		/// <summary>This is the info string that will display when the part info is shown.</summary>
 		/// <remarks>This can be overridden in the config for this module in the part file.</remarks>
 		[KSPField]
-		public string strInfo = "This part comes with enhanced steering and suspension.";
+		public string strPartInfo = "This part comes with enhanced steering and suspension.";
 		public override string GetInfo()
 		{
-			return strInfo;
+			return strPartInfo;
 		}
 		
 		public override void OnStart(PartModule.StartState state)  //when started

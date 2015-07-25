@@ -278,12 +278,5 @@ namespace KerbalFoundries
 			GameEvents.onGameUnpause.Remove(OnUnpause);
 			//Debug.LogWarning(string.Format("{0}Removed OnUnPause hook.", logprefix));
 		}
-		
-		/// <summary>Gets the current volume setting for Ship sounds.</summary>
-		/// <returns>The volume value as a float.</returns>
-		static float GetShipVolume()
-		{
-			return GameSettings.SHIP_VOLUME;
-		}
 	}
 }

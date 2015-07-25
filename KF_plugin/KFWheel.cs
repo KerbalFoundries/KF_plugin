@@ -10,7 +10,7 @@ namespace KerbalFoundries
 		[KSPField(isPersistant = false, guiActive = false, guiName = "Suspension travel")]
 		public float susTravel;
 
-		//config fields
+		// Config fields
 		[KSPField]
 		public string wheelName;
 		[KSPField]
@@ -20,10 +20,9 @@ namespace KerbalFoundries
 		[KSPField]
 		public string steeringName;
 		[KSPField]
-		public bool useDirectionCorrector = false;
-		//make sure it's set to false if not specified in the config.
+		public bool useDirectionCorrector;
 		[KSPField]
-		public bool isSprocket = false;
+		public bool isSprocket;
 		[KSPField]
 		public bool hasSuspension = true;
 		[KSPField]
@@ -37,9 +36,9 @@ namespace KerbalFoundries
 		[KSPField]
 		public float wheelRotationX = 1;
 		[KSPField]
-		public float wheelRotationY = 0;
+		public float wheelRotationY;
 		[KSPField]
-		public float wheelRotationZ = 0;
+		public float wheelRotationZ;
 		//suspension traverse axis
 		[KSPField]
 		public string susTravAxis = "Y";
@@ -56,7 +55,7 @@ namespace KerbalFoundries
 		[KSPField(isPersistant = true)]
 		public float suspensionDamper;
 		[KSPField(isPersistant = true)]
-		public bool isConfigured = false;
+		public bool isConfigured;
         
         float tweakScaleCorrector = 1;
 
@@ -77,17 +76,17 @@ namespace KerbalFoundries
 		public int directionCorrector = 1;
         
 		float degreesPerTick;
-		bool couroutinesActive = false;
+		bool couroutinesActive;
 
 		//OnStart
 		public override void OnStart(PartModule.StartState state)
 		{
-			_KFModuleWheel = this.part.GetComponentInChildren<KFModuleWheel>();
+			_KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
 			tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
             
 			if (!isConfigured)
 			{
-				foreach (WheelCollider wc in this.part.GetComponentsInChildren<WheelCollider>())
+				foreach (WheelCollider wc in part.GetComponentsInChildren<WheelCollider>())
 				{
 					if (wc.name.StartsWith(colliderName, StringComparison.Ordinal))
 					{
@@ -98,6 +97,7 @@ namespace KerbalFoundries
 					}
 				}
 			}
+			// disable once RedundantIfElseBlock
 			else
 			{
 				//Debug.LogError("Already configured - skipping.");
@@ -119,7 +119,7 @@ namespace KerbalFoundries
 					if (wc.name.StartsWith(colliderName, StringComparison.Ordinal))
 						_wheelCollider = wc;
 				}
-				foreach (Transform tr in this.part.GetComponentsInChildren<Transform>())
+				foreach (Transform tr in part.GetComponentsInChildren<Transform>())
 				{
 					if (tr.name.StartsWith(wheelName, StringComparison.Ordinal))
 						_wheel = tr;
@@ -173,7 +173,7 @@ namespace KerbalFoundries
                     StartCoroutine("Suspension");
                 }
 				
-				this.part.force_activate();
+				part.force_activate();
 			}//end flight
 			base.OnStart(state);
 		}

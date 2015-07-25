@@ -26,7 +26,6 @@ namespace KerbalFoundries
 		int objectCount;
 		int susTravIndex = 1;
 
-
 		//persistent fields. Not to be used for config
 		[KSPField(isPersistant = true)]
 		public float lastFrameTraverse;
@@ -45,11 +44,9 @@ namespace KerbalFoundries
 				//GameEvents.onGamePause.Add(new EventVoid.OnEvent(this.OnPause));
 				//GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(this.OnUnPause));
                 KFMW = this.part.GetComponentInChildren<KFModuleWheel>();
-                if (!Equals(KFMW, null))
-                {
-                    tweakScaleCorrector = KFMW.tweakScaleCorrector;
-                }
-                Debug.LogWarning("TS corrector " + tweakScaleCorrector);
+				if (!Equals(KFMW, null))
+					tweakScaleCorrector = KFMW.tweakScaleCorrector;
+				Debug.LogWarning(string.Format("TS Corrector: {0}", tweakScaleCorrector));
 
 				colliderList = Extensions.SplitString(colliderNames);
                 
@@ -60,8 +57,6 @@ namespace KerbalFoundries
                 }
                 susTrav = transform.SearchStartsWith(susTravName);
 
-
-
                 initialPosition = susTrav.localPosition;
                 susTravIndex = Extensions.SetAxisIndex(susTravAxis);
 
@@ -71,7 +66,6 @@ namespace KerbalFoundries
                 else
                     Debug.LogError("KFSuspension not configured correctly");
             }
-        
         }
 
         public void FixedUpdate()

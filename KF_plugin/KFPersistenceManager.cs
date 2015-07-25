@@ -166,12 +166,11 @@ namespace KerbalFoundries
         /// See https://bitbucket.org/xEvilReeperx/ksp_particonfixer/src/7f2ac4094c19?at=master for original code and license.</remarks>
         static void FixPartIcon(AvailablePart partToFix)
         {
-            KFLog.Log("Fixing icon of " + partToFix.name);
+			KFLog.Log(string.Format("Fixing icon of \"{0}\"", partToFix.name));
 
             // preparations
             GameObject partToFixIconPrefab = partToFix.iconPrefab;
             Bounds bounds = CalculateBounds(partToFixIconPrefab);
-            
 
             // retrieve icon fixes from cfg and calculate max part size
             float max = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
@@ -203,18 +202,15 @@ namespace KerbalFoundries
             if (string.IsNullOrEmpty(pivot))
             {
                 Transform model = partToFixIconPrefab.transform.GetChild(0).Find("model");
-                if (model == null)
-                    model = partToFixIconPrefab.transform.GetChild(0);
+				if (Equals(model, null))
+					model = partToFixIconPrefab.transform.GetChild(0);
 
                 Transform target = model.Find(pivot);
-                if (target != null)
-                {
-                    partToFixIconPrefab.transform.GetChild(0).position -= target.position;
-                }
+				if (!Equals(target, null))
+					partToFixIconPrefab.transform.GetChild(0).position -= target.position;
             }
             else
                 partToFixIconPrefab.transform.GetChild(0).localPosition = Vector3.zero;
-
         }
 
         /// <summary>Checks if a part velongs to Kerbal Foundries.</summary>
@@ -233,7 +229,7 @@ namespace KerbalFoundries
             // [LOG 15:43:15.760] [Kerbal Foundries - KFPersistenceManager()]: KF.TrackLong  configFileFullName: D:\KerbalFoundries\Kerbal Space Program\GameData\KerbalFoundries\Parts\TrackLong.cfg  partPath:   partUrl: KerbalFoundries/Parts/TrackLong/KF_TrackLong
             // Yes, partPath is empty for all parts. Deprecated attribute?
 
-            return part.name.StartsWith("KF.");
+			return part.name.StartsWith("KF.", System.StringComparison.Ordinal);
         }
 
         /// <summary>Checks if a part has an IconOverride node in it's config.</summary>
@@ -285,22 +281,23 @@ namespace KerbalFoundries
         {
             var renderers = new List<Renderer>(partGO.GetComponentsInChildren<Renderer>(true));
 
-            if (renderers.Count == 0)
-                return default(Bounds);
+			if (Equals(renderers.Count, 0))
+				return default(Bounds);
 
             var boundsList = new List<Bounds>();
 
             renderers.ForEach(r =>
             {
+                // disable once CanBeReplacedWithTryCastAndCheckForNull
                 if (r is SkinnedMeshRenderer)
                 {
                     var smr = r as SkinnedMeshRenderer;
-                    Mesh mesh = new Mesh();
+                    var mesh = new Mesh();
                     smr.BakeMesh(mesh);
 
                     Matrix4x4 m = Matrix4x4.TRS(smr.transform.position, smr.transform.rotation, Vector3.one);
                     var vertices = mesh.vertices;
-                    Bounds smrBounds = new Bounds(m.MultiplyPoint3x4(vertices[0]), Vector3.zero);
+                    var smrBounds = new Bounds(m.MultiplyPoint3x4(vertices[0]), Vector3.zero);
 
                     for (int i = 1; i < vertices.Length; ++i)
                         smrBounds.Encapsulate(m.MultiplyPoint3x4(vertices[i]));
@@ -318,7 +315,7 @@ namespace KerbalFoundries
 
             Bounds bounds = boundsList[0];
             boundsList.RemoveAt(0);
-            boundsList.ForEach(b => bounds.Encapsulate(b));
+			boundsList.ForEach(bounds.Encapsulate);
 
             return bounds;
 
