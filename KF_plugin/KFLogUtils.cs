@@ -48,7 +48,7 @@ namespace KerbalFoundries
         /// <remarks>Standard log entry.</remarks>
         public static void Log(string strText, string strClassName)
         {
-            CreateLog(LogType.Log, strClassName, strText);
+            CreateLog(LogType.Log, strText, strClassName);
         }
 
         /// <summary>A standard-level log utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
