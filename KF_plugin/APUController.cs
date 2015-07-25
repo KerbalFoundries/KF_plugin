@@ -28,8 +28,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		readonly KFLogUtil KFLog = new KFLogUtil();
-		public string strClassName = "APUController";
+		readonly KFLogUtil KFLog = new KFLogUtil("APUController");
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -61,7 +60,7 @@ namespace KerbalFoundries
 		{
 			foreach (ModuleEnginesFX me in part.GetComponentsInChildren<ModuleEnginesFX>())
 			{
-				KFLog.Log("Found an engine.", strClassName);
+				KFLog.Log("Found an engine.");
 				thisEngine = me;
 			}
 		}
@@ -72,7 +71,7 @@ namespace KerbalFoundries
 			if (throttleSetting < 100)
 			{
 				throttleSetting += 5f;
-				KFLog.Log("Increasing APU Output.", strClassName);
+				KFLog.Log("Increasing APU Output.");
 			}
 		}
 		//End Retract
@@ -83,7 +82,7 @@ namespace KerbalFoundries
 			if (throttleSetting > 0)
 			{
 				throttleSetting -= 5f;
-				KFLog.Log("Decreasing APU Output.", strClassName);
+				KFLog.Log("Decreasing APU Output.");
 			}
 		}
 		//End Retract
@@ -92,7 +91,7 @@ namespace KerbalFoundries
 		public void ShutdownAPU(KSPActionParam param)
 		{
 			throttleSetting = 0f;
-			KFLog.Log("Shutting down APU.", strClassName);
+			KFLog.Log("Shutting down APU.");
 		}
 		//End Retract
 
@@ -100,14 +99,14 @@ namespace KerbalFoundries
 		public void AutoAPU(KSPActionParam param)
 		{
 			autoThrottle = true;
-			KFLog.Log("APU Automatic.", strClassName);
+			KFLog.Log("APU Automatic.");
 		}
 
 		[KSPAction("APU Manual")]
 		public void ManualAPU(KSPActionParam param)
 		{
 			autoThrottle = false;
-			KFLog.Log("APU Manual.", strClassName);
+			KFLog.Log("APU Manual.");
 		}
 	}
 }

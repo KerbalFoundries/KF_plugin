@@ -39,7 +39,7 @@ namespace KerbalFoundries
 		/// <remarks>Maximum value this will ever be is 8, which is the constant maximum for the parameter in the repulsor module.</remarks>
 		public float rideHeight;
 		
-		readonly KFLogUtil KFLog = new KFLogUtil();
+		readonly KFLogUtil KFLog = new KFLogUtil("KFRepulsorDustFX");
 		
 		// Class-wide disabled warnings in SharpDevelop
 		// disable AccessToStaticMemberViaDerivedType
@@ -111,9 +111,6 @@ namespace KerbalFoundries
 		/// <remarks>Can be overridden in the module config on a per-part basis.</remarks>
 		[KSPField]
 		public string partInfoString = "This part will throw up dust when the repulsion field is actively repulsing.";
-		
-		/// <summary>Prefix the logs with this to identify it.</summary>
-		public string strClassName = "KFRepulsorDustFX";
 		
 		bool isPaused;
 		bool isColorOverrideActive;
@@ -300,7 +297,7 @@ namespace KerbalFoundries
 			
 			if (Equals(colorBiome, null))
 			{
-				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
+				KFLog.Error("Color \"BiomeColor\" is null!");
 				return;
 			}
 			if (force >= minScrapeSpeed)

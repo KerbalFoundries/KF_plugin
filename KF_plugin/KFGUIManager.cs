@@ -27,9 +27,7 @@ namespace KerbalFoundries
 		public static bool isGUIEnabled;
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
-		readonly KFLogUtil KFLog = new KFLogUtil();
-		/// <summary>Name of the class for logging purposes.</summary>
-		public string strClassName = "KFGUIManager";
+		readonly KFLogUtil KFLog = new KFLogUtil("KFGUIManager");
 		
 		#endregion Initialization
 		
@@ -42,7 +40,7 @@ namespace KerbalFoundries
         /// </remarks>
 		void Awake()
 		{
-            KFLog.Log("Awake()", strClassName);
+            KFLog.Log("Awake()");
 
             DontDestroyOnLoad(this); // makes sure this MonoBehavior doesn't get destroyed on game scene switch
 
@@ -56,7 +54,7 @@ namespace KerbalFoundries
         /// <param name="data"></param>
         void OnGUIUnready(GameScenes data)
         {
-            KFLog.Log("OnGUIUnready()", strClassName);
+            KFLog.Log("OnGUIUnready()");
             DestroyAppButton();
         }
 		
@@ -65,7 +63,7 @@ namespace KerbalFoundries
         /// </summary>
         void OnGUIReady()
         {
-            KFLog.Log("OnGUIReady()", strClassName);
+            KFLog.Log("OnGUIReady()");
 
             if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || HighLogic.LoadedScene == GameScenes.SPACECENTER)
                 SetupAppButton();
@@ -86,7 +84,7 @@ namespace KerbalFoundries
 				appTextureColor = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconColor), false);
 
 			appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.VAB, appTextureGrey);
-            KFLog.Log("App button created", strClassName);
+            KFLog.Log("App button created");
 		}
 		
 		/// <summary>Called when the ApplicationLauncher gets destroyed.</summary>

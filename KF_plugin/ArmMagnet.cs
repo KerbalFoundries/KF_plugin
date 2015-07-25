@@ -26,8 +26,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		readonly KFLogUtil KFLog = new KFLogUtil();
-		public string strClassName = "ArmMagnet";
+		readonly KFLogUtil KFLog = new KFLogUtil("ArmMagnet");
 		
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -38,7 +37,7 @@ namespace KerbalFoundries
 				_base = transform.Search(fixedName).gameObject;
 				_arm = transform.Search(armName).gameObject;
 				isReady = true;
-				KFLog.Error("Test Arm started.", strClassName);
+				KFLog.Error("Test Arm started.");
 			}
 		}
 
@@ -72,7 +71,7 @@ namespace KerbalFoundries
 				//_joint.connectedBody = _targetRb;
 			}
 			else
-				KFLog.Error("\"GO\" not found.", strClassName);
+				KFLog.Error("\"GO\" not found.");
 		}
 	}
 }

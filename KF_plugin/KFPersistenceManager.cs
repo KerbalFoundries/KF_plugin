@@ -11,9 +11,7 @@ namespace KerbalFoundries
 		#region Log
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
-		static readonly KFLogUtil KFLog = new KFLogUtil();
-		/// <summary>Name of the class for logging purposes.</summary>
-		static readonly string strClassName = "KFPersistenceManager";
+		static readonly KFLogUtil KFLog = new KFLogUtil("KFPersistenceManager");
 		
 		#endregion Log
 		
@@ -71,9 +69,9 @@ namespace KerbalFoundries
 				
 				DustColors.Add(celestialNode.name, biomes);
 				if (Equals(biomes.Count, 0))
-					KFLog.Error(string.Format("No biome colors found for {0}!", celestialNode.name), strClassName);
+					KFLog.Error(string.Format("No biome colors found for {0}!", celestialNode.name));
 				else
-					KFLog.Log(string.Format("Found {0} biome color definitions for {1}.", biomes.Count, celestialNode.name), strClassName);
+					KFLog.Log(string.Format("Found {0} biome color definitions for {1}.", biomes.Count, celestialNode.name));
 			}
 		}
 		
@@ -168,7 +166,7 @@ namespace KerbalFoundries
         /// See https://bitbucket.org/xEvilReeperx/ksp_particonfixer/src/7f2ac4094c19?at=master for original code and license.</remarks>
         static void FixPartIcon(AvailablePart partToFix)
         {
-            KFLog.Log("Fixing icon of " + partToFix.name, strClassName);
+            KFLog.Log("Fixing icon of " + partToFix.name);
 
             // preparations
             GameObject partToFixIconPrefab = partToFix.iconPrefab;

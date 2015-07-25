@@ -22,13 +22,11 @@ namespace KerbalFoundries
         bool isReady;
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
-		readonly KFLogUtil KFLog = new KFLogUtil();
-		/// <summary>Name of the class for logging purposes.</summary>
-		public string strClassName = "ModuleWaterSlider";
+		readonly KFLogUtil KFLog = new KFLogUtil("ModuleWaterSlider");
 
 		void Start()
 		{
-			KFLog.Log("WaterSlider start.", strClassName);
+			KFLog.Log("WaterSlider start.");
 			_vessel = GetComponent<Vessel>();
             //Debug.LogWarning(_vessel.IsControllable + " is cont");
             //Debug.LogWarning(_vessel.isCommandable + " is comm");

@@ -18,85 +18,143 @@ namespace KerbalFoundries
 	{
 		// disable MemberCanBeMadeStatic.Local
 		
-		public string strModName = "Kerbal Foundries";
-		
-		/// <summary>A standard-level log utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
-		/// <param name="strText">(Required) The text to be sent to the log.</param>
-		/// <param name="strClassName">(Optional) Name of the specific class that is being logged from.  Does not show if not specified.</param>
-		/// <remarks>Standard log entry.</remarks>
-		public void Log(string strText, string strClassName = "")
-		{
-			string strOutput = string.Format("[{0}", strModName);
-			if (!Equals(strClassName, ""))
-				strOutput += string.Format(" - {0}()", strClassName);
-			strOutput += string.Format("]: {0}", strText);
-			KFLogIt(strOutput);
-		}
-		
-		/// <summary>A warning-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+        enum LogType
+        {
+            Log,
+            Warning,
+            Error
+        }
+
+		public static string strModName = "Kerbal Foundries";
+        string strObjName = string.Empty;
+
+        /// <summary>Creates an instance of KFLogUtil.</summary>
+        public KFLogUtil() {}
+
+        /// <summary>Creates an instance of KFLogUtil.</summary>
+        /// <param name="obj">Name of calling class which will be included automatically in log messages.</param>
+        public KFLogUtil(string obj)
+        {
+            strObjName = obj;
+        }
+
+        /// <summary>Creates an instance of KFLogUtil.</summary>
+        /// <param name="obj">Calling class which type name will be included automatically in log messages.</param>
+        public KFLogUtil(object obj): this(nameof(obj)) {}
+
+        /// <summary>A standard-level log utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+        /// <param name="strText">(Required) The text to be sent to the log.</param>
+        /// <param name="strClassName">(Optional) Name of the specific class that is being logged from. Does not show if not specified.</param>
+        /// <remarks>Standard log entry.</remarks>
+        public static void Log(string strText, string strClassName)
+        {
+            CreateLog(LogType.Log, strClassName, strText);
+        }
+
+        /// <summary>A standard-level log utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+        /// <param name="strText">(Required) The text to be sent to the log.</param>
+        /// <param name="obj">(Optional) The specific class that is being logged from. Does not show if not specified.</param>
+        /// <remarks>Standard log entry.</remarks>
+        public static void Log(string strText, object obj)
+        {
+            Log(strText, nameof(obj));
+        }
+
+        /// <summary>A standard-level log utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+        /// <param name="strText">(Required) The text to be sent to the log.</param>
+        /// <remarks>Standard log entry.</remarks>
+        internal void Log(string strText)
+        {
+            CreateLog(LogType.Log, strText, strObjName);
+        }
+
+        /// <summary>A warning-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
 		/// <param name="strText">(Required) The text to be sent to the log.</param>
 		/// <param name="strClassName">(Optional) Name of the specific class that is being logged from.  Does not show if not specified.</param>
 		/// <remarks>Warning log entry.</remarks>
-		public void Warning(string strText, string strClassName = "")
-		{
-			string strOutput = string.Format("[{0}", strModName);
-			if (!Equals(strClassName, ""))
-				strOutput += string.Format(" - {0}()", strClassName);
-			strOutput += string.Format("]: {0}", strText);
-			KFLogIt(strOutput, 1);
-		}
-		
-		/// <summary>An error-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
-		/// <param name="strText">(Required) The text to be sent to the log.</param>
-		/// <param name="strClassName">(Optional) Name of the specific class that is being logged from.  Does not show if not specified.</param>
-		/// <remarks>Error log entry.</remarks>
-		public void Error(string strText, string strClassName = "")
-		{
-			string strOutput = string.Format("[{0}", strModName);
-			if (!Equals(strClassName, ""))
-			{
-				strOutput += string.Format(" - {0}()", strClassName);
-			}
-			strOutput += string.Format("]: {0}", strText);
-			KFLogIt(strOutput, 2);
-		}
-		
-		/// <summary>A DEBUG logging utility that prefixes the logged text with the name of the mod it is being sent from and a suffix that labels it as a DEBUG message..</summary>
-		/// <param name="strText">(Required) The text to be sent to the log.</param>
-		/// <param name="strClassName">(Optional) Name of the specific class that is being logged from.  Does not show if not specified.</param>
-		public void Debug(string strText, string strClassName = "")
-		{
-			string strOutput = string.Format("[{0}", strModName);
-			if (!Equals(strClassName, ""))
-			{
-				strOutput += string.Format(" - {0}()", strClassName);
-			}
-			strOutput += string.Format(" : DEBUG]: {0}", strText);
-			KFLogIt(strOutput);
-		}
-		
-		/// <summary>
-		/// This is the method that actually posts the logs.  Cannot be called from outside this class.</summary>
-		/// <param name="strLogMessage">The message from the formatting method (Log, Error, Warning, or Debug).</param>
-		/// <param name="iLogtype">(Optional) The type of log being posted.  Defaults to 0 (standard-level log entry).</param>
-		/// <remarks>"logtype" can be an integer of 0, 1, or 2 which corresponds with standard, warning, or error logs respectively.</remarks>
-		void KFLogIt(string strLogMessage, int iLogtype = 0)
-		{
-			switch (iLogtype)
-			{
-				case 0:
-					UnityEngine.Debug.Log(strLogMessage);
-					break;
-				case 1:
-					UnityEngine.Debug.LogWarning(strLogMessage);
-					break;
-				case 2:
-					UnityEngine.Debug.LogError(strLogMessage);
-					break;
-				default:
-					UnityEngine.Debug.Log(strLogMessage);
-					break;
-			}
-		}
+        public static void Warning(string strText, string strClassName)
+        {
+            CreateLog(LogType.Warning, strText, strClassName);
+        }
+
+        /// <summary>A warning-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+        /// <param name="strText">(Required) The text to be sent to the log.</param>
+        /// <param name="obj">(Optional) The specific class that is being logged from.  Does not show if not specified.</param>
+        /// <remarks>Warning log entry.</remarks>
+        public static void Warning(string strText, object obj)
+        {
+            Warning(strText, nameof(obj));
+        }
+
+        /// <summary>A warning-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+        /// <param name="strText">(Required) The text to be sent to the log.</param>
+        /// <remarks>Warning log entry.</remarks>
+        internal void Warning(string strText)
+        {
+            CreateLog(LogType.Warning, strText, strObjName);
+        }
+
+        /// <summary>An error-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+        /// <param name="strText">(Required) The text to be sent to the log.</param>
+        /// <param name="strClassName">(Optional) Name of the specific class that is being logged from.  Does not show if not specified.</param>
+        /// <remarks>Error log entry.</remarks>
+        public static void Error(string strText, string strClassName)
+        {
+            CreateLog(LogType.Error, strText, strClassName);
+        }
+
+        /// <summary>An error-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+        /// <param name="strText">(Required) The text to be sent to the log.</param>
+        /// <param name="strClassName">(Optional) Name of the specific class that is being logged from.  Does not show if not specified.</param>
+        /// <remarks>Error log entry.</remarks>
+        public static void Error(string strText, object obj)
+        {
+            Error(strText, nameof(obj));
+        }
+
+        /// <summary>An error-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+        /// <param name="strText">(Required) The text to be sent to the log.</param>
+        /// <remarks>Error log entry.</remarks>
+        internal void Error(string strText)
+        {
+            CreateLog(LogType.Error, strText, strObjName);
+        }
+
+        /// <summary>Builds the log entry and passes it to the UnityEngine log utility.</summary>
+        /// <param name="logType">what kind of log entry</param>
+        /// <param name="strText">message</param>
+        /// <param name="strObjName">name of calling class</param>
+        static void CreateLog(LogType logType, string strText, string strObjName = "")
+        {
+            string strOutput = string.Format("[{0}", strModName);
+            if (!string.IsNullOrEmpty(strObjName))
+                strOutput += string.Format(" - {0}", strObjName);
+            strOutput += string.Format("]: {0}", strText);
+
+            switch (logType)
+            {
+                case LogType.Error:
+                    UnityEngine.Debug.LogError(strOutput);
+			        break;
+                case LogType.Warning:
+                    UnityEngine.Debug.LogWarning(strOutput);
+			        break;
+                case LogType.Log:
+                default:
+                    UnityEngine.Debug.Log(strOutput);
+			        break;
+            }
+        }
+
+        /// <summary>Returns the type name of the specified object</summary>
+        /// <param name="obj">Object you want the name of.</param>
+        /// <returns>type name</returns>
+        static string nameof(object obj)
+        {
+            if (Equals(obj, null))
+                return string.Empty;
+
+            return obj.GetType().ToString();
+        }
 	}
 }

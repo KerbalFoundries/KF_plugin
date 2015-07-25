@@ -28,7 +28,7 @@ namespace KerbalFoundries
 		// disable AccessToStaticMemberViaDerivedType
 		// disable RedundantDefaultFieldInitializer
 		
-		readonly KFLogUtil KFLog = new KFLogUtil();
+		readonly KFLogUtil KFLog = new KFLogUtil("KFDustFX");
 		
 		/// <summary>Part instance of KFModuleWheel</summary>
 		KFModuleWheel _KFModuleWheel;
@@ -98,9 +98,6 @@ namespace KerbalFoundries
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
 		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
-		
-		/// <summary>Prefix the logs with this to identify it.</summary>
-		public string strClassName = "KFDustFX";
 		
 		bool isPaused;
 		GameObject kfdustFx;
@@ -232,7 +229,7 @@ namespace KerbalFoundries
 				colorAverage = colorBiome;
 			
 			if (Equals(colorBiome, null))
-				KFLog.Error("Color \"BiomeColor\" is null!", strClassName);
+				KFLog.Error("Color \"BiomeColor\" is null!");
 			if (speed >= minScrapeSpeed)
 			{
 				if (!Equals(colorAverage, colorDust))
