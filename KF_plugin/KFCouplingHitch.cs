@@ -104,7 +104,7 @@ namespace KerbalFoundries
 					beginWarp = false;
 
 					trailerOffset = _targetVessel.transform.position - this.vessel.transform.position;
-					KFLog.Log(string.Format("\"trailerOffset = \"", trailerOffset));
+					KFLog.Log(string.Format("\"trailerOffset\" = {0}", trailerOffset));
 				}
 
 				_targetVessel.SetPosition(this.vessel.transform.position + trailerOffset);
@@ -232,7 +232,7 @@ namespace KerbalFoundries
 				_LinkJoint = _Link.gameObject.AddComponent<ConfigurableJoint>();
 
 				#if Debug
-               KFLog.Warning("Created joint...", strClassName);
+				KFLog.Warning("Created joint...");
 				#endif
 				_LinkJoint.xMotion = ConfigurableJointMotion.Locked;
 				_LinkJoint.yMotion = ConfigurableJointMotion.Locked;
@@ -243,7 +243,7 @@ namespace KerbalFoundries
 				_HitchJoint.zMotion = ConfigurableJointMotion.Locked;
 
 				#if Debug
-               KFLog.Warning("Configured linear...", strClassName);
+				KFLog.Warning("Configured linear...");
 				#endif // Set up X limits
 				SoftJointLimit sjl;
 				sjl = _HitchJoint.highAngularXLimit;
@@ -263,7 +263,7 @@ namespace KerbalFoundries
 				_HitchJoint.angularZLimit = sjl;
 
 				#if Debug
-                KFLog.Warning("Configured linear...", strClassName);
+                KFLog.Warning("Configured linear...");
 				#endif    
 
 				_HitchJoint.angularXMotion = ConfigurableJointMotion.Limited;
@@ -281,7 +281,7 @@ namespace KerbalFoundries
 				SetJointDamper();
 
 				#if Debug
-                KFLog.Warning("Configured joint...", strClassName);
+                KFLog.Warning("Configured joint...");
 				#endif
 				_HitchJoint.anchor = new Vector3(0, 0.4f, 0); //this seems to make a springy joint
 
@@ -289,13 +289,13 @@ namespace KerbalFoundries
 				//_HitchJoint.axis = new Vector3(1, 0, 0);
 				//_HitchJoint.secondaryAxis = new Vector3(0, 0, 1);
 				#if Debug
-                KFLog.Warning("Configured axis...", strClassName);
+                KFLog.Warning("Configured axis...");
 				#endif
 				_HitchJoint.connectedBody = _rbLink;
 
 				_Link.transform.rotation = _coupledObject.transform.rotation;
 				#if Debug
-                KFLog.Warning("Connected joint...", strClassName);
+                KFLog.Warning("Connected joint...");
 				#endif
                 
 				KFLog.Log(string.Format("Target object is {0}.", _coupledObject.name));
@@ -385,10 +385,10 @@ namespace KerbalFoundries
 			#if Debug
             if (isDebug)
             {
-				KFLog.Log(string.Format("normalVector{0}", normalvectorX), strClassName);
-				KFLog.Log(string.Format("normalVector{0}", normalvectorY), strClassName);
-				KFLog.Log(string.Format("normalVector{0}", normalvectorZ), strClassName);
-				KFLog.Warning(string.Format("Rotate {0}", hitchRotation), strClassName);
+				KFLog.Log(string.Format("normalVector{0}", normalvectorX));
+				KFLog.Log(string.Format("normalVector{0}", normalvectorY));
+				KFLog.Log(string.Format("normalVector{0}", normalvectorZ));
+				KFLog.Warning(string.Format("Rotate {0}", hitchRotation));
             }
 			#endif
 			var couplingRotation = new Vector3(angleX, angleY, angleZ);

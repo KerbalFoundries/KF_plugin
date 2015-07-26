@@ -14,18 +14,18 @@ namespace KerbalFoundries
 		/// <returns>The color that corresponds to the body or biome in the configs.</returns>
 		public static Color GetDustColor(CelestialBody body, Collider col, double lat, double lon)
 		{
-			if (!Equals(FlightGlobals.ActiveVessel, null))
+			if (!Equals(FlightGlobals.ActiveVessel, null) && IsColliding(col))
 			{
-				if (IsColliding(col)) // are we touching the ground?
+				Dictionary<string, Color> biomeColors = KFPersistenceManager.DustColors[body.name];
+				if (biomeColors.Count > 0)// do we have biome color definitions for that body?
 				{
-					Dictionary<string, Color> biomeColors = KFPersistenceManager.DustColors[body.name];
-					if (biomeColors.Count > 0) // do we have biome color definitions for that body?
-					{
-						string biomeName = GetCurrentBiomeName(lat, lon); // get biome name
-						if (string.IsNullOrEmpty(biomeName)) // do we have a color for that biome?
-                            biomeName = "default"; // no -> use default color of body
-						return biomeColors[biomeName];
-					}
+					string biomeName = GetCurrentBiomeName(lat, lon);
+					// get biome name
+					if (string.IsNullOrEmpty(biomeName))
+						// do we have a color for that biome?
+						biomeName = "default";
+					// no -> use default color of body
+					return biomeColors[biomeName];
 				}
 			}
 			return KFPersistenceManager.DefaultDustColor; // no color found or conditions aren't met, use default color

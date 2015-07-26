@@ -11,17 +11,17 @@ namespace KerbalFoundries
         [KSPField]
         public string susTravName = "suspensionTraverse";
         [KSPField]
-		public float mass = 0;
+		public float mass;
         [KSPField]
-		public float radius = 0;
+		public float radius;
         [KSPField]
-		public float suspensionDistance = 0;
+		public float suspensionDistance;
         [KSPField]
-		public float spring = 0;
+		public float spring;
         [KSPField]
-		public float damper = 0;
+		public float damper;
         [KSPField]
-		public float targetPosition = 0;
+		public float targetPosition;
         
         [KSPField]
         public float forExtSlip = 1;
@@ -44,9 +44,8 @@ namespace KerbalFoundries
         public float sideAsyValue = 80;
         [KSPField]
         public float sideStiffness = 1;
-
         [KSPField]
-        public bool moveCollider = false;
+        public bool moveCollider;
         [KSPField]
         public bool overrideFriction = true;
         [KSPField]

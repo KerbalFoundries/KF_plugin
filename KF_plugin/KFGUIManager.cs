@@ -133,7 +133,7 @@ namespace KerbalFoundries
 		/// <summary>Called by Unity when it's time to draw the GUI.</summary>
 		void OnGUI()
 		{
-            //KFLog.Log("OnGUI(), enabled = " + this.enabled, strClassName);
+            //KFLog.Log(string.Format("OnGUI() - \"enabled\" = {0}", this.enabled));
 			if (isGUIEnabled)
 			{
                 /* Depending on the scene the cfg window displays 1, 2 or all 3 toggles.

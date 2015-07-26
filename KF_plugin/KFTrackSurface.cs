@@ -16,7 +16,6 @@ namespace KerbalFoundries
         [KSPField]
         public float trackLength = 10;
 
-
         public override void OnStart(PartModule.StartState state)
         {
             base.OnStart(state);

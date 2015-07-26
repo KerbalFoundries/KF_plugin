@@ -20,8 +20,8 @@ namespace KerbalFoundries
 
         public override void OnStart(PartModule.StartState state)
         {
-            _KFModuleWheel = this.part.GetComponentInChildren<KFModuleWheel>();
-            _steering = this.part.FindModelTransform(steeringObject);
+            _KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
+            _steering = part.FindModelTransform(steeringObject);
             initialSteeringAngle = _steering.transform.localEulerAngles;
             steeringIndex = Extensions.SetAxisIndex(steeringAxis);
 

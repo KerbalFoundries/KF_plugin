@@ -20,7 +20,7 @@ namespace KerbalFoundries
 				print(string.Format("Destroying: {0}", objectName));
 			}
 			else
-				Debug.LogWarning(string.Format("Could not find object named {0}", objectName)); 
+				Debug.LogWarning(string.Format("Could not find object named \"{0}\" to destroy.", objectName)); 
         }
     }
 }

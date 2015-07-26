@@ -17,9 +17,9 @@ namespace KerbalFoundries
 		const float triggerDistance = 25f;
 		bool isActive;
 		Vessel _vessel;
-        Vector3 boxSize = new Vector3(300f, .5f, 300f);
+		Vector3 boxSize = new Vector3(300f, .5f, 300f);
 		public float colliderHeight = -2.5f;
-        bool isReady;
+		bool isReady;
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
 		readonly KFLogUtil KFLog = new KFLogUtil("ModuleWaterSlider");
@@ -28,9 +28,9 @@ namespace KerbalFoundries
 		{
 			KFLog.Log("WaterSlider start.");
 			_vessel = GetComponent<Vessel>();
-            //Debug.LogWarning(_vessel.IsControllable + " is cont");
-            //Debug.LogWarning(_vessel.isCommandable + " is comm");
-            //Debug.LogWarning(_vessel.vesselType.ToString() + " Vesseltype");
+			//Debug.LogWarning(_vessel.IsControllable + " is cont");
+			//Debug.LogWarning(_vessel.isCommandable + " is comm");
+			//Debug.LogWarning(_vessel.vesselType.ToString() + " Vesseltype");
 
 			float repulsorCount = 0;
 			foreach (Part PA in _vessel.parts)
@@ -41,21 +41,21 @@ namespace KerbalFoundries
 					repulsorCount++;
 			}
 
-            var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            visible.transform.parent = _collider.transform;
-            visible.transform.localScale = boxSize;
-            visible.renderer.enabled = true; // enable to see collider
+			var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			visible.transform.parent = _collider.transform;
+			visible.transform.localScale = boxSize;
+			visible.renderer.enabled = true; // enable to see collider
 
 			isActive |= repulsorCount > 0;
-            if (!isActive || !_vessel.isCommandable)
-            {
-                _collider.transform.localScale = Vector3.zero;
+			if (!isActive || !_vessel.isCommandable)
+			{
+				_collider.transform.localScale = Vector3.zero;
 
-                Debug.Log("setting size to zero and returning");
-                return;
-            }
-            else
-                Debug.LogError("Continuing...");
+				Debug.Log("setting size to zero and returning");
+				return;
+			}
+			else
+				Debug.LogError("Continuing...");
 
 			var box = _collider.collider as BoxCollider;
 			box.size = boxSize; // Probably should encapsulate other colliders in real code
@@ -67,7 +67,7 @@ namespace KerbalFoundries
 
 			
 			UpdatePosition();
-            isReady = true;
+			isReady = true;
 		}
 
 		void UpdatePosition()
@@ -81,10 +81,9 @@ namespace KerbalFoundries
 
 		void FixedUpdate()
 		{
-            if (!isReady)
-                return;
+			if (!isReady)
+				return;
 			if (Vector3.Distance(_collider.transform.position, _vessel.transform.position) > triggerDistance && isReady)
-
 				UpdatePosition();
 			colliderHeight = Mathf.Clamp((colliderHeight -= 0.1f), -10, 2.5f);
 		}
@@ -99,17 +98,15 @@ namespace KerbalFoundries
 		const int threshHold = 1;
 		Vessel _vessel;
 		GameObject _cameraObject;
-        Camera _camera;
-        Texture2D groundShot;
+		Camera _camera;
+		Texture2D groundShot;
 		RenderTexture renderTexture;
-        bool dustCam;
+		bool dustCam;
 
-		/// <summary>Local name of the KFLogUtil class.</summary>
-		readonly KFLogUtil KFLog = new KFLogUtil();
-		/// <summary>Name of the class for logging purposes.</summary>
-		public string strClassName = "ModuleCameraShot";
+		/// <summary>Local definition of the KFLogUtil class.</summary>
+		readonly KFLogUtil KFLog = new KFLogUtil("ModuleCameraShot");
 
-		/// <summary>The layer or layers that the camera will render.</summary>
+		/// <summary>The layers that the camera will render.</summary>
 		public int cameraMask;
 
 		void Start()
@@ -118,59 +115,59 @@ namespace KerbalFoundries
 			_cameraObject = new GameObject("ColourCam");
             
 			_cameraObject.transform.parent = _vessel.transform;
-            _cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
-            _cameraObject.transform.Translate(new Vector3(0, 0, -10));
-            _camera = _cameraObject.AddComponent<Camera>();
-            _camera.targetTexture = renderTexture;
-            cameraMask = 32784;	// Layers 4 and 15, or water and local scenery.
-            // Generated from the binary place value output of 4 and 15 added to each other.
-            // (1 << 4) | (1 << 15) = (16) | (32768) = 32784
-            _camera.cullingMask = cameraMask;
+			_cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
+			_cameraObject.transform.Translate(new Vector3(0, 0, -10));
+			_camera = _cameraObject.AddComponent<Camera>();
+			_camera.targetTexture = renderTexture;
+			cameraMask = 32784;	// Layers 4 and 15, or water and local scenery.
+			// Generated from the binary place value output of 4 and 15 added to each other.
+			// (1 << 4) | (1 << 15) = (16) | (32768) = 32784
+			_camera.cullingMask = cameraMask;
 
-            _camera.enabled = false;
-            renderTexture = new RenderTexture(resWidth, resHeight, 24);
-            groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
-            dustCam = KFPersistenceManager.isDustCameraEnabled;
+			_camera.enabled = false;
+			renderTexture = new RenderTexture(resWidth, resHeight, 24);
+			groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
+			dustCam = KFPersistenceManager.isDustCameraEnabled;
 		}
 
-        public void Update()
-        {
-            dustCam = KFPersistenceManager.isDustCameraEnabled;
-            if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCam)
-            {
-                frameCount = 0;
+		public void Update()
+		{
+			dustCam = KFPersistenceManager.isDustCameraEnabled;
+			if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCam)
+			{
+				frameCount = 0;
 
-                //_cameraObject.transform.position = _vessel.transform.position;
-                _cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
-                _camera.targetTexture = renderTexture;
-                //Extensions.DebugLine(_cameraObject.transform.position, _cameraObject.transform.eulerAngles);
-                _camera.enabled = true;
+				//_cameraObject.transform.position = _vessel.transform.position;
+				_cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
+				_camera.targetTexture = renderTexture;
+				//Extensions.DebugLine(_cameraObject.transform.position, _cameraObject.transform.eulerAngles);
+				_camera.enabled = true;
                 
-                _camera.Render();
-                //Debug.LogError("rendered something...");
-                RenderTexture.active = renderTexture;
-                groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
-                _camera.targetTexture = null;
-                _camera.enabled = false;
-                RenderTexture.active = null; // JC: added to avoid errors
+				_camera.Render();
+				//Debug.LogError("rendered something...");
+				RenderTexture.active = renderTexture;
+				groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+				_camera.targetTexture = null;
+				_camera.enabled = false;
+				RenderTexture.active = null; // JC: added to avoid errors
 
-                Color[] texColors = groundShot.GetPixels();
-                int total = texColors.Length;
-                float divider = total * 1.25f;
-                float r = 0;
-                float g = 0;
-                float b = 0;
-                const float alpha = 0.007f;
+				Color[] texColors = groundShot.GetPixels();
+				int total = texColors.Length;
+				float divider = total * 1.25f;
+				float r = 0;
+				float g = 0;
+				float b = 0;
+				const float alpha = 0.007f;
 
-                for (int i = 0; i < total; i++)
-                {
-                    r += texColors[i].r;
-                    g += texColors[i].g;
-                    b += texColors[i].b;
-                }
-                _averageColour = new Color(r / divider, g / divider, b / divider, alpha);
-            }
-            frameCount++;
-        }
+				for (int i = 0; i < total; i++)
+				{
+					r += texColors[i].r;
+					g += texColors[i].g;
+					b += texColors[i].b;
+				}
+				_averageColour = new Color(r / divider, g / divider, b / divider, alpha);
+			}
+			frameCount++;
+		}
 	}
 }
