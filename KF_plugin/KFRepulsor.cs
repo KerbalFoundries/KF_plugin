@@ -67,19 +67,17 @@ namespace KerbalFoundries
 		public string resourceName = "ElectricCharge";
         
         /// <summary>This is the info string that will display when the part info is shown.</summary>
-		/// <remarks>This can be overridden in the part config for this module.</remarks>
+		/// <remarks>This can be overridden in the part config for this module due to its KSPField status.</remarks>
 		[KSPField]
-        public string strInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.\n\n" +
-                                "<b><color=#99ff00ff>Requires:</color></b>\n" +
-                                "- {ResourceName}: {ConsumptionRate}/sec @ max height";
+        public string strPartInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.\n\n<b><color=#99ff00ff>Requires:</color></b>\n- {{ResourceName}}: {{ConsumptionRate}}/sec @ max height";
         public override string GetInfo()
 		{
-            return UpdateInfoText(strInfo, resourceName, resourceConsumptionRate);            
+            return UpdateInfoText(strPartInfo, resourceName, resourceConsumptionRate);            
 		}
 
-        static string UpdateInfoText(string strInfo, string strResourceName, float consumptionRate)
+        static string UpdateInfoText(string strPartInfo, string strResourceName, float consumptionRate)
         {
-            return strInfo.Replace("{ResourceName}", strResourceName).Replace("{ConsumptionRate}", consumptionRate.ToString("0.00"));
+            return strPartInfo.Replace("{ResourceName}", strResourceName).Replace("{ConsumptionRate}", consumptionRate.ToString("0.00"));
         }
         
         //begin start
@@ -90,7 +88,7 @@ namespace KerbalFoundries
             _dustFX = this.part.GetComponent<KFRepulsorDustFX>(); //see if it's been added by MM
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
             {
-                this.part.AddModule("KFRepulsorDustFX");
+                part.AddModule("KFRepulsorDustFX");
                 _dustFX = this.part.GetComponent<KFRepulsorDustFX>();
                 //_dustFX.wheelImpact = true;
                 //_dustFX.wheelImpactSound = "KerbalFoundries/Sounds/TyreSqueal";
@@ -115,9 +113,9 @@ namespace KerbalFoundries
                     b.suspensionDistance = 2.5f; //default to low setting to save stupid shenanigans on takeoff
                     wcList.Add(b);
                 }
-                KFLogUtil.Log("repulsorCount: " + repulsorCount, this);
+				KFLogUtil.Log(string.Format("Repulsor Count: {0}", repulsorCount), this);
 				
-                if (pointDown && Equals(this.vessel, FlightGlobals.ActiveVessel))
+                if (pointDown && Equals(vessel, FlightGlobals.ActiveVessel))
                 {
                     StopAllCoroutines();
                     StartCoroutine("LookAt");
@@ -132,7 +130,7 @@ namespace KerbalFoundries
 
 		void SetupWaterSlider()
 		{
-			_MWS = this.vessel.GetComponent<ModuleWaterSlider>();
+			_MWS = vessel.GetComponent<ModuleWaterSlider>();
 		}
 
         /// <summary>A "Shrink" coroutine for steering.</summary>
@@ -259,10 +257,8 @@ namespace KerbalFoundries
         {
             if (appliedRideHeight > 0)
             {
-                for (int i = 0; i < wcList.Count(); i++)
-                {
-                    wcList[i].enabled = true;
-                }
+				for (int i = 0; i < wcList.Count(); i++)
+					wcList[i].enabled = true;
                 deployed = true; // catches redeploy after low charge retract
                 StopCoroutine("Shrink");
                 StartCoroutine("Grow");
@@ -316,7 +312,7 @@ namespace KerbalFoundries
         public void ApplySettings()
         {
             //appliedRideHeight = rideHeight;
-            foreach (KFRepulsor mt in this.vessel.FindPartModulesImplementing<KFRepulsor>())
+            foreach (KFRepulsor mt in vessel.FindPartModulesImplementing<KFRepulsor>())
             {
                 if (!Equals(groupNumber, 0) && Equals(groupNumber, mt.groupNumber))
                 {
