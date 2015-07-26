@@ -52,5 +52,11 @@ namespace KerbalFoundries.Log
                 Monitor.Exit(sync); // release lock
             }
         }
+
+        /// <summary>Static destructor to make sure thread is safely stopped when KSP shuts down.</summary>
+        static ~KFLog()
+        {
+            StopWriter();
+        }
     }
 }
