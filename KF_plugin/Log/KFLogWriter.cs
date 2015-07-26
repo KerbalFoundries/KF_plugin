@@ -1,0 +1,96 @@
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Reflection;
+using System.Threading;
+
+namespace KerbalFoundries.Log
+{
+    public class KFLogWriter
+    {
+        /// <summary>Helper object to synchronize queue access</summary>
+        object sync = null;
+        /// <summary>Stream which writes into a file</summary>
+        FileStream outStream = null;
+        /// <summary>Queue which holds log entries to be written to file</summary>
+        Queue<string> queue = null;
+        /// <summary>Flag for stopping a running thread</summary>
+        volatile bool dontExit = false;
+
+        /// <summary>Creates an instance of the log write thread, but does not start it yet</summary>
+        /// <param name="logFile">where to write to</param>
+        /// <param name="queue">log entries queue</param>
+        /// <param name="sync">helper object for synchronizing queue access</param>
+        public KFLogWriter(string logFile, Queue<string> queue, object sync)
+        {
+            outStream = CreateLogFile(logFile);
+            this.queue = queue;
+            this.sync = sync;
+        }
+
+        /// <summary>Main loop of the thread. Processes queue items until a stop flag is set.</summary>
+        /// <remarks>Use RequestStop() to end the thread.</remarks>
+        public void Loop()
+        {
+            if (!outStream.CanWrite)
+                return;
+
+            string startMessage = "Logging started at " + System.DateTime.Now.ToString("hh:mm:ss.fff") + "\n\nLoaded assemblies:\n";
+            foreach(Assembly assembly in Thread.GetDomain().GetAssemblies())
+                startMessage += string.Format("{0,-15} ({1}) ({2})", assembly.GetName().Name, assembly.GetName().Version,assembly.Location);
+            startMessage += "\n\n------------\n\n";
+
+            UTF8Encoding encoder = new UTF8Encoding(true);
+            byte[] buffer = encoder.GetBytes(startMessage);
+            outStream.Write(buffer, 0, buffer.Length);
+            outStream.Flush();
+
+            Monitor.Enter(sync); // block other thread(s) until lock is aquired
+
+            dontExit = true;
+            while(dontExit) // thread main loop
+            {
+                while (queue.Count < 1 || !dontExit) // check if there's something to do
+                    Monitor.Wait(sync); // release the lock, block this thread and
+                                        // wait until the lock is aquired again
+                                        // then the while-loop continues to work
+
+                if (queue.Count > 0)
+                {
+                    string queueItem = queue.Dequeue() + "\n"; // something is in the queue, quickly grab it!
+                    buffer = encoder.GetBytes(queueItem); // convert string into UTF8 and returns the result as a byte array
+                    outStream.Write(buffer, 0, buffer.Length); // write to file
+                    outStream.Flush();
+
+                    Monitor.Pulse(sync); // wake up the other thread (during the next Monitor.Wait)
+                }                
+            }
+            Monitor.Exit(sync); // release lock
+        }
+
+        /// <summary>Creates a stream which can write into the specified file.</summary>
+        /// <param name="logFile">where to write to</param>
+        /// <returns>stream for writing</returns>
+        /// <remarks>If the file already exists, it will be deleted and created again.</remarks>
+        FileStream CreateLogFile(string logFile)
+        {
+            if (File.Exists(logFile))
+                File.Delete(logFile);
+
+            return File.Create(logFile);
+        }
+
+        /// <summary>End writing to file and release all resources.</summary>
+        void CloseFile()
+        {
+            outStream.Flush(); // write everything still in buffer to disk
+            outStream.Close(); // close the file access and release all resources
+        }
+
+        /// <summary>Requests the thread to stop.</summary>
+        public void RequestStop()
+        {
+            dontExit = false;
+        }
+    }
+}

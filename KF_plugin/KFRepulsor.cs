@@ -69,11 +69,22 @@ namespace KerbalFoundries
         /// <summary>This is the info string that will display when the part info is shown.</summary>
 		/// <remarks>This can be overridden in the part config for this module.</remarks>
 		[KSPField]
-		public string strInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.";
+        public string strInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.\n\n" +
+                                "<b><color=#99ff00ff>Requires:</color></b>\n" +
+                                "- {ResourceName}: {ConsumptionRate}/sec @ max height";
         public override string GetInfo()
 		{
-			return strInfo;
+            // resource consumption calculation from ResourceConsumption()
+            // float resValue = repulsorCount * Time.deltaTime * resourceConsumptionRate / 32;
+
+            return UpdateInfoText(strInfo, resourceName,
+                                  this.part.GetComponentsInChildren<WheelCollider>().Length * resourceConsumptionRate / 32f);            
 		}
+
+        static string UpdateInfoText(string strInfo, string strResourceName, float consumptionRate)
+        {
+            return strInfo.Replace("{ResourceName}", strResourceName).Replace("{ConsumptionRate}", consumptionRate.ToString("0.00"));
+        }
         
         //begin start
         public override void OnStart(PartModule.StartState state)  //when started
@@ -108,6 +119,7 @@ namespace KerbalFoundries
                     b.suspensionDistance = 2.5f; //default to low setting to save stupid shenanigans on takeoff
                     wcList.Add(b);
                 }
+                KFLogUtil.Log("repulsorCount: " + repulsorCount, this);
 				
                 if (pointDown && Equals(this.vessel, FlightGlobals.ActiveVessel))
                 {
@@ -183,14 +195,18 @@ namespace KerbalFoundries
             _MWS.colliderHeight = -2.5f;
         }
 
-        public float ResourceConsumption()
+        public void ResourceConsumption()
         {
             float resValue = repulsorCount * Time.deltaTime * resourceConsumptionRate / 32;
             float resConsumption = (appliedRideHeight / 100) * resValue; 
             float resRequest = resConsumption / resValue;
             float resDrain = part.RequestResource(resourceName, resRequest);
 			lowEnergy = resDrain < resRequest ? true : false;
-            return resDrain;
+
+            KFLogUtil.Log("resValue = " + resValue + " = " + repulsorCount + " * " + Time.deltaTime + " * " + resourceConsumptionRate + " * 32", this);
+            KFLogUtil.Log("resConsumption = " + resConsumption + " = (" + appliedRideHeight + " / 100) * " + resValue, this);
+            KFLogUtil.Log("resRequest = " + resRequest + " = " + resConsumption + " / " + resValue, this);
+            KFLogUtil.Log("resDrain = " + resDrain, this);
         }
 
         public void FixedUpdate()
@@ -209,7 +225,7 @@ namespace KerbalFoundries
             {
                 // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
-                float requestResource = ResourceConsumption();
+                ResourceConsumption();
 
 
                 for (int i = 0; i < wcList.Count(); i++)

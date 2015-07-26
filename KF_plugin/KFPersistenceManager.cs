@@ -11,7 +11,7 @@ namespace KerbalFoundries
 		#region Log
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
-		static readonly KFLogUtil KFLog = new KFLogUtil("KFPersistenceManager");
+		static KFLogUtil KFLog;
 		
 		#endregion Log
 		
@@ -41,10 +41,22 @@ namespace KerbalFoundries
 			bool _isMarkerEnabled = false;
 			if (bool.TryParse(configNode.GetValue("isMarkerEnabled"), out _isMarkerEnabled))
 				isMarkerEnabled = _isMarkerEnabled;
-			
-			KFLog.Log(string.Format("isDustEnabled = {0}", isDustEnabled));
+
+            bool _writeToLogFile = false;
+            if (bool.TryParse(configNode.GetValue("writeToLogFile"), out _writeToLogFile))
+                writeToLogFile = _writeToLogFile;
+
+            logFile = configNode.GetValue("logFile");
+
+            KFLog = new KFLogUtil("KFPersistenceManager");
+            if (writeToLogFile)
+                KerbalFoundries.Log.KFLog.StartWriter();
+
+            KFLog.Log(string.Format("isDustEnabled = {0}", isDustEnabled));
 			KFLog.Log(string.Format("isDustCameraEnabled = {0}", isDustCameraEnabled));
 			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled));
+            KFLog.Log(string.Format("writeToLogFile = {0}", writeToLogFile));
+            KFLog.Log(string.Format("LogFile = {0}", logFile));
 			
 			// DustColors.cfg
 			configFile = ConfigNode.Load(string.Format("{0}GameData/KerbalFoundries/DustColors.cfg", KSPUtil.ApplicationRootPath));
@@ -85,6 +97,8 @@ namespace KerbalFoundries
 			configNode.SetValue("isDustEnabled", string.Format("{0}", isDustEnabled), true);
 			configNode.SetValue("isDustCameraEnabled", string.Format("{0}", isDustCameraEnabled), true);
 			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
+            configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
+            configNode.SetValue("logFile", logFile, true);
 			configFile.Save(string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath));
 			
 			KFLog.Log("Global Settings Saved.");
@@ -112,6 +126,21 @@ namespace KerbalFoundries
 			get;
 			set;
 		}
+
+        /// <summary>If all KF log messages should also be written to a log file.</summary>
+        /// <remarks>logFile must be specified in the config!</remarks>
+        public static bool writeToLogFile
+        {
+            get;
+            set;
+        }
+
+        /// <summary>Path of the log file</summary>
+        public static string logFile
+        {
+            get;
+            set;
+        }
 		#endregion
 
         #region DustFX

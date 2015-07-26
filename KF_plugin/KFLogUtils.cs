@@ -10,6 +10,7 @@
 
 using System;
 using System.Linq;
+using KerbalFoundries.Log;
 
 namespace KerbalFoundries
 {
@@ -26,6 +27,8 @@ namespace KerbalFoundries
         }
 
 		public static string strModName = "Kerbal Foundries";
+        static Log.KFLog KFLog = null;
+
         string strObjName = string.Empty;
 
         /// <summary>Creates an instance of KFLogUtil.</summary>
@@ -48,7 +51,7 @@ namespace KerbalFoundries
         /// <remarks>Standard log entry.</remarks>
         public static void Log(string strText, string strClassName)
         {
-            CreateLog(LogType.Log, strText, strClassName);
+            CreateUnityEngineLog(LogType.Log, strText, strClassName);
         }
 
         /// <summary>A standard-level log utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
@@ -65,7 +68,7 @@ namespace KerbalFoundries
         /// <remarks>Standard log entry.</remarks>
         internal void Log(string strText)
         {
-            CreateLog(LogType.Log, strText, strObjName);
+            CreateUnityEngineLog(LogType.Log, strText, strObjName);
         }
 
         /// <summary>A warning-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
@@ -74,7 +77,7 @@ namespace KerbalFoundries
 		/// <remarks>Warning log entry.</remarks>
         public static void Warning(string strText, string strClassName)
         {
-            CreateLog(LogType.Warning, strText, strClassName);
+            CreateUnityEngineLog(LogType.Warning, strText, strClassName);
         }
 
         /// <summary>A warning-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
@@ -91,7 +94,7 @@ namespace KerbalFoundries
         /// <remarks>Warning log entry.</remarks>
         internal void Warning(string strText)
         {
-            CreateLog(LogType.Warning, strText, strObjName);
+            CreateUnityEngineLog(LogType.Warning, strText, strObjName);
         }
 
         /// <summary>An error-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
@@ -100,7 +103,7 @@ namespace KerbalFoundries
         /// <remarks>Error log entry.</remarks>
         public static void Error(string strText, string strClassName)
         {
-            CreateLog(LogType.Error, strText, strClassName);
+            CreateUnityEngineLog(LogType.Error, strText, strClassName);
         }
 
         /// <summary>An error-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
@@ -117,14 +120,14 @@ namespace KerbalFoundries
         /// <remarks>Error log entry.</remarks>
         internal void Error(string strText)
         {
-            CreateLog(LogType.Error, strText, strObjName);
+            CreateUnityEngineLog(LogType.Error, strText, strObjName);
         }
 
         /// <summary>Builds the log entry and passes it to the UnityEngine log utility.</summary>
         /// <param name="logType">what kind of log entry</param>
         /// <param name="strText">message</param>
         /// <param name="strObjName">name of calling class</param>
-        static void CreateLog(LogType logType, string strText, string strObjName = "")
+        static void CreateUnityEngineLog(LogType logType, string strText, string strObjName = "")
         {
             string strOutput = string.Format("[{0}", strModName);
             if (!string.IsNullOrEmpty(strObjName))
@@ -143,6 +146,22 @@ namespace KerbalFoundries
                 default:
                     UnityEngine.Debug.Log(strOutput);
 			        break;
+            }
+
+            if (KFPersistenceManager.writeToLogFile)
+                CreateKFLog(logType, strText, strObjName);
+        }
+
+        /// <summary>Formats the message and sends it to the log writer thread.</summary>
+        /// <param name="logType">Log, Warning, Error</param>
+        /// <param name="strText">message</param>
+        /// <param name="strObjName">calling object</param>
+        static void CreateKFLog(LogType logType, string strText, string strObjName)
+        {
+            if (KFLog.Ready)
+            {
+                string strOutput = string.Format("{0} {1,-7} {2}: {3}", System.DateTime.Now.ToString("hh:mm:ss.fff"), logType.ToString().ToUpper(), strObjName, strText);
+                KerbalFoundries.Log.KFLog.WriteToFile(strOutput);
             }
         }
 
