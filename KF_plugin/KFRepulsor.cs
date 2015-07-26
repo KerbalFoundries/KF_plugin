@@ -74,11 +74,7 @@ namespace KerbalFoundries
                                 "- {ResourceName}: {ConsumptionRate}/sec @ max height";
         public override string GetInfo()
 		{
-            // resource consumption calculation from ResourceConsumption()
-            // float resValue = repulsorCount * Time.deltaTime * resourceConsumptionRate / 32;
-
-            return UpdateInfoText(strInfo, resourceName,
-                                  this.part.GetComponentsInChildren<WheelCollider>().Length * resourceConsumptionRate / 32f);            
+            return UpdateInfoText(strInfo, resourceName, resourceConsumptionRate);            
 		}
 
         static string UpdateInfoText(string strInfo, string strResourceName, float consumptionRate)
@@ -197,16 +193,9 @@ namespace KerbalFoundries
 
         public void ResourceConsumption()
         {
-            float resValue = repulsorCount * Time.deltaTime * resourceConsumptionRate / 32;
-            float resConsumption = (appliedRideHeight / 100) * resValue; 
-            float resRequest = resConsumption / resValue;
+            float resRequest = resourceConsumptionRate * Time.deltaTime * appliedRideHeight / 100f;
             float resDrain = part.RequestResource(resourceName, resRequest);
 			lowEnergy = resDrain < resRequest ? true : false;
-
-            KFLogUtil.Log("resValue = " + resValue + " = " + repulsorCount + " * " + Time.deltaTime + " * " + resourceConsumptionRate + " * 32", this);
-            KFLogUtil.Log("resConsumption = " + resConsumption + " = (" + appliedRideHeight + " / 100) * " + resValue, this);
-            KFLogUtil.Log("resRequest = " + resRequest + " = " + resConsumption + " / " + resValue, this);
-            KFLogUtil.Log("resDrain = " + resDrain, this);
         }
 
         public void FixedUpdate()
