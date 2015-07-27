@@ -27,7 +27,24 @@ namespace KerbalFoundries
 		static void ReadConfig()
 		{
 			// KFGlobals.cfg
-			ConfigNode configFile = ConfigNode.Load(string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath));
+            string fileName = string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath);
+            if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+            {
+                // config file doesn't exists!
+
+                // setting some default values
+                isDustEnabled = true;
+                isDustCameraEnabled = true;
+                isMarkerEnabled = true;
+                writeToLogFile = false;
+                logFile = "KF.log";
+
+                KFLog.Warning(string.Format("Configuration file {0} doesn't exists. Will recreate it now.", fileName));
+                SaveConfig();
+            }
+
+            KFLog.Log("Reading configuration file.");
+			ConfigNode configFile = ConfigNode.Load(fileName);
 			ConfigNode configNode = configFile.GetNode("KFGlobals");
 			
 			bool _isDustEnabled = false;
