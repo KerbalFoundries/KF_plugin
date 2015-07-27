@@ -344,7 +344,7 @@ namespace KerbalFoundries
 
 			Bounds bounds = boundsList[0];
 			boundsList.RemoveAt(0);
-			boundsList.ForEach(bounds.Encapsulate);
+            boundsList.ForEach(b => bounds.Encapsulate(b)); // Do not change that to boundsList.ForEach(bounds.Encapsulate)!
 
 			return bounds;
 
