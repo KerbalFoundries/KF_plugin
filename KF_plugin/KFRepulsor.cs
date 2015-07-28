@@ -69,7 +69,7 @@ namespace KerbalFoundries
         /// <summary>This is the info string that will display when the part info is shown.</summary>
 		/// <remarks>This can be overridden in the part config for this module due to its KSPField status.</remarks>
 		[KSPField]
-        public string strPartInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.\n\n<b><color=#99ff00ff>Requires:</color></b>\n- {{ResourceName}}: {{ConsumptionRate}}/sec @ max height";
+        public string strPartInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.\n\n<b><color=#99ff00ff>Requires:</color></b>\n- {ResourceName}: {ConsumptionRate}/sec @ max height";
         public override string GetInfo()
 		{
             return UpdateInfoText(strPartInfo, resourceName, resourceConsumptionRate);            
