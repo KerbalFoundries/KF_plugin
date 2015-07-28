@@ -12,6 +12,12 @@ namespace KerbalFoundries
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
 		static KFLogUtil KFLog;
+
+        /// <summary>Path\KFGlobals.cfg</summary>
+        static string configFileName;
+
+        /// <summary>Path\DustColors.cfg</summary>
+        static string dustColorsFileName;
 		
 		#endregion Log
 		
@@ -19,34 +25,34 @@ namespace KerbalFoundries
 		/// <remarks>This is a static constructor. It's called once when the class is loaded by Mono.</remarks>
 		static KFPersistenceManager()
 		{
-			ReadConfig();
+            writeToLogFile = false; // this makes sure that the logging thread can't start before all of the configuration is read or bad things will happen
+            KFLog = new KFLogUtil("KFPersistenceManager");
+
+			ReadConfigFile();
+            ReadDustColor();
 		}
 		
 		#region Read & write
 		/// <summary>Retrieves the settings which are stored in the configuration file and are auto-loaded by KSP.</summary>
-		static void ReadConfig()
+		static void ReadConfigFile()
 		{
 			// KFGlobals.cfg
-            string fileName = string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath);
-            if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+            configFileName = string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath);
+
+            ConfigNode configFile = ConfigNode.Load(configFileName);
+            if (Equals(configFile, null) || !configFile.HasNode("KFGlobals")) // KFGlobals-node doesn't exist
             {
-                // config file doesn't exists!
-
-                // setting some default values
-                isDustEnabled = true;
-                isDustCameraEnabled = true;
-                isMarkerEnabled = true;
-                writeToLogFile = false;
-                logFile = "KF.log";
-
-                KFLog.Warning(string.Format("Configuration file {0} doesn't exists. Will recreate it now.", fileName));
-                SaveConfig();
+                CreateConfig();
+                configFile = ConfigNode.Load(configFileName);
             }
 
-            KFLog.Log("Reading configuration file.");
-			ConfigNode configFile = ConfigNode.Load(fileName);
-			ConfigNode configNode = configFile.GetNode("KFGlobals");
-			
+            ConfigNode configNode = configFile.GetNode("KFGlobals");
+            if (Equals(configNode, null) || Equals(configNode.CountValues, 0)) // KFGlobals-node is empty
+            {
+                CreateConfig();
+                configNode = configFile.GetNode("KFGlobals");
+            }
+
 			bool _isDustEnabled = false;
 			if (bool.TryParse(configNode.GetValue("isDustEnabled"), out _isDustEnabled))
 				isDustEnabled = _isDustEnabled;
@@ -64,8 +70,7 @@ namespace KerbalFoundries
 				writeToLogFile = _writeToLogFile;
 
 			logFile = configNode.GetValue("logFile");
-
-			KFLog = new KFLogUtil("KFPersistenceManager");
+            
 			if (writeToLogFile)
 				KerbalFoundries.Log.KFLog.StartWriter();
 
@@ -74,12 +79,29 @@ namespace KerbalFoundries
 			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled));
 			KFLog.Log(string.Format("writeToLogFile = {0}", writeToLogFile));
 			KFLog.Log(string.Format("LogFile = {0}", logFile));
-			
+        }
+
+        /// <summary>Retrieves the dust colors which are stored in the DustColors-file and are auto-loaded by KSP.</summary>
+        static void ReadDustColor()
+        {
 			// DustColors.cfg
-			configFile = ConfigNode.Load(string.Format("{0}GameData/KerbalFoundries/DustColors.cfg", KSPUtil.ApplicationRootPath));
-			configNode = configFile.GetNode("DustColorDefinitions");
-			
-			DustColors = new Dictionary<string, Dictionary<string, Color>>();
+            dustColorsFileName = string.Format("{0}GameData/KerbalFoundries/DustColors.cfg", KSPUtil.ApplicationRootPath);
+            DustColors = new Dictionary<string, Dictionary<string, Color>>();
+            
+			ConfigNode configFile = ConfigNode.Load(dustColorsFileName);
+            if (Equals(configFile, null) || !configFile.HasNode("DustColorDefinitions"))  // DustColorDefinitions-node doesn't exist
+            {
+                KFLog.Log("DustColors.cfg is missing or damaged!");
+                return;
+            }
+
+            ConfigNode configNode = configFile.GetNode("DustColorDefinitions");
+            if (Equals(configNode, null) || Equals(configNode.CountNodes, 0)) // DustColorDefinitions-node is empty
+            {
+                KFLog.Warning("Dust color definitions not found or damaged!");
+                return;
+            }
+
 			foreach (ConfigNode celestialNode in configNode.GetNodes()) // for each celestial
 			{
 				var biomes = new Dictionary<string, Color>();
@@ -108,18 +130,34 @@ namespace KerbalFoundries
 		internal static void SaveConfig()
 		{
 			// KFGlobals.cfg
-			ConfigNode configFile = ConfigNode.Load(string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath));
-			ConfigNode configNode = configFile.GetNode("KFGlobals");
-			
+            System.IO.File.Delete(configFileName);
+            
+			ConfigNode configFile = new ConfigNode();
+            configFile.AddNode("KFGlobals");
+            ConfigNode configNode = configFile.GetNode("KFGlobals");
+            
 			configNode.SetValue("isDustEnabled", string.Format("{0}", isDustEnabled), true);
 			configNode.SetValue("isDustCameraEnabled", string.Format("{0}", isDustCameraEnabled), true);
 			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
 			configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
 			configNode.SetValue("logFile", logFile, true);
-			configFile.Save(string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath));
-			
+
+			configFile.Save(configFileName);
+
 			KFLog.Log("Global Settings Saved.");
 		}
+
+        /// <summary>Creates configuration file with default values.</summary>
+        static void CreateConfig()
+        {
+            isDustEnabled = true;
+            isDustCameraEnabled = true;
+            isMarkerEnabled = true;
+            writeToLogFile = false;
+            logFile = "KF.log";
+
+            SaveConfig();
+        }
 		#endregion
 		
 		#region Global configuration properties
