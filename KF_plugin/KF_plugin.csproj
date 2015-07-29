@@ -48,27 +48,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="APUController.cs" />
-    <Compile Include="ArmMagnet.cs" />
-    <Compile Include="DozerBlade.cs" />
     <Compile Include="DustFX\KFDustFX.cs" />
     <Compile Include="DustFX\RepulsorDustFX.cs" />
     <Compile Include="DustFX\KFDustFXUtils.cs" />
     <Compile Include="Log\KFLog.cs" />
     <Compile Include="Log\KFLogWriter.cs" />
-    <Compile Include="TestStuff.cs" />
-    <Compile Include="GoldenShower.cs" />
-    <Compile Include="HeavyCrawler.cs" />
-    <Compile Include="KEMeccanumWheel.cs" />
     <Compile Include="KFGUIManager.cs" />
     <Compile Include="KFPersistenceManager.cs" />
-    <Compile Include="KFCouplingEye.cs" />
-    <Compile Include="KFCouplingHitch.cs" />
     <Compile Include="KFLogUtils.cs" />
     <Compile Include="KFLookAt.cs" />
     <Compile Include="KFModuleMirror.cs" />
     <Compile Include="KFModuleWheel.cs" />
     <Compile Include="KFRepulsor.cs" />
-    <Compile Include="KFRepulsorLook.cs" />
     <Compile Include="KFSteering.cs" />
     <Compile Include="KFSuspension.cs" />
     <Compile Include="KFTrackSurface.cs" />
@@ -77,10 +68,8 @@
     <Compile Include="ObjectDestroy.cs" />
     <Compile Include="OrientationMarker.cs" />
     <Compile Include="OverrideWheelCollider.cs" />
-    <Compile Include="PartMirror.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepulsorWheel.cs" />
-    <Compile Include="RockSpawner.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Version.cs" />
     <Compile Include="VesselTools.cs" />
