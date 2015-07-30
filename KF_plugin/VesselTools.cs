@@ -28,9 +28,9 @@ namespace KerbalFoundries
 		{
 			KFLog.Log("WaterSlider start.");
 			_vessel = GetComponent<Vessel>();
-			//Debug.LogWarning(_vessel.IsControllable + " is cont");
-			//Debug.LogWarning(_vessel.isCommandable + " is comm");
-			//Debug.LogWarning(_vessel.vesselType.ToString() + " Vesseltype");
+			//Debug.LogWarning(string.Format("Is Controllable: {0}", _vessel.IsControllable));
+			//Debug.LogWarning(string.Format("Is Commandable: {0}", _vessel.isCommandable));
+			//Debug.LogWarning(string.Format("Vessel Type: {0}", _vessel.vesselType));
 
 			float repulsorCount = 0;
 			foreach (Part PA in _vessel.parts)
@@ -157,7 +157,7 @@ namespace KerbalFoundries
 				float r = 0;
 				float g = 0;
 				float b = 0;
-				const float alpha = 0.007f;
+				const float alpha = 0.014f;
 
 				for (int i = 0; i < total; i++)
 				{
