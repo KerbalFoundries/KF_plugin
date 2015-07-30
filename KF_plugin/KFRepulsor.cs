@@ -14,6 +14,16 @@ namespace KerbalFoundries
 {
     public class KFRepulsor : PartModule
     {
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Thermal Flux", guiUnits = "J"), UI_FloatRange(minValue = 0f, maxValue = 16000f, stepIncrement = 100f)]
+        public float Flux = 0f;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Skin Max Temp", guiUnits = "K"), UI_FloatRange(minValue = 0f, maxValue = 3600f, stepIncrement = 50f)]
+        public float MaxTemp = 1200f;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Skin-Skin Conduction Multi"), UI_FloatRange(minValue = 0.1f, maxValue = 2f, stepIncrement = 0.1f)]
+        public float ConductionMult = 1f;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Skin Thermal Mass Modifier"), UI_FloatRange(minValue = 0.1f, maxValue = 2f, stepIncrement = 0.1f)]
+        public float ThermalMassMod = 1f;
+        
+
         public JointSpring userspring;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Repulsor Settings")]
         public string settings = string.Empty;
@@ -198,6 +208,12 @@ namespace KerbalFoundries
 
         public void FixedUpdate()
         {
+            part.AddThermalFlux(Flux);
+            part.skinMaxTemp = MaxTemp;
+            part.skinSkinConductionMult = ConductionMult;
+            part.skinThermalMassModifier = ThermalMassMod;
+
+
             if (!isReady)
                 return;
             if (dir > 360)
@@ -213,7 +229,6 @@ namespace KerbalFoundries
                 // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
                 ResourceConsumption();
-
 
                 for (int i = 0; i < wcList.Count(); i++)
                 {

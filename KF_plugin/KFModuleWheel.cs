@@ -8,6 +8,17 @@ namespace KerbalFoundries
 {
     public class KFModuleWheel : PartModule
     {
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Thermal Flux", guiUnits = "J"), UI_FloatRange(minValue = 0f, maxValue = 16000f, stepIncrement = 100f)]
+        public float Flux = 0f;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Skin Max Temp", guiUnits = "K"), UI_FloatRange(minValue = 0f, maxValue = 3600f, stepIncrement = 50f)]
+        public float MaxTemp = 1200f;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Skin-Skin Conduction Multi"), UI_FloatRange(minValue = 0.1f, maxValue = 2f, stepIncrement = 0.1f)]
+        public float ConductionMult = 1f;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Skin Thermal Mass Modifier"), UI_FloatRange(minValue = 0.1f, maxValue = 2f, stepIncrement = 0.1f)]
+        public float ThermalMassMod = 1f;
+        
+
+
 		// disable RedundantDefaultFieldInitializer
 		// disable RedundantThisQualifier
 		
@@ -345,6 +356,12 @@ namespace KerbalFoundries
 
         public override void OnFixedUpdate()
         {
+            part.AddThermalFlux(Flux);
+            part.skinMaxTemp = MaxTemp;
+            part.skinSkinConductionMult = ConductionMult;
+            part.skinThermalMassModifier = ThermalMassMod;
+
+
             vesselMass = this.vessel.GetTotalMass();
             if (!Equals(Math.Round(vesselMass, 1),Math.Round(lastVesselMass, 1) ))
             {
