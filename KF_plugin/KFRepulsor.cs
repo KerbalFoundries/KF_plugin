@@ -283,7 +283,7 @@ namespace KerbalFoundries
         [KSPAction("Retract")]
         public void Retract(KSPActionParam param)
         {
-            if (rideHeight > 0)
+            if (rideHeight > 0f)
             {
                 rideHeight -= 5f;
                 //print("Retracting...");
@@ -294,7 +294,7 @@ namespace KerbalFoundries
         [KSPAction("Extend")]
         public void Extend(KSPActionParam param)
         {
-            if (rideHeight < 100)
+            if (rideHeight < 100f)
             {
                 rideHeight += 5f;
                 //print("Extending...");
@@ -323,6 +323,47 @@ namespace KerbalFoundries
             }
             //StartCoroutine("UpdateHeight"); 
         }
+
+        [KSPEvent(active = true, guiActive = true, guiActiveEditor = true, guiName = "Predict (group)")]
+        public void PredictSettings()
+        {
+            if (HighLogic.LoadedSceneIsEditor)
+            {
+                List<Part> repulsorList = EditorLogic.fetch.ship.parts.FindAll(part => part.Modules.Contains("KFRepulsor"));
+                repulsorList.ForEach(part => part.SendMessage("CalculateCoM"));                
+            }
+        }
+
+        [KSPEvent(active = true, guiActive = true, guiActiveEditor = true, guiName = "Predict (part)")]
+        public void CalculateCoM()
+        {
+            Vector3 CoMposition = Vector3.zero;
+            float shipMass = 0f;
+            List<Part> repulsorList = new List<Part>();
+
+            if (HighLogic.LoadedSceneIsEditor)
+            {   
+                foreach (Part part in EditorLogic.fetch.ship.parts)
+                {
+                    if (part.Modules.Contains("LaunchClamp") || part.physicalSignificance == Part.PhysicalSignificance.NONE) // ignore launch clamps and physicless parts
+                        continue;
+
+                    if (part.Modules.Contains("KFRepulsor")) // we'll need them later
+                        repulsorList.Add(part);
+
+                    float partMass = part.mass + part.GetModuleMass(part.mass) + part.GetResourceMass(); // a part's mass = it's mass + mass of all modules + mass of all resources
+                    shipMass += partMass;
+
+                    Vector3 partCoM = part.partTransform.position + part.partTransform.rotation * part.CoMOffset;
+                    CoMposition += partCoM * partMass;
+                }
+
+                KFLogUtil.Log("CoMposition: " + CoMposition, "CalculateCoM()");
+                KFLogUtil.Log("shipMass: " + shipMass, "CalculateCoM()");
+
+            }
+        }
+
 	}
 	// End class
 }
