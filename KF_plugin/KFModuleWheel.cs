@@ -479,7 +479,7 @@ namespace KerbalFoundries
 		}
 		//end OnUpdate
 
-        [KSPEvent(guiActive = true, guiName = "Find Modules", active = true)]
+        //[KSPEvent(guiActive = true, guiName = "Find Modules", active = true)]
         public void ChangeColliderMassAction()
         {
             ChangeColliderMass();

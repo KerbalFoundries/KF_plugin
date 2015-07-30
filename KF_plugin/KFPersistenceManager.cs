@@ -387,6 +387,8 @@ namespace KerbalFoundries
 						smrBounds.Encapsulate(m.MultiplyPoint3x4(vertices[i]));
 
 					Destroy(mesh);
+                    if (r.tag == "Icon_Hidden") 
+                        Destroy(r);
 					boundsList.Add(smrBounds);
 				}
 				else if (r is MeshRenderer)

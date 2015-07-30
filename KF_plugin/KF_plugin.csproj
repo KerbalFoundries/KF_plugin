@@ -51,6 +51,7 @@
     <Compile Include="DustFX\KFDustFX.cs" />
     <Compile Include="DustFX\RepulsorDustFX.cs" />
     <Compile Include="DustFX\KFDustFXUtils.cs" />
+    <Compile Include="KFConstrain.cs" />
     <Compile Include="Log\KFLog.cs" />
     <Compile Include="Log\KFLogWriter.cs" />
     <Compile Include="KFGUIManager.cs" />
