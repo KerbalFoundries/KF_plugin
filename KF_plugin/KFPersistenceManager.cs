@@ -387,7 +387,7 @@ namespace KerbalFoundries
 						smrBounds.Encapsulate(m.MultiplyPoint3x4(vertices[i]));
 
 					Destroy(mesh);
-                    if (r.tag == "Icon_Hidden") 
+                    if (r.tag == "Icon_Hidden") //KSP ignores Icon_Hidden tag for Skined Mesh renderers. 
                         Destroy(r);
 					boundsList.Add(smrBounds);
 				}
