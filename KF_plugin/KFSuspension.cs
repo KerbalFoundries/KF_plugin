@@ -94,7 +94,8 @@ namespace KerbalFoundries
                 else
                     traverse = colliders[i].suspensionDistance * tweakScaleCorrector; //movement defaults back to last position when the collider is not grounded. Ungrounded collider returns suspension travel of zero!
 
-                suspensionMovement += traverse; //debug only
+                suspensionMovement += traverse; 
+
             }
 
             frameTraverse = suspensionMovement / objectCount; //average the movement.

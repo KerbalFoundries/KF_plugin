@@ -137,8 +137,8 @@ namespace KerbalFoundries
 				case "repulsor":
 					if (lowEnergy)
 						return;
-					_moduletrack.UpdateColliders("retract");
-					_moduletrack.currentRideHeight = repulsorHeight * replusorHeightMultiplier;
+					_moduletrack.RetractDeploy("retract");
+					_moduletrack.currentTravel = repulsorHeight * replusorHeightMultiplier;
 					repulsorMode = true;
 					for (int i = 0; i < wcList.Count(); i++)
 					{
@@ -152,9 +152,9 @@ namespace KerbalFoundries
 					}
 					break;
 				case "wheel":
-					_moduletrack.currentRideHeight = _moduletrack.rideHeight;
-					_moduletrack.smoothedRideHeight = _moduletrack.currentRideHeight;
-					_moduletrack.UpdateColliders("deploy");
+					_moduletrack.currentTravel = _moduletrack.rideHeight;
+					_moduletrack.smoothedTravel = _moduletrack.currentTravel;
+					_moduletrack.RetractDeploy("deploy");
 					repulsorMode = false;
 					for (int i = 0; i < wcList.Count(); i++)
 					{
@@ -186,8 +186,8 @@ namespace KerbalFoundries
 				{
 					if (repulsorMode) // Similiarly, only apply settings when inreplusor mode.
 					{
-						_moduletrack.currentRideHeight = repulsorHeight * replusorHeightMultiplier;
-						mt.currentRideHeight = repulsorHeight * replusorHeightMultiplier;
+						_moduletrack.currentTravel = repulsorHeight * replusorHeightMultiplier;
+						mt.currentTravel = repulsorHeight * replusorHeightMultiplier;
 					}
 				}
 			}

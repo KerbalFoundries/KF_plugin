@@ -214,11 +214,12 @@ namespace KerbalFoundries
 		}
 
 		/// <summary>Coroutine for wheels with suspension.</summary>
+        /// DEPRECATED!!!!!!!!!!!!!! Use KFSuspension instead
 		IEnumerator Suspension()
 		{
 			while (true)
 			{
-				_wheelCollider.suspensionDistance = suspensionDistance * _KFModuleWheel.appliedRideHeight;
+				
 				//suspension movement
 				WheelHit hit; //set this up to grab sollider raycast info
 				float frameTraverse = 0;
@@ -239,9 +240,6 @@ namespace KerbalFoundries
 					frameTraverse = lastFrameTraverse; //movement defaults back to last position when the collider is not grounded. Ungrounded collider returns suspension travel of zero!
 				
 				susTravel = frameTraverse; //debug only
-
-				//newTranslation = tempLastFrameTraverse - frameTraverse; // calculate the change of movement. Using Translate on susTrav, which is cumulative, not absolute.
-				//MoveSuspension(susTravIndex, newTranslation, _susTrav); //move suspension in its configured direction by the amount calculated for this frame. 
 				_susTrav.localPosition = initialPosition; //use the 
 				MoveSuspension(susTravIndex, -frameTraverse, _susTrav);
 				//end suspension movement
