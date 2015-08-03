@@ -123,7 +123,7 @@ namespace KerbalFoundries
 		Color colorBiome;
 		Color colorAverage;
 		Color colorCam;
-		
+				
 		/// <summary>Loaded from the KFConfigManager class.</summary>
 		/// <remarks>Persistent field.</remarks>
 		[Persistent]
@@ -168,11 +168,9 @@ namespace KerbalFoundries
 				return;
 			}
 			
-			if (isDustEnabledGlobally && !isDustEnabledLocally)
+			if (!isDustEnabledGlobally || !isDustEnabledLocally || !HighLogic.LoadedSceneIsFlight)
 				return;
 			
-			if (!HighLogic.LoadedSceneIsFlight)
-				return;
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				_ModuleCameraShot = vessel.GetComponent<ModuleCameraShot>();
@@ -202,12 +200,22 @@ namespace KerbalFoundries
 			_kfRepDustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = _kfRepDustFx.particleEmitter.GetComponent<ParticleAnimator>();
 			//KFLog.Log("Particles have been set up.", strClassName);
+			if (KFPersistenceManager.isRepLightEnabled)
+				SetupLights();
+		}
+		
+		void SetupLights()
+		{
+			if (!KFPersistenceManager.isRepLightEnabled)
+				return;
 			_kfRepLight = new GameObject("Rep Light");
 			_kfRepLight.transform.parent = _kfRepDustFx.transform;
 			_kfRepLight.transform.position = Vector3.zero;
+			
 			_repLight = _kfRepLight.AddComponent<Light>();
 			_repLight.type = LightType.Point;
-			_repLight.range = 2.0f;
+			_repLight.renderMode = LightRenderMode.ForceVertex;
+			_repLight.range = 3.0f;
 			_repLight.color = Color.blue;
 			_repLight.intensity = 0.0f;
 		}
@@ -290,7 +298,11 @@ namespace KerbalFoundries
 			if (KFPersistenceManager.isDustCameraEnabled)
 			{
 				colorCam = _ModuleCameraShot._averageColour;
-				colorAverage = (colorCam + colorBiome) / 2;
+				//colorAverage = (colorCam + colorBiome) / 2;
+				colorAverage.r = (colorCam.r + colorBiome.r) / 2;
+				colorAverage.g = (colorCam.g + colorBiome.g) / 2;
+				colorAverage.b = (colorCam.b + colorBiome.b) / 2;
+				colorAverage.a = colorBiome.a;
 			}
 			else
 				colorAverage = colorBiome;
@@ -321,9 +333,15 @@ namespace KerbalFoundries
 				_kfRepDustFx.particleEmitter.maxEmission = Mathf.Clamp((force * maxDustEmissionMult), (minDustEmission * appliedRideHeight), (maxDustEmission * appliedRideHeight));
 				_kfRepDustFx.particleEmitter.maxSize = Mathf.Clamp((force / appliedRideHeight), minDustSize, maxDustSize);
 				_kfRepDustFx.particleEmitter.Emit();
-				_kfRepLight.transform.localPosition = Vector3.zero;
-				_repLight.intensity = 0.5f;
-				_repLight.enabled = true;
+				
+				if (!KFPersistenceManager.isRepLightEnabled || Equals(_KFRepulsor.rideHeight, 0))
+					_repLight.enabled = false;
+				else
+				{
+					_kfRepLight.transform.localPosition = Vector3.zero;
+					_repLight.intensity = 0.5f;
+					_repLight.enabled = true;
+				}
 			}
 			return;
 		}

@@ -85,14 +85,14 @@ namespace KerbalFoundries
         {
             base.OnStart(state);
            
-            _dustFX = this.part.GetComponent<KFRepulsorDustFX>(); //see if it's been added by MM
+            _dustFX = part.GetComponent<KFRepulsorDustFX>(); //see if it's been added by MM. MM deprecated in favor of adding the module manually. - Gaalidas 
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
             {
                 part.AddModule("KFRepulsorDustFX");
-                _dustFX = this.part.GetComponent<KFRepulsorDustFX>();
+                _dustFX = part.GetComponent<KFRepulsorDustFX>();
                 //_dustFX.wheelImpact = true;
                 //_dustFX.wheelImpactSound = "KerbalFoundries/Sounds/TyreSqueal";
-                _dustFX.maxDustEmission = 28;
+                _dustFX.maxDustEmission = 28; // Not really necessary to set this, a reasonable default exists in the modukle. - Gaalidas
                 _dustFX.OnStart(state);
             }
 
@@ -103,7 +103,7 @@ namespace KerbalFoundries
                 _gimbal = transform.Search(gimbalName);
                 SetupWaterSlider();
 
-                foreach (WheelCollider b in this.part.GetComponentsInChildren<WheelCollider>())
+                foreach (WheelCollider b in part.GetComponentsInChildren<WheelCollider>())
                 {
                     repulsorCount ++;
                     userspring = b.suspensionSpring;
@@ -133,7 +133,7 @@ namespace KerbalFoundries
 			_MWS = vessel.GetComponent<ModuleWaterSlider>();
 		}
 
-        /// <summary>A "Shrink" coroutine for steering.</summary>
+        /// <summary>A "Shrink" coroutine for the animation.</summary>
         IEnumerator Shrink()
         {
             while (_grid.transform.localScale.x > 0.2f && _grid.transform.localScale.y > 0.2f && _grid.transform.localScale.z > 0.2f)
@@ -145,7 +145,7 @@ namespace KerbalFoundries
             //Debug.LogWarning("Finished shrinking");
         }
 
-        /// <summary>A "grow" coroutine for steering.</summary>
+        /// <summary>A "grow" coroutine for the animation.</summary>
         IEnumerator Grow()
         {
             while (_grid.transform.localScale.x < _gridScale.x && _grid.transform.localScale.y < _gridScale.y && _grid.transform.localScale.z < _gridScale.z)
@@ -159,7 +159,7 @@ namespace KerbalFoundries
         }
 
         // disable once FunctionNeverReturns
-        /// <summary>A "LookAt" coroutine for steering.</summary>
+        /// <summary>A "LookAt" coroutine for steering/orientation.</summary>
         IEnumerator LookAt()
         {
             while (true)
@@ -205,15 +205,14 @@ namespace KerbalFoundries
             float sin = (float)Math.Sin(Mathf.Deg2Rad * dir);
             float cos = (float)Math.Cos(Mathf.Deg2Rad * dir);
             var emitDirection = new Vector3(0, sin * 10, cos * 10);
-           
+
             float hitForce = 0;
 
-            if (deployed && this.vessel.IsControllable)
+            if (deployed && vessel.IsControllable)
             {
                 // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
                 ResourceConsumption();
-
 
                 for (int i = 0; i < wcList.Count(); i++)
                 {
@@ -222,7 +221,8 @@ namespace KerbalFoundries
                     if (grounded)
                     {
                         hitForce += hit.force;
-                        _dustFX.RepulsorEmit(hit.point, hit.collider, hit.force, hit.normal, emitDirection);
+                        if (KFPersistenceManager.isDustEnabled)
+                        	_dustFX.RepulsorEmit(hit.point, hit.collider, hit.force, hit.normal, emitDirection);
                     }
                 }
 
@@ -280,32 +280,37 @@ namespace KerbalFoundries
             //Debug.LogWarning("Finished height update.");
         }
 
-        [KSPAction("Retract")]
+        [KSPAction("Dec. Height")]
         public void Retract(KSPActionParam param)
         {
             if (rideHeight > 0)
             {
                 rideHeight -= 5f;
                 //print("Retracting...");
-                StartCoroutine("UpdateHeight");
+                //StartCoroutine("UpdateHeight");
+				ApplySettingsAction();
             }
 		}
 
-        [KSPAction("Extend")]
+        [KSPAction("Inc. Height")]
         public void Extend(KSPActionParam param)
         {
             if (rideHeight < 100)
             {
                 rideHeight += 5f;
-                //print("Extending...");
-                StartCoroutine("UpdateHeight");
+				//print("Extending...");
+				//StartCoroutine("UpdateHeight");
+				ApplySettingsAction();
             }
 		}
 
-		[KSPAction("Apply Settings")]
-		public void ApplySettingsAction(KSPActionParam param)
+        //[KSPAction("Apply Settings")]
+        //public void ApplySettingsAction(KSPActionParam param)
+		public void ApplySettingsAction()
 		{
-			ApplySettings();
+			appliedRideHeight = rideHeight;
+			StartCoroutine("UpdateHeight");
+			//ApplySettings();
 		}
 		
         [KSPEvent(guiActive = true, guiName = "Apply Settings", active = true)]
@@ -318,10 +323,10 @@ namespace KerbalFoundries
                 {
                     mt.rideHeight = rideHeight;
                     mt.appliedRideHeight = rideHeight;
-                    mt.StartCoroutine("UpdateHeight"); 
+                    mt.StartCoroutine("UpdateHeight");
                 }
             }
-            //StartCoroutine("UpdateHeight"); 
+            //StartCoroutine("UpdateHeight");
         }
 	}
 	// End class

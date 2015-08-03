@@ -156,7 +156,7 @@ namespace KerbalFoundries
 				return;
 			}
 			
-			if (isDustEnabledGlobally && !isDustEnabledLocally)
+			if (!isDustEnabledGlobally || !isDustEnabledLocally)
 				return;
 			
 			if (HighLogic.LoadedSceneIsFlight)

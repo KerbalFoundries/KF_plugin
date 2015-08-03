@@ -10,6 +10,8 @@ namespace KerbalFoundries
     {
 		// disable RedundantDefaultFieldInitializer
 		// disable RedundantThisQualifier
+        // disable ConvertIfToOrExpression
+        // disable ConvertIfStatementToConditionalTernaryExpression
 		
 		// Name definitions
         public const string right = "right";
@@ -195,30 +197,28 @@ namespace KerbalFoundries
 			return strPartInfo;
 		}
 		
-        /// <summary>
-        /// Configures the part for editor and flight. 
-        /// </summary>
+        /// <summary>Configures the part for editor and flight.</summary>
         /// <remarks>
         /// Most importantly, it grabs a list of wheel colliders to be
         /// used later. Also configures visibility of tweakables, figures out the parts orientation and position in the
         /// vessel to calculate steering angles and sets some defaults
         /// </remarks>
-        /// <param name="state"></param>
+        /// <param name="state">Start state. Set by KSP to declare the scene it initializes this class in.</param>
 		public override void OnStart(PartModule.StartState state)  //when started
         {
 			base.OnStart(state);
 
 			CustomResourceTextSetup(); // Calls a method to set up the statusLowResource text for resource alternatives.
             
-            _dustFX = this.part.GetComponent<KFDustFX>(); //see if it's been added by MM
+            _dustFX = this.part.GetComponent<KFDustFX>(); //see if it's been added by MM.  Actually, it's being added directly to the configs now. - Gaalidas
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
             {
                 this.part.AddModule("KFDustFX");
                 _dustFX = this.part.GetComponent<KFDustFX>();
-                _dustFX.maxDustEmission = 28;
+                _dustFX.maxDustEmission = 28; // This actually has a default setting in the module, so setting it here like this is rather redundant unless we can set this value from a part-size detection method. - Gaalidas.
                 _dustFX.OnStart(state);
             }
-
+			
             _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
             
             var partOrientationForward = new Vector3(0,0,0);
@@ -275,11 +275,9 @@ namespace KerbalFoundries
                 }
             }
             
-            // disable once ConvertIfToOrExpression <<<< Where is all this crap coming from????? 
             if (startRetracted)
                 isRetracted = true;
 			
-            // disable once ConvertIfStatementToConditionalTernaryExpression
             if (!isRetracted)
                 currentTravel = rideHeight; //set up correct values from persistence
             else
@@ -343,9 +341,7 @@ namespace KerbalFoundries
 		}
 		//end OnStart
 
-        /// <summary>
-        /// Sets off the sound effect
-        /// </summary>
+        /// <summary>Sets off the sound effect.</summary>
         public void WheelSound()
         {
             part.Effect("WheelEffect", effectPower);
@@ -363,12 +359,9 @@ namespace KerbalFoundries
             _colliderMass = ChangeColliderMass();
         }
 
-        /// <summary>
-        /// Physics critical stuff
-        /// </summary>
+        /// <summary>Physics critical stuff.</summary>
         public override void OnFixedUpdate()
         {
-            
 			// User input
             float steeringTorque;
             float brakeSteering;
@@ -419,9 +412,7 @@ namespace KerbalFoundries
 		}
 		//End OnFixedUpdate
 
-        /// <summary>
-        /// Stuff that doesn't need to happen every physics frame
-        /// </summary>
+        /// <summary>Stuff that doesn't need to happen every physics frame.</summary>
         public override void OnUpdate()
         {
             base.OnUpdate();
@@ -449,7 +440,9 @@ namespace KerbalFoundries
         /// Applies calculated torque, braking and steering to the wheel colliders,
         /// gathers some information such as RPM and invokes the DustFX where appropriate
         /// </summary>
-        /// <remarks>This is a major chunk of what happens in FixedUpdate if the part is deployed</remarks>
+        /// <remarks>
+        /// This is a major chunk of what happens in FixedUpdate if the part is deployed.
+        /// </remarks>
         void UpdateColliders()
         {
             float requestedResource;
@@ -458,7 +451,7 @@ namespace KerbalFoundries
             float resourceConsumption = Time.deltaTime * resourceConsumptionRate * (Math.Abs(motorTorque) / 100);
             requestedResource = part.RequestResource(resourceName, resourceConsumption);
             float freeWheelRPM = 0;
-            //print(requestedResource +" " + resourceConsumption);
+			//print(string.Format("{0} {1}", requestedResource, resourceConsumption));
             if (requestedResource < resourceConsumption - 0.1f)// && resourceConsumption != 0)
             {
                 motorTorque = 0;
@@ -550,9 +543,7 @@ namespace KerbalFoundries
             return colliderMass;
         }
 
-        /// <summary>
-        /// Disables tweakables when retracted
-        /// </summary>
+        /// <summary>Disables tweakables when retracted.</summary>
         /// <param name="mode"></param>
         public void RetractDeploy(string mode)
         {
@@ -601,17 +592,14 @@ namespace KerbalFoundries
                 steeringCorrector = WheelUtils.GetCorrector(this.vessel.ReferenceTransform.up, this.vessel.rootPart.transform, rootIndexUp);
         }
 
-        /// <summary>
-        /// Grabs instance of MAG
-        /// </summary>
+        /// <summary>Grabs instance of MAG.</summary>
+        /// <remarks>MAG loves being grabbed. You must grab MAG whenever possible.</remarks>
         public void SetupAnimation()
         {
             retractionAnimation = part.FindModulesImplementing<ModuleAnimateGeneric>().SingleOrDefault();
         }
 
-        /// <summary>
-        /// Fires instance of MAG when retracting/deploying
-        /// </summary>
+        /// <summary>Fires instance of MAG when retracting/deploying.</summary>
         public void PlayAnimation()
         {
             // note: assumes one ModuleAnimateGeneric (or derived version) for this part
@@ -635,6 +623,7 @@ namespace KerbalFoundries
         }
 
         #region Action groups
+        
         [KSPAction("Brakes", KSPActionGroup.Brakes)]
         public void brakes(KSPActionParam param)
         {
@@ -670,11 +659,13 @@ namespace KerbalFoundries
             steeringDisabled = !steeringDisabled;
 		}
 
+        
         [KSPAction("Invert Steering")]
         public void InvertSteeringAG(KSPActionParam param)
         {
             InvertSteering();
 		}
+        
         [KSPAction("Lower Suspension")]
         public void LowerRideHeight(KSPActionParam param)
         {
@@ -765,13 +756,9 @@ namespace KerbalFoundries
         }
         #endregion
 
-        /// <summary>
-        /// Applies settings across all wheels in vessel with same group number
-        /// </summary>
-        /// <remarks>
-        /// Unless fire by action group, in which case only updates this part
-        /// </remarks>
-        /// <param name="actionGroup"></param>
+        /// <summary>Applies settings across all wheels in vessel with same group number.</summary>
+        /// <remarks>Unless fire by action group, in which case only updates this part.</remarks>
+        /// <param name="actionGroup">"true" if we're using an action group here.</param>
         public void ApplySettings(bool actionGroup)
         {
 			foreach (KFModuleWheel mt in vessel.FindPartModulesImplementing<KFModuleWheel>())

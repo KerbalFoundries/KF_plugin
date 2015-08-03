@@ -142,25 +142,30 @@ namespace KerbalFoundries
                  * 
                  * window height calculates like this:
                  *   24 units - space for title bar (automatically drawn)
-                 *   24 units - space for first toggle
+                 *  +24 units - space for first toggle
                  * (+ 8 units - space between two toggles
-                 *  +24 units - space for second toggle)
+                 *  +24 units - space for second toggle
                  * (+ 8 units - space between two toggles
-                 *  +24 units - space for third toggle)
-                 *  16 units - space till end of window
+                 *  +24 units - space for third toggle
+                 * (+ 8 units - space between two toggles)
+                 *  +24 units - space for the fourth toggle
+                 *  +16 units - space till end of window
                  * 
                  * =>
                  *   Window height (1 toogle) :  64
                  *   Window height (2 toogles):  96
                  *   Window height (3 toogles): 128
+                 *   Window height (4 toggles): 160
                  */
 
                 float windowTop = 42f;
                 float windowLeft = -260f;
-                float windowHeight = 128f; // assume 3 toggles will be displayed
+                float windowHeight = 160f; // assume 4 toggles will be displayed
 
-                if (HighLogic.LoadedSceneIsFlight)
-                    windowHeight -= 32f; // remove the space of 1 toggle, because only 2 toggles need to be displayed
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					windowHeight -= 32f; // remove the space of 1 toggles, because only 3 toggles need to be displayed.
+				}
 
                 if (HighLogic.LoadedSceneIsEditor)
                 {
@@ -190,12 +195,14 @@ namespace KerbalFoundries
 			{
 				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
 				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
 			}
 
 			if (Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
 			{
 				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
 				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 120f, 240f, 24f), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
 			}
 		}
 		
