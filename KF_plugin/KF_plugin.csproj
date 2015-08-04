@@ -49,7 +49,6 @@
   <ItemGroup>
     <Compile Include="APUController.cs" />
     <Compile Include="DustFX\KFDustFX.cs" />
-    <Compile Include="DustFX\RepulsorDustFX.cs" />
     <Compile Include="DustFX\KFDustFXUtils.cs" />
     <Compile Include="KFConstrain.cs" />
     <Compile Include="Log\KFLog.cs" />

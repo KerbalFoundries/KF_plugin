@@ -158,12 +158,13 @@ namespace KerbalFoundries
             if (isRepulsor)
             {
                 _KFRepulsor = this.part.GetComponent<KFRepulsor>();
-
+                Debug.LogWarning ("Finding repulsor");
             }
             else
             {
                 _KFModuleWheel = this.part.GetComponent<KFModuleWheel>();
                 tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
+                Debug.LogWarning ("finding wheel");
             }
 			
 			isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
