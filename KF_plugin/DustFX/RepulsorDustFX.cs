@@ -117,7 +117,7 @@ namespace KerbalFoundries
 		bool isDustCameraEnabled;
 		GameObject _kfRepDustFx;
 		GameObject _kfRepLight;
-		public Light _repLight;
+		Light _repLight;
 		ParticleAnimator dustAnimator;
 		Color colorDust;
 		Color colorBiome;
@@ -228,57 +228,13 @@ namespace KerbalFoundries
 		/// <param name="direction">Emission direction..</param>
 		public void RepulsorEmit(Vector3 hitPoint, Collider col, float force, Vector3 normal, Vector3 direction)
 		{
-			CollisionInfo cInfo;
+
 			isColorOverrideActive |= string.Equals("ModuleWaterSlider.Collider", col.gameObject.name);
 			if (isPaused || Equals(rideHeight, 0))
 				return;
-			cInfo = KFRepulsorDustFX.GetClosestChild(part, hitPoint + part.rigidbody.velocity * Time.deltaTime);
-			if (!Equals(cInfo.KFRepDustFX, null))
-				cInfo.KFRepDustFX.Scrape(hitPoint, col, force, normal, direction);
-			Scrape(hitPoint, col, force, normal, direction);
-		}
-		
-		/// <summary>Searches child parts for the nearest instance of this class to the given point.</summary>
-		/// <remarks>
-		/// Parts with "physicsSignificance = 1" have their collisions detected by the parent part.
-		/// To identify which part is the source of a collision, check which part the collision is closest to.
-		/// </remarks>
-		/// <param name="parent">The parent part whose children should be tested.</param>
-		/// <param name="point">The point to test the distance from.</param>
-		/// <returns>The nearest child part with a DustFX module, or null if the parent part is nearest.</returns>
-		static CollisionInfo GetClosestChild(Part parent, Vector3 point)
-		{
-			float parentDistance = Vector3.Distance(parent.transform.position, point);
-			float minDistance = parentDistance;
-			KFRepulsorDustFX closestChild = null;
-			foreach (Part child in parent.children)
-			{
-				if (!Equals(child, null) && !Equals(child.collider, null) && (Equals(child.physicalSignificance, Part.PhysicalSignificance.NONE)))
-				{
-					float childDistance = Vector3.Distance(child.transform.position, point);
-					var cfx = child.GetComponent<KFRepulsorDustFX>();
-					if (!Equals(cfx, null) && childDistance < minDistance)
-					{
-						minDistance = childDistance;
-						closestChild = cfx;
-					}
-				}
-			}
-			return new CollisionInfo(closestChild);
-		}
-		
-		/// <summary>Called when the part is scraping over a surface.</summary>
-		/// <param name="position">Position of the scrape.</param>
-		/// <param name="col">The collider being referenced.</param>
-		/// <param name="force">Scrape force.</param>
-		/// <param name="normal">Nothing comes to mind to explain this.</param>
-		/// <param name="direction">Emission direction.</param>
-		public void Scrape(Vector3 position, Collider col, float force, Vector3 normal, Vector3 direction)
-		{
-			if ((isPaused || Equals(part, null)) || Equals(part.rigidbody, null))
-				return;
-			//float fMagnitude = this.part.rigidbody.velocity.magnitude;
-			DustParticles(force, position + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
+
+			//Scrape(hitPoint, col, force, normal, direction);
+            DustParticles(force, hitPoint + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
 		}
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>

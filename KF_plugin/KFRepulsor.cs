@@ -51,7 +51,7 @@ namespace KerbalFoundries
         float currentRideHeight;
         float repulsorCount = 0;
 
-        KFRepulsorDustFX _dustFX;
+        KFDustFX _dustFX;
         float dir;
         
         public List<WheelCollider> wcList = new List<WheelCollider>();
@@ -85,13 +85,12 @@ namespace KerbalFoundries
         {
             base.OnStart(state);
            
-            _dustFX = part.GetComponent<KFRepulsorDustFX>(); //see if it's been added by MM. MM deprecated in favor of adding the module manually. - Gaalidas 
+            _dustFX = part.GetComponent<KFDustFX>(); //see if it's been added by MM. MM deprecated in favor of adding the module manually. - Gaalidas 
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
             {
                 part.AddModule("KFRepulsorDustFX");
-                _dustFX = part.GetComponent<KFRepulsorDustFX>();
-                //_dustFX.wheelImpact = true;
-                //_dustFX.wheelImpactSound = "KerbalFoundries/Sounds/TyreSqueal";
+                _dustFX = part.GetComponent<KFDustFX>();
+                _dustFX.isRepulsor = true;
                 _dustFX.maxDustEmission = 28; // Not really necessary to set this, a reasonable default exists in the modukle. - Gaalidas
                 _dustFX.OnStart(state);
             }

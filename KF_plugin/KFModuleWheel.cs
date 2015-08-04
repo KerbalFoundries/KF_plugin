@@ -484,7 +484,7 @@ namespace KerbalFoundries
                     trackRPM += wcList[i].rpm;
                     colliderLoad += hit.force;
                     if (KFPersistenceManager.isDustEnabled)
-                    	_dustFX.CollisionScrape(hit.point, hit.collider);
+                    	_dustFX.WheelEmit(hit.point, hit.collider);
                 }
                 else if (!Equals(wcList[i].suspensionDistance, 0)) //the sprocket colliders could be doing anything. Don't count them.
                     freeWheelRPM += wcList[i].rpm;
