@@ -8,6 +8,7 @@ namespace KerbalFoundries
 	public static class Extensions
 	{
 		// disable EmptyGeneralCatchClause
+		// disable UnusedParameter
 		public static void DebugLine(Vector3 position, Vector3 rotation)
 		{
 			var lineDebugX = new GameObject("lineDebug");

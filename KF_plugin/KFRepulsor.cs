@@ -287,7 +287,6 @@ namespace KerbalFoundries
             {
                 rideHeight -= 5f;
                 //print("Retracting...");
-                //StartCoroutine("UpdateHeight");
 				ApplySettingsAction();
             }
 		}
@@ -299,13 +298,10 @@ namespace KerbalFoundries
             {
                 rideHeight += 5f;
 				//print("Extending...");
-				//StartCoroutine("UpdateHeight");
 				ApplySettingsAction();
             }
 		}
 
-        //[KSPAction("Apply Settings")]
-        //public void ApplySettingsAction(KSPActionParam param)
 		public void ApplySettingsAction()
 		{
 			appliedRideHeight = rideHeight;

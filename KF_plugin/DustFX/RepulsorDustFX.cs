@@ -215,7 +215,7 @@ namespace KerbalFoundries
 			_repLight = _kfRepLight.AddComponent<Light>();
 			_repLight.type = LightType.Point;
 			_repLight.renderMode = LightRenderMode.ForceVertex;
-			_repLight.range = 3.0f;
+			_repLight.range = 6.0f;
 			_repLight.color = Color.blue;
 			_repLight.intensity = 0.0f;
 		}
@@ -293,7 +293,8 @@ namespace KerbalFoundries
 			if (!dustEffects || force < minScrapeSpeed || Equals(dustAnimator, null) || Equals(rideHeight, 0))
 				return;
 			float appliedRideHeight = Mathf.Clamp((rideHeight / 2), 1, 4);
-			colorBiome = !isColorOverrideActive ? KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
+			//colorBiome = !isColorOverrideActive ? KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude) : WaterColor;
+			colorBiome = KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
 			
 			if (KFPersistenceManager.isDustCameraEnabled)
 			{
@@ -334,8 +335,11 @@ namespace KerbalFoundries
 				_kfRepDustFx.particleEmitter.maxSize = Mathf.Clamp((force / appliedRideHeight), minDustSize, maxDustSize);
 				_kfRepDustFx.particleEmitter.Emit();
 				
-				if (!KFPersistenceManager.isRepLightEnabled || Equals(_KFRepulsor.rideHeight, 0))
+				if (!KFPersistenceManager.isRepLightEnabled || _KFRepulsor.rideHeight < 1 || !_KFRepulsor.deployed)
+				{
+					_repLight.intensity = 0.0f;
 					_repLight.enabled = false;
+				}
 				else
 				{
 					_kfRepLight.transform.localPosition = Vector3.zero;

@@ -200,8 +200,9 @@ namespace KerbalFoundries
         /// <summary>Configures the part for editor and flight.</summary>
         /// <remarks>
         /// Most importantly, it grabs a list of wheel colliders to be
-        /// used later. Also configures visibility of tweakables, figures out the parts orientation and position in the
-        /// vessel to calculate steering angles and sets some defaults
+        /// used later. Also configures visibility of tweakables, figures
+        /// out the parts orientation and position in the vessel to calculate
+        /// steering angles and sets some defaults.
         /// </remarks>
         /// <param name="state">Start state. Set by KSP to declare the scene it initializes this class in.</param>
 		public override void OnStart(PartModule.StartState state)  //when started
@@ -482,7 +483,8 @@ namespace KerbalFoundries
                     groundedWheels++;
                     trackRPM += wcList[i].rpm;
                     colliderLoad += hit.force;
-                    _dustFX.CollisionScrape(hit.point, hit.collider);
+                    if (KFPersistenceManager.isDustEnabled)
+                    	_dustFX.CollisionScrape(hit.point, hit.collider);
                 }
                 else if (!Equals(wcList[i].suspensionDistance, 0)) //the sprocket colliders could be doing anything. Don't count them.
                     freeWheelRPM += wcList[i].rpm;

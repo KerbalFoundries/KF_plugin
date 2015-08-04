@@ -223,7 +223,11 @@ namespace KerbalFoundries
 			if (KFPersistenceManager.isDustCameraEnabled)
 			{
 				colorCam = _ModuleCameraShot._averageColour;
-				colorAverage = colorCam + colorBiome / 2;
+				//colorAverage = colorCam + colorBiome / 2;
+				colorAverage.r = (colorCam.r + colorBiome.r) / 2;
+				colorAverage.g = (colorCam.g + colorBiome.g) / 2;
+				colorAverage.b = (colorCam.b + colorBiome.b) / 2;
+				colorAverage.a = colorBiome.a;
 			}
 			else
 				colorAverage = colorBiome;

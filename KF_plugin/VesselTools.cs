@@ -91,6 +91,8 @@ namespace KerbalFoundries
 
 	public class ModuleCameraShot : VesselModule
 	{
+		// disable RedundantDefaultFieldInitializer
+		
 		const int resWidth = 6;
 		const int resHeight = 6;
 		public Color _averageColour = new Color(1, 1, 1, 0.025f);

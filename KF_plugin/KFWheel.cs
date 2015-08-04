@@ -114,7 +114,7 @@ namespace KerbalFoundries
 				GameEvents.onGamePause.Add(new EventVoid.OnEvent(this.OnPause));
 				GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(this.OnUnPause));
 				//find named onjects in part
-				foreach (WheelCollider wc in this.part.GetComponentsInChildren<WheelCollider>())
+				foreach (WheelCollider wc in part.GetComponentsInChildren<WheelCollider>())
 				{
 					if (wc.name.StartsWith(colliderName, StringComparison.Ordinal))
 						_wheelCollider = wc;
@@ -214,7 +214,7 @@ namespace KerbalFoundries
 		}
 
 		/// <summary>Coroutine for wheels with suspension.</summary>
-        /// DEPRECATED!!!!!!!!!!!!!! Use KFSuspension instead
+        /// <remarks>DEPRECATED!!!!!!!!!!!!!! Use KFSuspension instead!</remarks>
 		IEnumerator Suspension()
 		{
 			while (true)

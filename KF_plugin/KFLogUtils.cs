@@ -148,7 +148,8 @@ namespace KerbalFoundries
 				case LogType.Warning:
 					UnityEngine.Debug.LogWarning(strOutput);
 					break;
-				case LogType.Log: // This is quite redundant, but I'm leaving it alone for the time being.
+				// disable once RedundantCaseLabel
+				case LogType.Log:
 				default:
 					UnityEngine.Debug.Log(strOutput);
 					break;

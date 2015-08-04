@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace KerbalFoundries
 {
     public class KFConstrain : PartModule
     {
+        // disable FieldCanBeMadeReadOnly.Local
+        // disable RedundantDefaultFieldInitializer
+        // disable FunctionNeverReturns
+        
         [KSPField]
         public string targetName;
         [KSPField]
@@ -34,7 +37,6 @@ namespace KerbalFoundries
         {
             base.OnStart(state);
 
-            
             moverList = moversName.Split(new[] { ',', ' ', '|' }, StringSplitOptions.RemoveEmptyEntries); //Thanks, Mihara!
 
             if (HighLogic.LoadedSceneIsFlight)
@@ -91,10 +93,8 @@ namespace KerbalFoundries
         {
             while (true)
             {
-                for (int i = 0; i < objectCount; i++)
-                {
-                    movers[i].position = _target.position;
-                }
+				for (int i = 0; i < objectCount; i++)
+					movers[i].position = _target.position;
                 yield return null;
             }
         }

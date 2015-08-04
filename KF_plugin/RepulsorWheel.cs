@@ -13,6 +13,8 @@ namespace KerbalFoundries
 {
 	public class RepulsorWheel : PartModule
 	{
+		// disable RedundantDefaultFieldInitializer
+		
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Repulsor Height %"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5)]
 		public float repulsorHeight = 50;
 
@@ -214,7 +216,7 @@ namespace KerbalFoundries
 				return; // The Log.Error line fails syntax check with 'The name 'Log' does not appear in the current context.
 			myAnimation.Toggle();
 		}
-
+		
 		[KSPAction("Wheel Mode")]
 		public void toWheel(KSPActionParam param)
 		{
@@ -226,7 +228,7 @@ namespace KerbalFoundries
 			}
 		}
 		// End Deploy All
-
+		
 		[KSPAction("Repulsor Mode")]
 		public void toRepulsor(KSPActionParam param)
 		{

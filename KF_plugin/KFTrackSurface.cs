@@ -21,9 +21,9 @@ namespace KerbalFoundries
             base.OnStart(state);
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
 
-            _smr = this.part.GetComponentInChildren<SkinnedMeshRenderer>(); //this is the track
+            _smr = part.GetComponentInChildren<SkinnedMeshRenderer>(); //this is the track
             _trackSurface = _smr.gameObject;
-            _track = this.part.GetComponentInChildren<KFModuleWheel>();
+            _track = part.GetComponentInChildren<KFModuleWheel>();
 
             if (HighLogic.LoadedSceneIsFlight)
             {
