@@ -27,8 +27,8 @@ namespace KerbalFoundries
         public float SpringRate;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Damping"), UI_FloatRange(minValue = 0, maxValue = 0.3f, stepIncrement = 0.05f)]
         public float DamperRate;
-        [KSPField]
-        public bool deployed = true;
+
+        
         [KSPField]
         public bool lowEnergy;
         [KSPField]
@@ -55,6 +55,7 @@ namespace KerbalFoundries
         float dir;
         
         public List<WheelCollider> wcList = new List<WheelCollider>();
+        public bool deployed = true;
         //public List<float> susDistList = new List<float>();
         ModuleWaterSlider _MWS;
 
@@ -141,6 +142,7 @@ namespace KerbalFoundries
                 yield return null;
             }
             _grid.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+            deployed = false;
             //Debug.LogWarning("Finished shrinking");
         }
 
@@ -207,7 +209,7 @@ namespace KerbalFoundries
 
             float hitForce = 0;
 
-            if (deployed && vessel.IsControllable)
+            if (deployed)
             {
                 // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
@@ -243,9 +245,11 @@ namespace KerbalFoundries
             {
                 //effectPower = 0;
 				status = lowEnergy ? "Low Charge" : "Off";
+                //Debug.LogWarning("deployed " + deployed);
             }
 			
             RepulsorSound(hitForce);
+            _dustFX.RepulsorLight(deployed);
             //effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //print(effectPower);
 
@@ -273,6 +277,7 @@ namespace KerbalFoundries
             {
 				for (int i = 0; i < wcList.Count(); i++)
 					wcList[i].enabled = false;
+                
                 StopCoroutine("Grow");
                 StartCoroutine("Shrink");
             }

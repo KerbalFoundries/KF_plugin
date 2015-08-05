@@ -255,6 +255,21 @@ namespace KerbalFoundries
             //Scrape(hitPoint, col, force, normal, direction);
             DustParticles(force, hitPoint + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
         }
+
+        public void RepulsorLight(bool enabled)
+        {
+            if (KFPersistenceManager.isRepLightEnabled && enabled)
+            {
+                _kfRepLight.transform.localPosition = Vector3.zero;
+                _repLight.intensity = 0.5f;
+                _repLight.enabled = true;
+            }
+            else
+            {
+                _repLight.intensity = 0.0f;
+                _repLight.enabled = false;
+            }
+        }
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
 		/// <param name="speed">Speed of the part which is scraping.</param>
@@ -272,11 +287,7 @@ namespace KerbalFoundries
 			if (KFPersistenceManager.isDustCameraEnabled)
 			{
 				colorCam = _ModuleCameraShot._averageColour;
-				//colorAverage = colorCam + colorBiome / 2;
-				colorAverage.r = (colorCam.r + colorBiome.r) / 2;
-				colorAverage.g = (colorCam.g + colorBiome.g) / 2;
-				colorAverage.b = (colorCam.b + colorBiome.b) / 2;
-				colorAverage.a = colorBiome.a;
+				colorAverage = ((colorCam * 10) + colorBiome) / 9; //make the camera colour dominant
 			}
 			else
 				colorAverage = colorBiome;
@@ -285,8 +296,9 @@ namespace KerbalFoundries
 				KFLog.Error("Color \"BiomeColor\" is null!");
 			if (speed >= minScrapeSpeed)
 			{
-				if (!Equals(colorAverage, colorDust))
+                if (colorDust != colorAverage)
 				{
+                    print("ColorDust != " + colorAverage);
 					Color[] colors = dustAnimator.colorAnimation;
 					colors[0] = colorAverage;
 					colors[1] = colorAverage;
@@ -322,6 +334,8 @@ namespace KerbalFoundries
         void DustParticles(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
         {
             var WaterColor = new Color(0.65f, 0.65f, 0.65f, 0.025f);
+            
+
             if (!dustEffects || force < minScrapeSpeed || Equals(dustAnimator, null))
                 return;
             
@@ -330,17 +344,6 @@ namespace KerbalFoundries
             kfdustFx.particleEmitter.localVelocity = direction;
             DustParticles(force, contactPoint, col);
 
-            if (!KFPersistenceManager.isRepLightEnabled || !_KFRepulsor.deployed)
-            {
-                _repLight.intensity = 0.0f;
-                _repLight.enabled = false;
-            }
-            else
-            {
-                _kfRepLight.transform.localPosition = Vector3.zero;
-                _repLight.intensity = 0.5f;
-                _repLight.enabled = true;
-            }
             return;
         }
 		

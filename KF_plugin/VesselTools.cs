@@ -44,7 +44,7 @@ namespace KerbalFoundries
 			var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			visible.transform.parent = _collider.transform;
 			visible.transform.localScale = boxSize;
-			visible.renderer.enabled = true; // enable to see collider
+			//visible.renderer.enabled = true; // enable to see collider
 
 			isActive |= repulsorCount > 0;
 			if (!isActive || !_vessel.isCommandable)
@@ -135,11 +135,10 @@ namespace KerbalFoundries
 		public void Update()
 		{
 			dustCam = KFPersistenceManager.isDustCameraEnabled;
-			if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCam)
+			if (frameCount >= threshHold && _vessel == FlightGlobals.ActiveVessel && dustCam)
 			{
 				frameCount = 0;
 
-				//_cameraObject.transform.position = _vessel.transform.position;
 				_cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
 				_camera.targetTexture = renderTexture;
 				//Extensions.DebugLine(_cameraObject.transform.position, _cameraObject.transform.eulerAngles);
@@ -155,10 +154,11 @@ namespace KerbalFoundries
 
 				Color[] texColors = groundShot.GetPixels();
 				int total = texColors.Length;
-				float divider = total * 1.25f;
-				float r = 0;
-				float g = 0;
-				float b = 0;
+                print (texColors.Length);
+
+                float r = texColors[0].r;
+                float g = texColors[0].g;
+                float b = texColors[0].b;
 				const float alpha = 0.014f;
 
 				for (int i = 0; i < total; i++)
@@ -167,7 +167,9 @@ namespace KerbalFoundries
 					g += texColors[i].g;
 					b += texColors[i].b;
 				}
-				_averageColour = new Color(r / divider, g / divider, b / divider, alpha);
+                //print(r + " " + g + " " + " " + b + " ");
+				_averageColour = new Color(r / total, g / total, b / total, alpha);
+                //print(_averageColour);
 			}
 			frameCount++;
 		}
