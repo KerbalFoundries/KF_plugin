@@ -95,7 +95,7 @@ namespace KerbalFoundries
 		
 		const int resWidth = 6;
 		const int resHeight = 6;
-		public Color _averageColour = new Color(1, 1, 1, 0.025f);
+		public Color _averageColour = new Color(1f, 1f, 1f, 1f);
 		int frameCount = 0;
 		const int threshHold = 1;
 		Vessel _vessel;

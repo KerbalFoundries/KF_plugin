@@ -89,7 +89,7 @@ namespace KerbalFoundries
             _dustFX = part.GetComponent<KFDustFX>(); //see if it's been added by MM. MM deprecated in favor of adding the module manually. - Gaalidas 
             if (Equals(_dustFX, null)) //add if not... sets some defaults.
             {
-                part.AddModule("KFRepulsorDustFX");
+                part.AddModule("KFDustFX");
                 _dustFX = part.GetComponent<KFDustFX>();
                 _dustFX.isRepulsor = true;
                 _dustFX.maxDustEmission = 28; // Not really necessary to set this, a reasonable default exists in the modukle. - Gaalidas
