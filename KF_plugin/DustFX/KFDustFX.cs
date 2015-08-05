@@ -33,8 +33,8 @@ namespace KerbalFoundries
 		/// <summary>Part instance of KFModuleWheel</summary>
 		KFModuleWheel _KFModuleWheel;
 
-        /// <summary>Part instance of KFRepulsor</summary>
-        KFRepulsor _KFRepulsor;
+		/// <summary>Part instance of KFRepulsor</summary>
+		KFRepulsor _KFRepulsor;
 		
 		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
 		ModuleCameraShot _ModuleCameraShot;
@@ -42,10 +42,10 @@ namespace KerbalFoundries
 		/// <summary>Local copy of the tweakScaleCorrector parameter in the KFModuleWheel module.</summary>
 		public float tweakScaleCorrector = 1;
 
-        /// <summary>Specifies if the module is to be used for repulsors</summary>
-        /// <remarks>Default is "false"</remarks>
-        [KSPField]
-        public bool isRepulsor = false;
+		/// <summary>Specifies if the module is to be used for repulsors.</summary>
+		/// <remarks>Default is "false"</remarks>
+		[KSPField]
+		public bool isRepulsor = false;
 
 		/// <summary>Mostly unnecessary, since there is no other purpose to having the module active.</summary>
 		/// <remarks>Default is "true"</remarks>
@@ -114,11 +114,10 @@ namespace KerbalFoundries
 		Color colorBiome;
 		Color colorAverage;
 		Color colorCam;
-        bool isColorOverrideActive;
+		bool isColorOverrideActive;
 
-
-        GameObject _kfRepLight;
-        Light _repLight;
+		GameObject _kfRepLight;
+		Light _repLight;
 		
 		/// <summary>Loaded from the KFConfigManager class.</summary>
 		/// <remarks>Persistent field.</remarks>
@@ -155,17 +154,18 @@ namespace KerbalFoundries
 		
 		public override void OnStart(StartState state)
 		{
-            if (isRepulsor)
-            {
-                _KFRepulsor = this.part.GetComponent<KFRepulsor>();
-                Debug.LogWarning ("Finding repulsor");
-            }
-            else
-            {
-                _KFModuleWheel = this.part.GetComponent<KFModuleWheel>();
-                tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
-                Debug.LogWarning ("finding wheel");
-            }
+			if (isRepulsor)
+			{
+				_KFRepulsor = part.GetComponent<KFRepulsor>();
+				tweakScaleCorrector = 1f;
+				Debug.LogWarning ("Finding repulsor");
+			}
+			else
+			{
+				_KFModuleWheel = part.GetComponent<KFModuleWheel>();
+				tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
+				Debug.LogWarning ("finding wheel");
+			}
 			
 			isDustEnabledGlobally = KFPersistenceManager.isDustEnabled;
 			isDustCameraEnabled = KFPersistenceManager.isDustCameraEnabled;
@@ -207,26 +207,26 @@ namespace KerbalFoundries
 			kfdustFx.particleEmitter.minEmission = minDustEmission;
 			kfdustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = kfdustFx.particleEmitter.GetComponent<ParticleAnimator>();
-            if (KFPersistenceManager.isRepLightEnabled && repulsor)
-                SetupLights();
+			if (KFPersistenceManager.isRepLightEnabled && repulsor)
+				SetupLights();
 		}
 
 
-        void SetupLights()
-        {
-            if (!KFPersistenceManager.isRepLightEnabled)
-                return;
-            _kfRepLight = new GameObject("Rep Light");
-            _kfRepLight.transform.parent = kfdustFx.transform;
-            _kfRepLight.transform.position = Vector3.zero;
+		void SetupLights()
+		{
+			if (!KFPersistenceManager.isRepLightEnabled)
+				return;
+			_kfRepLight = new GameObject("Rep Light");
+			_kfRepLight.transform.parent = kfdustFx.transform;
+			_kfRepLight.transform.position = Vector3.zero;
 
-            _repLight = _kfRepLight.AddComponent<Light>();
-            _repLight.type = LightType.Point;
-            _repLight.renderMode = LightRenderMode.ForceVertex;
-            _repLight.range = 6.0f;
-            _repLight.color = Color.blue;
-            _repLight.intensity = 0.0f;
-        }
+			_repLight = _kfRepLight.AddComponent<Light>();
+			_repLight.type = LightType.Point;
+			_repLight.renderMode = LightRenderMode.ForceVertex;
+			_repLight.range = 4.0f;
+			_repLight.color = Color.blue;
+			_repLight.intensity = 0.0f;
+		}
 		
 		/// <summary>Called when the part is scraping over a surface.</summary>
 		/// <param name="col">The collider being referenced.</param>
@@ -239,29 +239,27 @@ namespace KerbalFoundries
 			DustParticles(fMagnitude, position + (part.rigidbody.velocity * Time.deltaTime), col);
 		}
 
-        /// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
-        /// <param name="hitPoint">Point at which the collision takes place.</param>
-        /// <param name="col">The collider being referenced.</param>
-        /// <param name="force">Force of the hit.</param>
-        /// <param name="normal">I got nothing here.</param>
-        /// <param name="direction">Emission direction..</param>
-        public void RepulsorEmit(Vector3 hitPoint, Collider col, float force, Vector3 normal, Vector3 direction)
-        {
+		/// <summary>Contains information about what to do when the part stays in the collided state over a period of time.</summary>
+		/// <param name="hitPoint">Point at which the collision takes place.</param>
+		/// <param name="col">The collider being referenced.</param>
+		/// <param name="force">Force of the hit.</param>
+		/// <param name="normal">I got nothing here.</param>
+		/// <param name="direction">Emission direction..</param>
+		public void RepulsorEmit(Vector3 hitPoint, Collider col, float force, Vector3 normal, Vector3 direction)
+		{
+			isColorOverrideActive |= string.Equals("ModuleWaterSlider.Collider", col.gameObject.name);
+			if (isPaused)
+				return;
 
-            isColorOverrideActive |= string.Equals("ModuleWaterSlider.Collider", col.gameObject.name);
-            if (isPaused)
-                return;
-
-            //Scrape(hitPoint, col, force, normal, direction);
-            DustParticles(force, hitPoint + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
-        }
+			//Scrape(hitPoint, col, force, normal, direction);
+			DustParticles(force, hitPoint + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
+		}
 		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
 		/// <param name="speed">Speed of the part which is scraping.</param>
 		/// <param name="contactPoint">The point at which the collider and the scraped surface make contact.</param>
 		/// <param name="col">The collider being referenced.</param>
-		public void DustParticles(float speed, Vector3 contactPoint, Collider col)
-                                //(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
+		public void DustParticles(float speed, Vector3 contactPoint, Collider col) //(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
 		{
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || !KFPersistenceManager.isDustEnabled)
 				return;
@@ -271,6 +269,7 @@ namespace KerbalFoundries
 			//colorBiome = _ModuleCameraShot._averageColour; //debug only. Forces camera colour only.
 			if (KFPersistenceManager.isDustCameraEnabled)
 			{
+				//const float deviationValue = 15f;
 				colorCam = _ModuleCameraShot._averageColour;
 				//colorAverage = colorCam + colorBiome / 2;
 				colorAverage.r = (colorCam.r + colorBiome.r) / 2;
@@ -308,41 +307,36 @@ namespace KerbalFoundries
 			return;
 		}
 
-        /// <summary>
-        /// Repsulsor overload of Dustpartciles.
-        /// </summary>
-        /// <remarks>
-        /// Adds direction and orientation
-        /// </remarks>
-        /// <param name="force"></param>
-        /// <param name="contactPoint"></param>
-        /// <param name="col"></param>
-        /// <param name="normal"></param>
-        /// <param name="direction"></param>
-        void DustParticles(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
-        {
-            var WaterColor = new Color(0.65f, 0.65f, 0.65f, 0.025f);
-            if (!dustEffects || force < minScrapeSpeed || Equals(dustAnimator, null))
-                return;
+		/// <summary>Repsulsor overload of Dustpartciles.</summary>
+		/// <remarks>Adds direction and orientation.</remarks>
+		/// <param name="force">Force of the repulsion field's collision with the surface.</param>
+		/// <param name="contactPoint">Point of contact.</param>
+		/// <param name="col">Collider making contact.</param>
+		/// <param name="normal">No idea what this is.</param>
+		/// <param name="direction">A direction to emit this stuff.</param>
+		void DustParticles(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
+		{
+			var WaterColor = new Color(0.65f, 0.65f, 0.65f, 0.025f);
+			if (!dustEffects || force < minScrapeSpeed || Equals(dustAnimator, null))
+				return;
             
+			kfdustFx.transform.rotation = Quaternion.Euler(normal);
+			kfdustFx.particleEmitter.localVelocity = direction;
+			DustParticles(force, contactPoint, col);
 
-            kfdustFx.transform.rotation = Quaternion.Euler(normal);
-            kfdustFx.particleEmitter.localVelocity = direction;
-            DustParticles(force, contactPoint, col);
-
-            if (!KFPersistenceManager.isRepLightEnabled || !_KFRepulsor.deployed)
-            {
-                _repLight.intensity = 0.0f;
-                _repLight.enabled = false;
-            }
-            else
-            {
-                _kfRepLight.transform.localPosition = Vector3.zero;
-                _repLight.intensity = 0.5f;
-                _repLight.enabled = true;
-            }
-            return;
-        }
+			if (!KFPersistenceManager.isRepLightEnabled || !_KFRepulsor.deployed || _KFRepulsor.rideHeight < 1)
+			{
+				_repLight.intensity = 0.0f;
+				_repLight.enabled = false;
+			}
+			else
+			{
+				_kfRepLight.transform.localPosition = Vector3.zero;
+				_repLight.intensity = 0.5f;
+				_repLight.enabled = true;
+			}
+			return;
+		}
 		
 		/// <summary>Called when the game enters a "paused" state.</summary>
 		void OnPause()

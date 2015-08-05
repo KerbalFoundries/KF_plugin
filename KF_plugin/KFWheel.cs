@@ -111,8 +111,8 @@ namespace KerbalFoundries
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 
-				GameEvents.onGamePause.Add(new EventVoid.OnEvent(this.OnPause));
-				GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(this.OnUnPause));
+				GameEvents.onGamePause.Add(new EventVoid.OnEvent(OnPause));
+				GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(OnUnPause));
 				//find named onjects in part
 				foreach (WheelCollider wc in part.GetComponentsInChildren<WheelCollider>())
 				{
