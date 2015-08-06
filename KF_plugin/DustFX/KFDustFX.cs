@@ -217,7 +217,7 @@ namespace KerbalFoundries
 			if (!KFPersistenceManager.isRepLightEnabled)
 				return;
 			_kfRepLight = new GameObject("Rep Light");
-			_kfRepLight.transform.parent = kfdustFx.transform;
+			_kfRepLight.transform.parent = _KFRepulsor._grid;
 			_kfRepLight.transform.position = Vector3.zero;
 
 			_repLight = _kfRepLight.AddComponent<Light>();
@@ -255,12 +255,12 @@ namespace KerbalFoundries
             DustParticles(force, hitPoint + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
         }
 
-        public void RepulsorLight(bool enabled)
+        public void RepulsorLight(bool enabled, float rideheight, float squish)
         {
             if (KFPersistenceManager.isRepLightEnabled && enabled)
             {
                 _kfRepLight.transform.localPosition = Vector3.zero;
-                _repLight.intensity = 0.5f;
+                _repLight.intensity = Mathf.Clamp(squish,0,0.5f);
                 _repLight.enabled = true;
             }
             else
@@ -297,7 +297,7 @@ namespace KerbalFoundries
 			{
                 if (colorDust != colorAverage)
 				{
-                    print("ColorDust != " + colorAverage);
+                    
 					Color[] colors = dustAnimator.colorAnimation;
 					colors[0] = colorAverage;
 					colors[1] = colorAverage;

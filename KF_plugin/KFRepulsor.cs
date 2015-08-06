@@ -40,7 +40,7 @@ namespace KerbalFoundries
         [KSPField]
         public string gimbalName;
         bool isReady;
-        Transform _grid;
+        public Transform _grid;
         Transform _gimbal;
 
         Vector3 _gridScale;
@@ -50,6 +50,8 @@ namespace KerbalFoundries
         float appliedRideHeight;
         float currentRideHeight;
         float repulsorCount = 0;
+        float compression = 0;
+        float squish;
 
         KFDustFX _dustFX;
         float dir;
@@ -214,18 +216,37 @@ namespace KerbalFoundries
                 // Reset the height of the water collider that slips away every frame.
                 UpdateWaterSlider();
                 ResourceConsumption();
-
+                bool anyGrounded = false;
+                float frameCompression = 0;
                 for (int i = 0; i < wcList.Count(); i++)
                 {
                     WheelHit hit;
                     bool grounded = wcList[i].GetGroundHit(out hit);
                     if (grounded)
                     {
+                        anyGrounded |= grounded;
                         hitForce += hit.force;
                         if (KFPersistenceManager.isDustEnabled)
                         	_dustFX.RepulsorEmit(hit.point, hit.collider, hit.force, hit.normal, emitDirection);
+                        frameCompression += -wcList[i].transform.InverseTransformPoint(hit.point).y - wcList[i].radius;
                     }
+                    compression = frameCompression;
                 }
+                if (anyGrounded)
+                {
+                    compression /= (wcList.Count() + 1);
+
+                    float normalisedComp = compression / 8;
+                    squish = normalisedComp / (appliedRideHeight / 100);
+
+                }
+                else if (squish > 0.1)
+                {
+                    
+                    squish /= 2;
+                }
+                //print("comp " + compression);
+                //print("squish " + squish);
 
                 if (lowEnergy)
                 {
@@ -249,7 +270,7 @@ namespace KerbalFoundries
             }
 			
             RepulsorSound(hitForce);
-            _dustFX.RepulsorLight(deployed);
+            _dustFX.RepulsorLight(deployed, appliedRideHeight, squish);
             //effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //print(effectPower);
 
