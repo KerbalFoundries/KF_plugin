@@ -152,7 +152,7 @@ namespace KerbalFoundries
 				_camera.enabled = false;
 				RenderTexture.active = null; // JC: added to avoid errors
 
-				Color32[] texColors = groundShot.GetPixels32();
+				Color[] texColors = groundShot.GetPixels();
 				int total = texColors.Length;
 
                 float r = texColors[0].r;

@@ -16,6 +16,10 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 using KerbalFoundries;
 
@@ -105,7 +109,7 @@ namespace KerbalFoundries
 		/// <summary>KSP path to the effect being used here.  Made into a field so that it can be customized in the future.</summary>
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
-		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
+		public const string dustEffectObject = "Effects/fx_smokeTrail_medium";
 		
 		bool isPaused;
 		GameObject kfdustFx;
@@ -198,6 +202,15 @@ namespace KerbalFoundries
 			if (!dustEffects)
 				return;
 			kfdustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectObject));
+            /*
+            List<ParticleEmitter> PA = Resources.FindObjectsOfTypeAll<ParticleEmitter>().ToList();
+            foreach (var PE in PA)
+            {
+                print(PE.name);
+                if (PE.name == "waterSpray")
+                    kfdustFx = (GameObject)GameObject.Instantiate(PE.gameObject as GameObject);
+            }
+             * */
 			kfdustFx.transform.parent = part.transform;
 			kfdustFx.transform.position = part.transform.position;
 			kfdustFx.particleEmitter.localVelocity = Vector3.zero;
@@ -336,10 +349,6 @@ namespace KerbalFoundries
 			kfdustFx.transform.rotation = Quaternion.Euler(normal);
 			kfdustFx.particleEmitter.localVelocity = direction;
 			DustParticles(force, contactPoint, col);
-
-            kfdustFx.transform.rotation = Quaternion.Euler(normal);
-            kfdustFx.particleEmitter.localVelocity = direction;
-            DustParticles(force, contactPoint, col);
 
             return;
         }

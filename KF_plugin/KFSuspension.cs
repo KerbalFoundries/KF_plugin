@@ -62,7 +62,10 @@ namespace KerbalFoundries
 
                 MoveSuspension(susTravIndex, -lastFrameTraverse, susTrav); //to get the initial stuff correct
                 if (objectCount > 0)
+                {
+                    Debug.LogError("lastFrameTraverse " + lastFrameTraverse);
                     isReady = true;
+                }
                 else
                     Debug.LogError("KFSuspension not configured correctly");
             }
@@ -109,6 +112,17 @@ namespace KerbalFoundries
             var tempVector = new Vector3(0, 0, 0);
             tempVector[index] = movement;
             _movedObject.transform.Translate(tempVector, Space.Self);
+        }
+
+        public void OnPause()
+        {
+            Debug.LogWarning("lastFrameTraverse " + lastFrameTraverse);
+            isReady = false; // This will drop couroutines checking it out. StopCoroutine() will stop all instances, which is NOT good.
+        }
+
+        public void OnUnPause()
+        {
+            isReady = true;
         }
     }
 }
