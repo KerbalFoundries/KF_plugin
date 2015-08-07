@@ -117,7 +117,7 @@ namespace KerbalFoundries
         public void OnPause()
         {
             Debug.LogWarning("lastFrameTraverse " + lastFrameTraverse);
-            isReady = false; // This will drop couroutines checking it out. StopCoroutine() will stop all instances, which is NOT good.
+            isReady = false;
         }
 
         public void OnUnPause()
