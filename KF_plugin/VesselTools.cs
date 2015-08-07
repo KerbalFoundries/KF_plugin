@@ -28,10 +28,10 @@ namespace KerbalFoundries
 		{
 			KFLog.Log("WaterSlider start.");
 			_vessel = GetComponent<Vessel>();
-			//Debug.LogWarning(string.Format("Is Controllable: {0}", _vessel.IsControllable));
-			//Debug.LogWarning(string.Format("Is Commandable: {0}", _vessel.isCommandable));
-			//Debug.LogWarning(string.Format("Vessel Type: {0}", _vessel.vesselType));
-
+			//KFLog.Warning(string.Format("Is Controllable: {0}", _vessel.IsControllable));
+			//KFLog.Warning(string.Format("Is Commandable: {0}", _vessel.isCommandable));
+			//KFLog.Warning(string.Format("Vessel Type: {0}", _vessel.vesselType));
+			
 			float repulsorCount = 0;
 			foreach (Part PA in _vessel.parts)
 			{
@@ -47,15 +47,14 @@ namespace KerbalFoundries
 			//visible.renderer.enabled = true; // enable to see collider
 
 			isActive |= repulsorCount > 0;
-			if (!isActive || !_vessel.isCommandable)
+			if (isActive && _vessel.isCommandable)
+				Debug.LogError("Continuing...");
+			else
 			{
 				_collider.transform.localScale = Vector3.zero;
-
-				Debug.Log("setting size to zero and returning");
+				KFLog.Log("Setting size to zero and returning.");
 				return;
 			}
-			else
-				Debug.LogError("Continuing...");
 
 			var box = _collider.collider as BoxCollider;
 			box.size = boxSize; // Probably should encapsulate other colliders in real code
@@ -64,7 +63,6 @@ namespace KerbalFoundries
 			rb.isKinematic = true;
 
 			_collider.SetActive(true);
-
 			
 			UpdatePosition();
 			isReady = true;
@@ -77,8 +75,7 @@ namespace KerbalFoundries
 			_collider.rigidbody.position = newPosition;
 			_collider.rigidbody.rotation = Quaternion.LookRotation(oceanNormal) * Quaternion.AngleAxis(90f, Vector3.right);
 		}
-
-
+		
 		void FixedUpdate()
 		{
 			if (!isReady)
@@ -145,7 +142,7 @@ namespace KerbalFoundries
 				_camera.enabled = true;
                 
 				_camera.Render();
-				//Debug.LogError("rendered something...");
+				//KFLog.Error("Rendered something...");
 				RenderTexture.active = renderTexture;
 				groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
 				_camera.targetTexture = null;
@@ -166,9 +163,9 @@ namespace KerbalFoundries
 					g += texColors[i].g;
 					b += texColors[i].b;
 				}
-                //print(r + " " + g + " " + " " + b + " ");
+				//KFLog.Log(string.Format("Color: {0}r {1}g {2}b ", r, g, b));
 				_averageColour = new Color(r / total, g / total, b / total, alpha);
-                //print(_averageColour);
+				//KFLog.Log(string.Format("Variable \"_averageColour\" = \"{0}.\"", _averageColour));
 			}
 			frameCount++;
 		}
