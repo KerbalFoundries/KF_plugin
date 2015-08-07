@@ -41,8 +41,8 @@ namespace KerbalFoundries
 			base.OnStart(state);
 			if (HighLogic.LoadedSceneIsFlight)
 			{
-				//GameEvents.onGamePause.Add(new EventVoid.OnEvent(this.OnPause));
-				//GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(this.OnUnPause));
+				GameEvents.onGamePause.Add(new EventVoid.OnEvent(this.OnPause));
+				GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(this.OnUnPause));
                 KFMW = this.part.GetComponentInChildren<KFModuleWheel>();
 				if (!Equals(KFMW, null))
 					tweakScaleCorrector = KFMW.tweakScaleCorrector;
@@ -63,12 +63,24 @@ namespace KerbalFoundries
                 MoveSuspension(susTravIndex, -lastFrameTraverse, susTrav); //to get the initial stuff correct
                 if (objectCount > 0)
                 {
-                    Debug.LogError("lastFrameTraverse " + lastFrameTraverse);
-                    isReady = true;
+                    //Debug.LogError("lastFrameTraverse " + lastFrameTraverse);
+                    StartCoroutine("WaitAndStart");
                 }
                 else
                     Debug.LogError("KFSuspension not configured correctly");
             }
+        }
+
+        System.Collections.IEnumerator WaitAndStart() //Part partToAttach, Vector3 position, Quaternion rotation, Part toPart = null
+        {
+            int i = 0;
+            while (i < 50)
+            {
+                i++;
+                yield return new WaitForFixedUpdate();
+            }
+            //Debug.LogError("Ready to start " + lastFrameTraverse);
+            isReady = true;
         }
 
         public void FixedUpdate()
@@ -91,7 +103,7 @@ namespace KerbalFoundries
 
                     if (traverse > (colliders[i].suspensionDistance * tweakScaleCorrector)) //the raycast sometimes goes further than its max value. Catch and stop the mesh moving further
                         traverse = colliders[i].suspensionDistance * tweakScaleCorrector;
-                    else if (traverse < -0.1) //the raycast can be negative (!); catch this too
+                    else if (traverse < -0.01) //the raycast can be negative (!); catch this too
                         traverse = 0;
                 }
                 else
@@ -102,7 +114,7 @@ namespace KerbalFoundries
 
             frameTraverse = suspensionMovement / objectCount; //average the movement.
             lastFrameTraverse = frameTraverse;
-
+            //Debug.Log("frameTraverse " + frameTraverse);
             susTrav.localPosition = initialPosition;
             MoveSuspension(susTravIndex, -frameTraverse, susTrav);
         }
@@ -116,13 +128,20 @@ namespace KerbalFoundries
 
         public void OnPause()
         {
-            Debug.LogWarning("lastFrameTraverse " + lastFrameTraverse);
+            //Debug.LogWarning("OnPause " + lastFrameTraverse);
             isReady = false;
         }
 
         public void OnUnPause()
         {
+            //Debug.LogWarning("OnUnPause " + lastFrameTraverse);
             isReady = true;
+        }
+
+        public void OnDestroy()
+        {
+             GameEvents.onGamePause.Remove(new EventVoid.OnEvent(this.OnPause));
+             GameEvents.onGameUnpause.Remove(new EventVoid.OnEvent(this.OnUnPause));
         }
     }
 }

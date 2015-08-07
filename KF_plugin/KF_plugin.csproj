@@ -78,7 +78,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /y "$(TargetPath)" "C:\KSPDev\GameData\KerbalFoundries\Plugins\" 
-90 taskkill /IM tail.exe /F 2&amp;gt;&amp;amp;1 | exit /B 0 
+
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
