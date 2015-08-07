@@ -245,7 +245,7 @@ namespace KerbalFoundries
 			DustParticles(force, hitPoint + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
 		}
 		
-		public void RepulsorLight(bool enabled, float rideheight, float squish)
+		public void RepulsorLight(bool enabled, float squish)
 		{
 			if (KFPersistenceManager.isRepLightEnabled && enabled)
 			{

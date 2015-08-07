@@ -27,7 +27,6 @@ namespace KerbalFoundries
         public float SpringRate;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Damping"), UI_FloatRange(minValue = 0, maxValue = 0.3f, stepIncrement = 0.05f)]
         public float DamperRate;
-
         
         [KSPField]
         public bool lowEnergy;
@@ -242,7 +241,6 @@ namespace KerbalFoundries
                 }
                 else if (squish > 0.1)
                 {
-                    
                     squish /= 2;
                 }
                 //print("comp " + compression);
@@ -270,7 +268,7 @@ namespace KerbalFoundries
             }
 			
             RepulsorSound(hitForce);
-            _dustFX.RepulsorLight(deployed, appliedRideHeight, squish);
+            _dustFX.RepulsorLight(deployed, squish);
             //effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //print(effectPower);
 
