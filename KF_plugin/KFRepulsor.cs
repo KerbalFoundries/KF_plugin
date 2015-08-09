@@ -188,7 +188,7 @@ namespace KerbalFoundries
 
         public void UpdateWaterSlider()
         {
-            _MWS.colliderHeight = -2.5f;
+            _MWS.colliderHeight = -2f;
         }
 
         public void ResourceConsumption()

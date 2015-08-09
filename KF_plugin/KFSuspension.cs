@@ -83,7 +83,7 @@ namespace KerbalFoundries
             isReady = true;
         }
 
-        public void FixedUpdate()
+        public void Update()
         {
             if (!isReady)
                 return;
@@ -96,7 +96,6 @@ namespace KerbalFoundries
                 WheelHit hit; //set this up to grab sollider raycast info
                 
                 bool grounded = colliders[i].GetGroundHit(out hit); //set up to pass out wheelhit coordinates
-                //float tempLastFrameTraverse = lastFrameTraverse; //we need the value, but will over-write shortly. Store it here.
                 if (grounded) //is it on the ground
                 {
                     traverse = (-colliders[i].transform.InverseTransformPoint(hit.point).y - (colliders[i].radius) ) * tweakScaleCorrector; //calculate suspension travel using the collider raycast.

@@ -59,7 +59,7 @@ namespace KerbalFoundries
 		/// <summary>Minimum scrape speed.</summary>
 		/// <remarks>Default is 0.5.  Repulsors should have this extremely low.</remarks>
 		[KSPField]
-		public float minScrapeSpeed = 0.5f;
+		public float minScrapeSpeed = 0.1f;
 		
 		/// <summary>Minimum dust energy value.</summary>
 		/// <remarks>Default is 0.1.  Represents the minimum thickness of the particles.</remarks>
@@ -109,7 +109,7 @@ namespace KerbalFoundries
 		/// <summary>KSP path to the effect being used here.  Made into a field so that it can be customized in the future.</summary>
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
-		public const string dustEffectObject = "Effects/fx_smokeTrail_medium";
+		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
 		
 		bool isPaused;
 		GameObject kfdustFx;
@@ -180,15 +180,6 @@ namespace KerbalFoundries
 			if (!dustEffects)
 				return;
 			kfdustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectObject));
-            /*
-            List<ParticleEmitter> PA = Resources.FindObjectsOfTypeAll<ParticleEmitter>().ToList();
-            foreach (var PE in PA)
-            {
-                print(PE.name);
-                if (PE.name == "waterSpray")
-                    kfdustFx = (GameObject)GameObject.Instantiate(PE.gameObject as GameObject);
-            }
-             */
 			kfdustFx.transform.parent = part.transform;
 			kfdustFx.transform.position = part.transform.position;
 			kfdustFx.particleEmitter.localVelocity = Vector3.zero;

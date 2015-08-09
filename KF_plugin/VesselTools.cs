@@ -13,7 +13,7 @@ namespace KerbalFoundries
 {
 	public class ModuleWaterSlider : VesselModule
 	{
-		readonly GameObject _collider = new GameObject("ModuleWaterSlider.Collider", typeof(BoxCollider), typeof(Rigidbody));
+        GameObject _collider;
 		const float triggerDistance = 25f;
 		bool isActive;
 		Vessel _vessel;
@@ -28,10 +28,7 @@ namespace KerbalFoundries
 		{
 			KFLog.Log("WaterSlider start.");
 			_vessel = GetComponent<Vessel>();
-			//KFLog.Warning(string.Format("Is Controllable: {0}", _vessel.IsControllable));
-			//KFLog.Warning(string.Format("Is Commandable: {0}", _vessel.isCommandable));
-			//KFLog.Warning(string.Format("Vessel Type: {0}", _vessel.vesselType));
-			
+		
 			float repulsorCount = 0;
 			foreach (Part PA in _vessel.parts)
 			{
@@ -41,31 +38,36 @@ namespace KerbalFoundries
 					repulsorCount++;
 			}
 
-			var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			visible.transform.parent = _collider.transform;
-			visible.transform.localScale = boxSize;
-			//visible.renderer.enabled = true; // enable to see collider
-
 			isActive |= repulsorCount > 0;
-			if (isActive && _vessel.isCommandable)
-				Debug.LogError("Continuing...");
-			else
-			{
-				_collider.transform.localScale = Vector3.zero;
-				KFLog.Log("Setting size to zero and returning.");
-				return;
-			}
 
-			var box = _collider.collider as BoxCollider;
-			box.size = boxSize; // Probably should encapsulate other colliders in real code
+            if (isActive && _vessel.isCommandable)
+            {
+                _collider = new GameObject("ModuleWaterSlider.Collider");
+                Debug.LogError("Continuing...");
 
-			var rb = _collider.rigidbody;
-			rb.isKinematic = true;
+                var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                visible.transform.parent = _collider.transform;
+                visible.transform.localScale = boxSize;
+                visible.renderer.enabled = true; // enable to see collider
 
-			_collider.SetActive(true);
-			
-			UpdatePosition();
-			isReady = true;
+                BoxCollider box = _collider.AddComponent("BoxCollider") as BoxCollider;
+                box.size = boxSize; // Probably should encapsulate other colliders in real code
+
+                Rigidbody rb = _collider.AddComponent("Rigidbody") as Rigidbody;
+                rb.rigidbody.isKinematic = true;
+
+                _collider.SetActive(true);
+
+                UpdatePosition();
+                isReady = true;
+            }
+
+            else
+            {
+                Destroy(_collider);
+                KFLog.Log("Setting size to zero and returning.");
+                return;
+            }
 		}
 
 		void UpdatePosition()
