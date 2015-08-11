@@ -339,7 +339,6 @@ namespace KerbalFoundries
 		{
 			appliedRideHeight = rideHeight;
 			StartCoroutine("UpdateHeight");
-			suspentionIncrementAmmount = suspentionIncrementAmmount;
 			//ApplySettings();
 		}
 		

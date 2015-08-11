@@ -125,6 +125,8 @@ namespace KerbalFoundries
 		Color colorAverage;
 		Color colorCam;
 		Color colorWater;
+		Color colorPlus;
+		Color colorMinus;
 		bool isColorOverrideActive;
 		
 		bool useSparks;
@@ -316,6 +318,9 @@ namespace KerbalFoundries
 			else
 				colorAverage = colorBiome;
 			
+			colorPlus = new Color(colorAverage.r + colorVariance, colorAverage.g + colorVariance, colorAverage.b + colorVariance, colorAverage.a);
+			colorMinus = new Color(colorAverage.r - colorVariance, colorAverage.g - colorVariance, colorAverage.b - colorVariance, colorAverage.a);
+			
 			if (isColorOverrideActive)
 				colorAverage = colorWater;
 			
@@ -324,15 +329,15 @@ namespace KerbalFoundries
 				if (!Equals(colorAverage, colorDust))
 				{
 					Color[] colors = dustAnimator.colorAnimation;
-					colors[0] = UnityEngine.Random.Range(1, 3) < 2f ? colorAverage + colorVariance : colorAverage;
+					colors[0] = UnityEngine.Random.Range(1, 3) < 2f ? colorPlus : colorAverage;
 					//colors[0] = colorAverage;
-					colors[1] = UnityEngine.Random.Range(1, 3) > 2f ? colorAverage - colorVariance : colorAverage;
+					colors[1] = UnityEngine.Random.Range(1, 3) > 2f ? colorMinus : colorAverage;
 					//colors[1] = colorAverage;
-					colors[2] = UnityEngine.Random.Range(1, 3) < 2f ? colorAverage + colorVariance : colorAverage;
+					colors[2] = UnityEngine.Random.Range(1, 3) < 2f ? colorPlus : colorAverage;
 					//colors[2] = colorAverage;
-					colors[3] = UnityEngine.Random.Range(1, 3) > 2f ? colorAverage - colorVariance : colorAverage;
+					colors[3] = UnityEngine.Random.Range(1, 3) > 2f ? colorMinus : colorAverage;
 					//colors[3] = colorAverage;
-					colors[4] = UnityEngine.Random.Range(1, 3) < 2f ? colorAverage + colorVariance : colorAverage;
+					colors[4] = UnityEngine.Random.Range(1, 3) < 2f ? colorPlus : colorAverage;
 					//colors[4] = colorAverage;
 					dustAnimator.colorAnimation = colors;
 					colorDust = colorAverage;
