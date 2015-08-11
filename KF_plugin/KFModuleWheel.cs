@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -8,6 +8,7 @@ namespace KerbalFoundries
 {
     public class KFModuleWheel : PartModule
     {
+        // disable UnusedParameter
 		// disable RedundantDefaultFieldInitializer
 		// disable RedundantThisQualifier
         // disable ConvertIfToOrExpression
@@ -22,21 +23,28 @@ namespace KerbalFoundries
         [KSPField(isPersistant = false, guiActive = true, guiName = "Wheel Settings")]
         public string settings = string.Empty;
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group Number"), UI_FloatRange(minValue = 0, maxValue = 10f, stepIncrement = 1f)]
-        public float groupNumber = 1;
+        public float groupNumber = 1f;
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Torque Ratio"), UI_FloatRange(minValue = 0, maxValue = 2f, stepIncrement = .25f)]
-        public float torque = 1;
+        public float torque = 1f;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Spring Strength"), UI_FloatRange(minValue = 0, maxValue = 6.00f, stepIncrement = 0.2f)]
         public float springRate;        
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Spring Damping"), UI_FloatRange(minValue = 0, maxValue = 1.0f, stepIncrement = 0.025f)]
         public float damperRate;
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Suspension Travel"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5)]
-        public float rideHeight = 100;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Suspension Travel"), UI_FloatRange(minValue = 0, maxValue = 100f, stepIncrement = 5f)]
+        public float rideHeight = 100f;
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Steering"), UI_Toggle(disabledText = "Enabled", enabledText = "Disabled")]
         public bool steeringDisabled;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Start"), UI_Toggle(disabledText = "Deployed", enabledText = "Retracted")]
         public bool startRetracted;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Status")]
         public string status = "Nominal";
+        
+		// Set the suspension travel increment dynamically.
+		[KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Susp. Step Value")]
+        public string suspsettings = string.Empty;
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = ""), UI_FloatRange(minValue = 1, maxValue = 20f, stepIncrement = 1f)]
+		public float suspentionIncrementAmmount = 5f;
+		UI_FloatRange stepInc;
         
 		// Config fields
 		/// <summary>Torque applied to wheel colliders.</summary>
@@ -143,7 +151,6 @@ namespace KerbalFoundries
         float brakeTorque;
         float motorTorque;
 
-        
         int groundedWheels = 0; 
         float effectPower;
         float trackRPM = 0;
@@ -434,6 +441,10 @@ namespace KerbalFoundries
             lastCommandId = commandId;
             effectPower = Math.Abs(averageTrackRPM / maxRPM);
             WheelSound();
+            
+			// Keeping track of the increment value for the sustravel in both the GUI slider and the action groups.
+			stepInc = (UI_FloatRange)Fields["rideHeight"].uiControlFlight;
+			stepInc.stepIncrement = suspentionIncrementAmmount;
 		}
 		//end OnUpdate
 
@@ -672,7 +683,7 @@ namespace KerbalFoundries
         public void LowerRideHeight(KSPActionParam param)
         {
             if (rideHeight > 0)
-                rideHeight -= 5;
+                rideHeight -= Mathf.Clamp(suspentionIncrementAmmount, 0, 100f);
 
             ApplySettings(true);
         }
@@ -681,7 +692,7 @@ namespace KerbalFoundries
         public void RaiseRideHeight(KSPActionParam param)
         {
             if (rideHeight < 100)
-                rideHeight += 5;
+            	rideHeight += Mathf.Clamp(suspentionIncrementAmmount, 0, 100f);
 
             ApplySettings(true);
         }
@@ -697,6 +708,7 @@ namespace KerbalFoundries
         {
             ApplySteeringSettings();
         }
+        
         [KSPAction("Toggle Deployed")]
         public void AGToggleDeployed(KSPActionParam param)
         {
@@ -771,20 +783,15 @@ namespace KerbalFoundries
                     mt.currentTravel = rideHeight;
                     mt.rideHeight = rideHeight;
                     mt.torque = torque;
+					mt.suspentionIncrementAmmount = suspentionIncrementAmmount;
                 }
 				if (actionGroup || Equals(groupNumber, 0))
                     currentTravel = rideHeight;
             }
         }
 
-       
-
-        
-
         //Addons by Gaalidas
-
-   
-        /// <summary>Initializes some custom text data for the status strings.</summary>
+		/// <summary>Initializes some custom text data for the status strings.</summary>
         public void CustomResourceTextSetup()
         {
 			string textoutput = string.Empty;

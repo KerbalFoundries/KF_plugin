@@ -10,9 +10,13 @@ namespace KerbalFoundries
 		[KSPField]
 		public float propellerForce = 5;
 
+		/// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("ModulePropeller");
+		
 		public override void OnStart(PartModule.StartState state)
 		{
-			print("ModulePropeller called");
+			KFLog.Log("ModulePropeller called");
 			base.OnStart(state);
 			if (HighLogic.LoadedSceneIsFlight)
 				master = part.GetComponentInChildren<KFModuleWheel>();

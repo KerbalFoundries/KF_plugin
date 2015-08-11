@@ -28,6 +28,13 @@ namespace KerbalFoundries
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Damping"), UI_FloatRange(minValue = 0, maxValue = 0.3f, stepIncrement = 0.05f)]
         public float DamperRate;
         
+        // Set the suspension travel increment dynamically.
+		[KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Susp. Step Value")]
+        public string suspsettings = string.Empty;
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = ""), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
+		public float suspentionIncrementAmmount = 5f;
+		UI_FloatRange stepInc;
+        
         [KSPField]
         public bool lowEnergy;
         [KSPField]
@@ -82,6 +89,10 @@ namespace KerbalFoundries
             return strPartInfo.Replace("{ResourceName}", strResourceName).Replace("{ConsumptionRate}", consumptionRate.ToString("0.00"));
         }
         
+        /// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("KFRepulsor");
+        
         //begin start
         public override void OnStart(PartModule.StartState state)  //when started
         {
@@ -93,7 +104,7 @@ namespace KerbalFoundries
                 part.AddModule("KFDustFX");
                 _dustFX = part.GetComponent<KFDustFX>();
                 _dustFX.isRepulsor = true;
-                _dustFX.maxDustEmission = 28; // Not really necessary to set this, a reasonable default exists in the modukle. - Gaalidas
+                _dustFX.maxDustEmission = 28f; // Not really necessary to set this, a reasonable default exists in the modukle. - Gaalidas
                 _dustFX.OnStart(state);
             }
 
@@ -114,7 +125,7 @@ namespace KerbalFoundries
                     b.suspensionDistance = 2.5f; //default to low setting to save stupid shenanigans on takeoff
                     wcList.Add(b);
                 }
-				KFLogUtil.Log(string.Format("Repulsor Count: {0}", repulsorCount), this);
+                KFLog.Log(string.Format("Repulsor Count: {0}", repulsorCount));
 				
                 if (pointDown && Equals(vessel, FlightGlobals.ActiveVessel))
                 {
@@ -144,7 +155,7 @@ namespace KerbalFoundries
             }
             _grid.localScale = new Vector3(0.01f, 0.01f, 0.01f);
             deployed = false;
-            //Debug.LogWarning("Finished shrinking");
+            //KFLog.Warning("Finished shrinking");
         }
 
         /// <summary>A "grow" coroutine for the animation.</summary>
@@ -155,9 +166,9 @@ namespace KerbalFoundries
                 _grid.transform.localScale += (_gridScale / 50);
                 yield return null;
             }
-            //print(_gridScale);
+            //KFLog.Log(_gridScale);
             _grid.transform.localScale = _gridScale;
-            //Debug.LogWarning("Finished growing");
+            //KFLog.Warning("Finished growing");
         }
 
         // disable once FunctionNeverReturns
@@ -177,7 +188,7 @@ namespace KerbalFoundries
 			if (!Equals(bounds, null))
             {
 				UnityEngine.Object.Destroy(bounds.gameObject);
-				print("Destroying Bounds.");
+				//KFLog.Log("Destroying Bounds.");
             }
         }
 
@@ -237,42 +248,41 @@ namespace KerbalFoundries
 
                     float normalisedComp = compression / 8;
                     squish = normalisedComp / (appliedRideHeight / 100);
-
                 }
                 else if (squish > 0.1)
-                {
-                    squish /= 2;
-                }
-                //print("comp " + compression);
-                //print("squish " + squish);
+					squish /= 2;
+                //KFLog.Log("comp " + compression);
+                //KFLog.Log("squish " + squish);
 
-                if (lowEnergy)
-                {
-                    print("Retracting due to low Electric Charge");
-                    appliedRideHeight = 0;
-                    rideHeight = 0;
-                    StartCoroutine("UpdateHeight");
-                    status = "Low Charge";
-                    deployed = false;
-                }
-                else
-                {
-                    status = "Nominal";
-                }
+				if (lowEnergy)
+				{
+					KFLog.Log("Retracting due to low Electric Charge");
+					appliedRideHeight = 0f;
+					rideHeight = 0f;
+					StartCoroutine("UpdateHeight");
+					status = "Low Charge";
+					deployed = false;
+				}
+				else
+					status = "Nominal";
             }
             else
             {
                 //effectPower = 0;
 				status = lowEnergy ? "Low Charge" : "Off";
-                //Debug.LogWarning("deployed " + deployed);
+                //KFLog.Warning("deployed " + deployed);
             }
 			
             RepulsorSound(hitForce);
             _dustFX.RepulsorLight(deployed, squish);
             //effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
-            //print(effectPower);
+            //KFLog.Log(effectPower);
 
             dir += UnityEngine.Random.Range(20,60);
+            
+            // Keeping track of the increment value for the sustravel in both the GUI slider and the action groups.
+			stepInc = (UI_FloatRange)Fields["rideHeight"].uiControlFlight;
+			stepInc.stepIncrement = suspentionIncrementAmmount;
         }
 
         IEnumerator UpdateHeight()
@@ -300,7 +310,7 @@ namespace KerbalFoundries
                 StopCoroutine("Grow");
                 StartCoroutine("Shrink");
             }
-            //Debug.LogWarning("Finished height update.");
+            //KFLog.Warning("Finished height update.");
         }
 
         [KSPAction("Dec. Height")]
@@ -308,8 +318,8 @@ namespace KerbalFoundries
         {
             if (rideHeight > 0)
             {
-                rideHeight -= 5f;
-                //print("Retracting...");
+                rideHeight -= Mathf.Clamp(suspentionIncrementAmmount, 0f, 100f);
+                //KFLog.Log("Retracting...");
 				ApplySettingsAction();
             }
 		}
@@ -319,8 +329,8 @@ namespace KerbalFoundries
         {
             if (rideHeight < 100)
             {
-                rideHeight += 5f;
-				//print("Extending...");
+                rideHeight += Mathf.Clamp(suspentionIncrementAmmount, 0f, 100f);
+				//KFLog.Log("Extending...");
 				ApplySettingsAction();
             }
 		}
@@ -329,6 +339,7 @@ namespace KerbalFoundries
 		{
 			appliedRideHeight = rideHeight;
 			StartCoroutine("UpdateHeight");
+			suspentionIncrementAmmount = suspentionIncrementAmmount;
 			//ApplySettings();
 		}
 		
@@ -343,6 +354,7 @@ namespace KerbalFoundries
                     mt.rideHeight = rideHeight;
                     mt.appliedRideHeight = rideHeight;
                     mt.StartCoroutine("UpdateHeight");
+					mt.suspentionIncrementAmmount = suspentionIncrementAmmount;
                 }
             }
             //StartCoroutine("UpdateHeight");

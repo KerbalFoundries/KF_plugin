@@ -16,10 +16,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using KerbalFoundries;
 
@@ -51,13 +48,18 @@ namespace KerbalFoundries
 		[KSPField]
 		public bool isRepulsor = false;
 		
+		/// <summary>Specifies if the module is to be used for the screw drive.</summary>
+		/// <remarks>Default is "false"</remarks>
+		[KSPField]
+		public bool isScrewDrive = false;
+		
 		/// <summary>Mostly unnecessary, since there is no other purpose to having the module active.</summary>
 		/// <remarks>Default is "true"</remarks>
 		[KSPField]
 		public bool dustEffects = true;
 		
 		/// <summary>Minimum scrape speed.</summary>
-		/// <remarks>Default is 0.5.  Repulsors should have this extremely low.</remarks>
+		/// <remarks>Default is 0.1.  Repulsors should have this extremely low.</remarks>
 		[KSPField]
 		public float minScrapeSpeed = 0.1f;
 		
@@ -110,9 +112,13 @@ namespace KerbalFoundries
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
 		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
+		//public const string dustEffectObject = "Effects/fx_smokeTrail_medium";
+		[KSPField]
+		public const string sparkEffectsObject = "Effects/fx_exhaustSparks_flameout";
 		
 		bool isPaused;
 		GameObject kfdustFx;
+		GameObject sparkFx;
 		ParticleAnimator dustAnimator;
 		Color colorDust;
 		Color colorBiome;
@@ -121,8 +127,11 @@ namespace KerbalFoundries
 		Color colorWater;
 		bool isColorOverrideActive;
 		
+		bool useSparks;
+		
 		GameObject _kfRepLight;
 		Light _repLight;
+		Light _scrapeLight;
 		
 		/// <summary>CollisionInfo class for the DustFX module.</summary>
 		public class CollisionInfo
@@ -151,13 +160,18 @@ namespace KerbalFoundries
 			{
 				_KFRepulsor = part.GetComponent<KFRepulsor>();
 				tweakScaleCorrector = 1f;
-				Debug.LogWarning("Finding repulsor.");
+				KFLog.Warning("Finding repulsor.");
+			}
+			else if (isScrewDrive)
+			{
+				useSparks = true;
+				KFLog.Warning("Finding screw drive.");
 			}
 			else
 			{
 				_KFModuleWheel = part.GetComponent<KFModuleWheel>();
 				tweakScaleCorrector = _KFModuleWheel.tweakScaleCorrector;
-				Debug.LogWarning("Finding wheel.");
+				KFLog.Warning("Finding wheel.");
 			}
 			
 			if (!KFPersistenceManager.isDustEnabled)
@@ -190,10 +204,34 @@ namespace KerbalFoundries
 			kfdustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = kfdustFx.particleEmitter.GetComponent<ParticleAnimator>();
 			if (KFPersistenceManager.isRepLightEnabled && repulsor)
-				SetupLights();
+				SetupRepulsorLights();
+			if (useSparks)
+				SetupSparks();
+		}
+
+		void SetupSparks()
+		{
+			sparkFx = (GameObject)UnityEngine.Object.Instantiate(Resources.Load(sparkEffectsObject));
+			sparkFx.transform.parent = part.transform;
+			sparkFx.transform.position = part.transform.position;
+			sparkFx.particleEmitter.localVelocity = Vector3.zero;
+			sparkFx.particleEmitter.useWorldSpace = true;
+			sparkFx.particleEmitter.emit = false;
+			sparkFx.particleEmitter.minEnergy = 0;
+			sparkFx.particleEmitter.minEmission = 0;
+			SetupSparkLight();
 		}
 		
-		void SetupLights()
+		void SetupSparkLight()
+		{
+			_scrapeLight = sparkFx.AddComponent<Light>();
+			_scrapeLight.type = LightType.Point;
+			_scrapeLight.range = 3f;
+			_scrapeLight.shadows = LightShadows.None;
+			_scrapeLight.enabled = false;
+		}
+		
+		void SetupRepulsorLights()
 		{
 			if (!KFPersistenceManager.isRepLightEnabled)
 				return;
@@ -258,6 +296,7 @@ namespace KerbalFoundries
 		public void DustParticles(float speed, Vector3 contactPoint, Collider col) //(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
 		{
 			bool cameraEnabled = KFPersistenceManager.isDustCameraEnabled;
+			const float colorVariance = 0.06f;
 			colorWater = new Color(0.65f, 0.65f, 0.65f, 0.025f);
 			
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || !KFPersistenceManager.isDustEnabled)
@@ -285,11 +324,16 @@ namespace KerbalFoundries
 				if (!Equals(colorAverage, colorDust))
 				{
 					Color[] colors = dustAnimator.colorAnimation;
-					colors[0] = colorAverage;
-					colors[1] = colorAverage;
-					colors[2] = colorAverage;
-					colors[3] = colorAverage;
-					colors[4] = colorAverage;
+					colors[0] = UnityEngine.Random.Range(1, 3) < 2f ? colorAverage + colorVariance : colorAverage;
+					//colors[0] = colorAverage;
+					colors[1] = UnityEngine.Random.Range(1, 3) > 2f ? colorAverage - colorVariance : colorAverage;
+					//colors[1] = colorAverage;
+					colors[2] = UnityEngine.Random.Range(1, 3) < 2f ? colorAverage + colorVariance : colorAverage;
+					//colors[2] = colorAverage;
+					colors[3] = UnityEngine.Random.Range(1, 3) > 2f ? colorAverage - colorVariance : colorAverage;
+					//colors[3] = colorAverage;
+					colors[4] = UnityEngine.Random.Range(1, 3) < 2f ? colorAverage + colorVariance : colorAverage;
+					//colors[4] = colorAverage;
 					dustAnimator.colorAnimation = colors;
 					colorDust = colorAverage;
 				}
