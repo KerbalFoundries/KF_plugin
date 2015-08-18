@@ -69,6 +69,10 @@ namespace KerbalFoundries
 			if (bool.TryParse(configNode.GetValue("isRepLightEnabled"), out _isRepLightEnabled))
 				isRepLightEnabled = _isRepLightEnabled;
 
+            float _dustAmount = 1;
+            if (float.TryParse(configNode.GetValue("dustAmount"), out _dustAmount))
+                dustAmount = _dustAmount;
+
 			bool _writeToLogFile = false;
 			if (bool.TryParse(configNode.GetValue("writeToLogFile"), out _writeToLogFile))
 				writeToLogFile = _writeToLogFile;
@@ -145,6 +149,7 @@ namespace KerbalFoundries
 			configNode.SetValue("isDustCameraEnabled", string.Format("{0}", isDustCameraEnabled), true);
 			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
 			configNode.SetValue("isRepLightEnabled", string.Format("{0}", isRepLightEnabled), true);
+            configNode.SetValue("dustAmount", string.Format("{0}", dustAmount), true);
 			configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
 			configNode.SetValue("logFile", logFile, true);
 
@@ -195,6 +200,12 @@ namespace KerbalFoundries
 			get;
 			set;
 		}
+
+        public static float dustAmount
+        {
+            get;
+            set;
+        }
 
 		/// <summary>If all KF log messages should also be written to a log file.</summary>
 		/// <remarks>logFile must be specified in the config!</remarks>

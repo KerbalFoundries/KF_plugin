@@ -194,6 +194,7 @@ namespace KerbalFoundries
 				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
 				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
 				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
+                KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 120f, 240f, 30), KFPersistenceManager.dustAmount, 0.0F, 3.0F); 
 			}
 			
 			if (Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
@@ -201,6 +202,7 @@ namespace KerbalFoundries
 				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
 				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
 				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 120f, 240f, 24f), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
+                KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 152f, 240f, 30), KFPersistenceManager.dustAmount, 0.0F, 3.0F); 
 			}
 		}
 		

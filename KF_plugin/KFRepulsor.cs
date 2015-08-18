@@ -116,7 +116,7 @@ namespace KerbalFoundries
                 }
                 KFLog.Log(string.Format("Repulsor Count: {0}", repulsorCount));
 				
-                if (pointDown && Equals(vessel, FlightGlobals.ActiveVessel))
+                if (pointDown)
                 {
                     StopAllCoroutines();
                     StartCoroutine("LookAt");
@@ -137,11 +137,10 @@ namespace KerbalFoundries
             if (!Equals(_dustFX, null)) //add if not... sets some defaults.
             {
                 _dustFX = part.gameObject.AddComponent<KFDustFX>();
-                 //part.GetComponent<KFDustFX>();
                 _dustFX.isRepulsor = true;
-                _dustFX.maxDustEmission = 28; // Not really necessary to set this, a reasonable default exists in the modukle. - Gaalidas
                 _dustFX.OnStart(state);
             }
+            
         }
 		void SetupWaterSlider()
 		{

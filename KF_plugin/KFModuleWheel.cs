@@ -100,10 +100,6 @@ namespace KerbalFoundries
         [KSPField]
         public bool hasRetract = false;
 
-        /// <summary>Scaling factor for dust</summary>
-        [KSPField]
-        public float dustScale = 1;
-
         /// <summary>Does the part have an animation to be triggered when retracting.</summary>
         [KSPField]
         public bool hasRetractAnimation = false;
@@ -310,9 +306,9 @@ namespace KerbalFoundries
                 if (Equals(_dustFX, null)) //add if not... sets some defaults.
                 {
                     _dustFX = this.part.gameObject.AddComponent<KFDustFX>();
-                    _dustFX.tweakScaleCorrector = dustScale;
                     _dustFX.OnStart(state);
                 }
+                _dustFX.tweakScalefactor = tweakScaleCorrector;
 
                 appliedTravel = rideHeight / 100; // need to be here if no KFWheel or everything gets set to zero as below.
                 StartCoroutine(StartupStuff());
