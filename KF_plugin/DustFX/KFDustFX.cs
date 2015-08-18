@@ -16,10 +16,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using KerbalFoundries;
 
@@ -49,11 +46,6 @@ namespace KerbalFoundries
 		/// <remarks>Default is "false"</remarks>
 		[KSPField]
 		public bool isRepulsor = false;
-		
-		/// <summary>Mostly unnecessary, since there is no other purpose to having the module active.</summary>
-		/// <remarks>Default is "true"</remarks>
-		//[KSPField]
-		public bool dustEffects = true;
 		
 		/// <summary>Minimum scrape speed.</summary>
 		/// <remarks>Default is 0.1.  Repulsors should have this extremely low.</remarks>
@@ -108,7 +100,7 @@ namespace KerbalFoundries
 		/// <summary>KSP path to the effect being used here.  Made into a field so that it can be customized in the future.</summary>
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
-		public string dustEffectObject = "Effects/fx_smokeTrail_light"; //DO NOT DECLARE THIS (OR ANY KSPFIELD) CONST!!!!!!!! IT WILL BREAK STUFF!!!!!!!
+		public string dustEffectObject = "Effects/fx_smokeTrail_light";
 		//public const string dustEffectObject = "Effects/fx_smokeTrail_medium";
 		
 		/// <summary>Added or subracted from the individual color parameters (rgb) to create a variance in the dust colors.</summary>
@@ -123,13 +115,14 @@ namespace KerbalFoundries
 		bool isPaused;
 		GameObject kfdustFx;
 		ParticleAnimator dustAnimator;
-		Color colorDust;
+		Color colorPrevious;
 		Color colorBiome;
 		Color colorAverage;
 		Color colorCam;
 		Color colorWater;
 		Color colorPlus;
 		Color colorMinus;
+		Color colorFinal;
         Queue<Color> colorFIFO = new Queue<Color>();
 		
 		bool isColorOverrideActive;
@@ -139,7 +132,7 @@ namespace KerbalFoundries
 		
 		GameObject _kfRepLight;
 		Light _repLight;
-			
+		
 		/// <summary>Part Info that will be displayed when part details are shown.</summary>
 		/// <remarks>Can be overridden in the module config on a per-part basis.</remarks>
 		[KSPField]
@@ -155,7 +148,7 @@ namespace KerbalFoundries
 		{
 			if (!KFPersistenceManager.isDustEnabled)
 				return;
-					
+
 			if (HighLogic.LoadedSceneIsFlight)
 			{
                 _ModuleCameraShot = vessel.rootPart.gameObject.GetComponent<ModuleCameraShot>();
@@ -164,7 +157,7 @@ namespace KerbalFoundries
                     _ModuleCameraShot = vessel.rootPart.gameObject.AddComponent<ModuleCameraShot>();
                     _ModuleCameraShot.StartUp();
                 }
-				if (dustEffects)
+				if (KFPersistenceManager.isDustEnabled)
 					SetupParticles(isRepulsor);
 			}
 			
@@ -183,7 +176,7 @@ namespace KerbalFoundries
 		/// <summary>Defines the particle effects used in this module.</summary>
 		public void SetupParticles(bool repulsor)
 		{
-			if (!dustEffects)
+			if (!KFPersistenceManager.isDustEnabled)
 				return;
 			kfdustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectObject));
 			//kfdustFx.transform.parent = part.transform;
@@ -262,13 +255,14 @@ namespace KerbalFoundries
 		/// <param name="col">The collider being referenced.</param>
 		public void DustParticles(float speed, Vector3 contactPoint, Collider col) //(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
 		{
+			// disable ConvertToConstant.Local
 			bool cameraEnabled = KFPersistenceManager.isDustCameraEnabled;
-			float randomthreshold = 2f;
+			int randomthreshold = 2;
 			int randomMin = 1;
 			int randomMax = 3;
 			colorWater = new Color(0.65f, 0.65f, 0.65f, 0.025f);
 			
-			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || !KFPersistenceManager.isDustEnabled)
+			if (speed < minScrapeSpeed || Equals(dustAnimator, null) || !KFPersistenceManager.isDustEnabled)
 				return;
 			
 			if (Equals(sizeFactor, 0) || sizeFactor < 0)
@@ -282,7 +276,7 @@ namespace KerbalFoundries
 			if (cameraEnabled)
 			{
 				colorCam = _ModuleCameraShot._averageColour;
-				colorTemp = (colorCam /2) + (colorBiome /2); // Make the camera colour dominant.
+				colorTemp = (colorCam / 2) + (colorBiome / 2); // Make the camera colour dominant.
                 colorTemp.a = colorBiome.a;
 			}
 			else
@@ -294,9 +288,7 @@ namespace KerbalFoundries
             colorFIFO.Enqueue(colorTemp);
 
             if (colorFIFO.Count > 100)
-            {
                 colorFIFO.Dequeue();
-            }
 
             Color[] colorArray = colorFIFO.ToArray();
 
@@ -315,7 +307,6 @@ namespace KerbalFoundries
 
             colorAverage = new Color(r / 100, g / 100, b / 100, a / 100);
 
-
 			if (isColorOverrideActive)
 				colorAverage = colorWater;
 			
@@ -324,15 +315,10 @@ namespace KerbalFoundries
 				if (!Equals(colorAverage, colorDust))
 				{
 					Color[] colors = dustAnimator.colorAnimation;
-					//colors[0] = UnityEngine.Random.Range(randomMin, randomMax) < randomthreshold ? colorPlus : colorAverage; //what the????
 					colors[0] = colorAverage;
-					//colors[1] = UnityEngine.Random.Range(randomMin, randomMax) > randomthreshold ? colorMinus : colorAverage;
 					colors[1] = colorAverage;
-					//colors[2] = UnityEngine.Random.Range(randomMin, randomMax) < randomthreshold ? colorPlus : colorAverage;
 					colors[2] = colorAverage;
-					//colors[3] = UnityEngine.Random.Range(randomMin, randomMax) > randomthreshold ? colorMinus : colorAverage;
 					colors[3] = colorAverage;
-					//colors[4] = UnityEngine.Random.Range(randomMin, randomMax) < randomthreshold ? colorPlus : colorAverage;
 					colors[4] = colorAverage;
 					dustAnimator.colorAnimation = colors;
 					colorDust = colorAverage; 
@@ -357,16 +343,14 @@ namespace KerbalFoundries
 		/// <param name="direction">A direction to emit this stuff.</param>
 		void DustParticles(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
 		{
-			if (!dustEffects || force < minScrapeSpeed || Equals(dustAnimator, null))
+			if (force < minScrapeSpeed || Equals(dustAnimator, null))
 				return;
-            
 			kfdustFx.transform.rotation = Quaternion.Euler(normal);
 			kfdustFx.particleEmitter.localVelocity = direction;
 			DustParticles(force, contactPoint, col);
-			
 			return;
 		}
-				
+		
 		/// <summary>Called when the game enters a "paused" state.</summary>
 		void OnPause()
 		{
@@ -384,11 +368,8 @@ namespace KerbalFoundries
 		/// <summary>Called when the object being referenced is destroyed, or when the module instance is deactivated.</summary>
 		void OnDestroy()
 		{
-			//Debug.LogWarning(string.Format("{0}Stopped Audio.", logprefix));
 			GameEvents.onGamePause.Remove(OnPause);
-			//Debug.LogWarning(string.Format("{0}Removed OnPause hook.", logprefix));
 			GameEvents.onGameUnpause.Remove(OnUnpause);
-			//Debug.LogWarning(string.Format("{0}Removed OnUnPause hook.", logprefix));
 		}
 	}
 }

@@ -44,7 +44,6 @@ namespace KerbalFoundries
         public string suspsettings = string.Empty;
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#"), UI_FloatRange(minValue = 1, maxValue = 20f, stepIncrement = 1f)]
 		public float suspentionIncrementAmmount = 5f;
-		UI_FloatRange stepInc;
         
 		// Config fields
 		/// <summary>Torque applied to wheel colliders.</summary>
@@ -138,6 +137,7 @@ namespace KerbalFoundries
 		/// <summary>Saves the brake state.</summary>
         [KSPField(isPersistant = true)]
 		public bool brakesApplied;
+		/// <summary>Saves the retracted state.</summary>
         [KSPField(isPersistant = true)]
         public bool isRetracted = false;
 
@@ -195,8 +195,6 @@ namespace KerbalFoundries
         List<float> suspensionDistance = new List<float>();
         ModuleAnimateGeneric retractionAnimation;
         KFDustFX _dustFX;
-        
-		public bool hasDust = true;
         
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
@@ -288,9 +286,9 @@ namespace KerbalFoundries
                 currentTravel = rideHeight; //set up correct values from persistence
             else
                 currentTravel = 0;
-            //KFLog.Log(appliedRideHeight);
+            //KFLog.Log(string.Format("\"appliedRideHeight\" = {0}", appliedRideHeight));
             
-            //disable retract tweakables is retract option not specified
+            // Disable retract tweakables if retract option not specified.
 			if (HighLogic.LoadedSceneIsEditor && !hasRetract)
             {
                 Extensions.DisableAnimateButton(this.part);
@@ -300,7 +298,7 @@ namespace KerbalFoundries
                 Fields["startRetracted"].guiActiveEditor = false;
             } 
 
-            if (HighLogic.LoadedSceneIsFlight && vessel.vesselType != VesselType.Debris && vessel.parts.Count > 1)
+            if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris)) // && vessel.parts.Count > 1) // Vessels don't have to be made up of only one part to still be considered debris.
             {
                 _dustFX = this.part.gameObject.GetComponent<KFDustFX>();
                 if (Equals(_dustFX, null)) //add if not... sets some defaults.
@@ -450,20 +448,15 @@ namespace KerbalFoundries
             lastCommandId = commandId;
             effectPower = Math.Abs(averageTrackRPM / maxRPM);
             WheelSound();
-            
-			// Keeping track of the increment value for the sustravel in both the GUI slider and the action groups.
-			stepInc = (UI_FloatRange)Fields["rideHeight"].uiControlFlight;
-			stepInc.stepIncrement = suspentionIncrementAmmount;
 		}
 		//end OnUpdate
 
         /// <summary>
         /// Applies calculated torque, braking and steering to the wheel colliders,
-        /// gathers some information such as RPM and invokes the DustFX where appropriate
+        /// gathers some information such as RPM and invokes the DustFX where appropriate.
+        /// Also keeps track of suspension travel interval variables.
         /// </summary>
-        /// <remarks>
-        /// This is a major chunk of what happens in FixedUpdate if the part is deployed.
-        /// </remarks>
+        /// <remarks>This is a major chunk of what happens in FixedUpdate if the part is deployed.</remarks>
         void UpdateColliders()
         {
             float requestedResource;
@@ -503,7 +496,7 @@ namespace KerbalFoundries
                     groundedWheels++;
                     trackRPM += wcList[i].rpm;
                     colliderLoad += hit.force;
-                    if (KFPersistenceManager.isDustEnabled && vessel.vesselType != VesselType.Debris)
+                    if (KFPersistenceManager.isDustEnabled)
                     	_dustFX.WheelEmit(hit.point, hit.collider);
                 }
                 else if (!Equals(wcList[i].suspensionDistance, 0)) //the sprocket colliders could be doing anything. Don't count them.
@@ -691,7 +684,7 @@ namespace KerbalFoundries
         public void LowerRideHeight(KSPActionParam param)
         {
             if (rideHeight > 0)
-                rideHeight -= Mathf.Clamp(suspentionIncrementAmmount, 0, 100f);
+                rideHeight -= Mathf.Clamp(suspentionIncrementAmmount, 0f, 100f);
 
             ApplySettings(true);
         }
@@ -700,7 +693,7 @@ namespace KerbalFoundries
         public void RaiseRideHeight(KSPActionParam param)
         {
             if (rideHeight < 100)
-            	rideHeight += Mathf.Clamp(suspentionIncrementAmmount, 0, 100f);
+            	rideHeight += Mathf.Clamp(suspentionIncrementAmmount, 0f, 100f);
 
             ApplySettings(true);
         }
@@ -710,7 +703,7 @@ namespace KerbalFoundries
         /// <param name="value">The height requested. (0-100 float)</param>
         void Presetter(float value)
         {
-			rideHeight = Mathf.Clamp(value, 0, 100f);
+			rideHeight = Mathf.Clamp(value, 0f, 100f);
 			ApplySettings(true);
         }
         

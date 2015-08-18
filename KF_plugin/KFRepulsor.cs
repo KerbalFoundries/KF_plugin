@@ -5,8 +5,8 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -31,9 +31,8 @@ namespace KerbalFoundries
         // Set the suspension travel increment dynamically.
 		[KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Susp. Step Value")]
         public string suspsettings = string.Empty;
-		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = ""), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#"), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
 		public float suspentionIncrementAmmount = 5f;
-		UI_FloatRange stepInc;
         
         [KSPField]
         public bool lowEnergy;
@@ -52,6 +51,7 @@ namespace KerbalFoundries
         Vector3 _gridScale;
         
         //float effectPower; 
+        // disable once ConvertToConstant.Local
         float effectPowerMax = 50f;
         float appliedRideHeight;
         float currentRideHeight;
@@ -98,7 +98,7 @@ namespace KerbalFoundries
         {
 			base.OnStart(state);
 
-            if (HighLogic.LoadedSceneIsFlight && vessel.vesselType != VesselType.Debris && vessel.parts.Count > 1)
+			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris)) // && vessel.parts.Count > 1) // Vessel could still be debris even with a part cound greater than one.
             {
                 _grid = transform.Search(gridName);
                 _gridScale = _grid.transform.localScale;
@@ -140,8 +140,8 @@ namespace KerbalFoundries
                 _dustFX.isRepulsor = true;
                 _dustFX.OnStart(state);
             }
-            
         }
+
 		void SetupWaterSlider()
 		{
 			_MWS = vessel.rootPart.GetComponent<ModuleWaterSlider>();
@@ -190,6 +190,7 @@ namespace KerbalFoundries
             }
         }
 
+        // disable once MemberCanBeMadeStatic.Local
         public void DestroyBounds()
         {
             Transform bounds = transform.Search("Bounds");
@@ -244,7 +245,7 @@ namespace KerbalFoundries
                     {
                         anyGrounded |= grounded;
                         hitForce += hit.force;
-                        if (KFPersistenceManager.isDustEnabled && vessel.vesselType != VesselType.Debris)
+                        if (KFPersistenceManager.isDustEnabled)
                         	_dustFX.RepulsorEmit(hit.point, hit.collider, hit.force, hit.normal, emitDirection);
                         frameCompression += -wcList[i].transform.InverseTransformPoint(hit.point).y - wcList[i].radius;
                     }
@@ -278,20 +279,16 @@ namespace KerbalFoundries
             {
                 //effectPower = 0;
 				status = lowEnergy ? "Low Charge" : "Off";
-                //KFLog.Warning("deployed " + deployed);
+                //KFLog.Warning(string.Format("\"deployed\" = {0}", deployed));
             }
 			
             RepulsorSound(hitForce);
-			if (vessel.vesselType != VesselType.Debris)
-            	_dustFX.RepulsorLight(deployed, squish);
+			if (deployed && KFPersistenceManager.isRepLightEnabled)
+				_dustFX.RepulsorLight(deployed, squish);
             //effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //KFLog.Log(effectPower);
-
+			
             dir += UnityEngine.Random.Range(20,60);
-            
-            // Keeping track of the increment value for the sustravel in both the GUI slider and the action groups.
-			stepInc = (UI_FloatRange)Fields["rideHeight"].uiControlFlight;
-			stepInc.stepIncrement = suspentionIncrementAmmount;
         }
 
         IEnumerator UpdateHeight()
@@ -403,8 +400,8 @@ namespace KerbalFoundries
                 {
                     mt.rideHeight = rideHeight;
                     mt.appliedRideHeight = rideHeight;
-                    mt.StartCoroutine("UpdateHeight");
 					mt.suspentionIncrementAmmount = suspentionIncrementAmmount;
+                    mt.StartCoroutine("UpdateHeight");
                 }
             }
             //StartCoroutine("UpdateHeight");

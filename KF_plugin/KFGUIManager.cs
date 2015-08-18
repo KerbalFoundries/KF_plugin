@@ -143,12 +143,14 @@ namespace KerbalFoundries
                  * window height calculates like this:
                  *   24 units - space for title bar (automatically drawn)
                  *  +24 units - space for first toggle
-                 * (+ 8 units - space between two toggles
+                 * (+ 8 units - space between the elements)
                  *  +24 units - space for second toggle
-                 * (+ 8 units - space between two toggles
+                 * (+ 8 units - space between the elements)
                  *  +24 units - space for third toggle
-                 * (+ 8 units - space between two toggles)
+                 * (+ 8 units - space between the elements)
                  *  +24 units - space for the fourth toggle
+				 * (+ 8 units - space between the elements)
+				 *  +24 units - space for the slider
                  *  +16 units - space till end of window
                  * 
                  * =>
@@ -156,18 +158,20 @@ namespace KerbalFoundries
                  *   Window height (2 toogles):  96
                  *   Window height (3 toogles): 128
                  *   Window height (4 toggles): 160
+				 *   Window height (+slider)  : 192
+				 *
                  */
 
                 float windowTop = 42f;
                 float windowLeft = -260f;
-                float windowHeight = 160f; // assume 4 toggles will be displayed
+                float windowHeight = 192f; // assume 4 toggles will be displayed
 
 				if (HighLogic.LoadedSceneIsFlight)
 					windowHeight -= 32f; // remove the space of 1 toggles, because only 3 toggles need to be displayed.
 				
                 if (HighLogic.LoadedSceneIsEditor)
                 {
-                    windowHeight -= 64f; // remove the space of 2 toggles, because only 1 toggle needs to be displayed
+                    windowHeight -= 96f; // remove the space of 2 toggles (+ a slider), because only 1 toggle needs to be displayed
                     // in the editor the toolbar is at the bottom of the screen, so let's move it down
                     windowTop = Screen.height - 42f - windowHeight; // 42f is the height of the toolbar buttons + 2 units of space
                 }
@@ -194,7 +198,7 @@ namespace KerbalFoundries
 				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
 				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
 				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
-                KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 120f, 240f, 30), KFPersistenceManager.dustAmount, 0.0F, 3.0F); 
+                KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 120f, 240f, 30), KFPersistenceManager.dustAmount, 0f, 3f); 
 			}
 			
 			if (Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
