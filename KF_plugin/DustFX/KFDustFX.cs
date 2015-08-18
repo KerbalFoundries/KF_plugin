@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using KerbalFoundries;
@@ -122,7 +123,7 @@ namespace KerbalFoundries
 		Color colorWater;
 		Color colorPlus;
 		Color colorMinus;
-		Color colorFinal;
+		//Color colorFinal;
         Queue<Color> colorFIFO = new Queue<Color>();
 		
 		bool isColorOverrideActive;
@@ -257,9 +258,9 @@ namespace KerbalFoundries
 		{
 			// disable ConvertToConstant.Local
 			bool cameraEnabled = KFPersistenceManager.isDustCameraEnabled;
-			int randomthreshold = 2;
-			int randomMin = 1;
-			int randomMax = 3;
+			//int randomthreshold = 2;
+			//int randomMin = 1;
+			//int randomMax = 3;
 			colorWater = new Color(0.65f, 0.65f, 0.65f, 0.025f);
 			
 			if (speed < minScrapeSpeed || Equals(dustAnimator, null) || !KFPersistenceManager.isDustEnabled)
@@ -312,7 +313,7 @@ namespace KerbalFoundries
 			
 			if (speed >= minScrapeSpeed)
 			{
-				if (!Equals(colorAverage, colorDust))
+				if (!Equals(colorAverage, colorPrevious))
 				{
 					Color[] colors = dustAnimator.colorAnimation;
 					colors[0] = colorAverage;
@@ -321,7 +322,7 @@ namespace KerbalFoundries
 					colors[3] = colorAverage;
 					colors[4] = colorAverage;
 					dustAnimator.colorAnimation = colors;
-					colorDust = colorAverage; 
+					colorPrevious = colorAverage; 
 				}
 				kfdustFx.transform.position = contactPoint;
                 kfdustFx.particleEmitter.maxEnergy = Mathf.Clamp(((speed / maxDustEnergyDiv) * sizeFactor), minDustEnergy, maxDustEnergy * sizeFactor);
