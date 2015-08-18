@@ -14,9 +14,9 @@ namespace KerbalFoundries
         // disable ConvertIfStatementToConditionalTernaryExpression
 		
 		// Name definitions
-        public const string right = "right";
-        public const string forward = "forward";
-        public const string up = "up";
+        const string right = "right";
+        const string forward = "forward";
+        const string up = "up";
 
 		// Tweakables
         [KSPField(isPersistant = false, guiActive = true, guiName = "Wheel Settings")]
@@ -146,7 +146,7 @@ namespace KerbalFoundries
         uint lastCommandId;
         float brakeTorque;
         float motorTorque;
-
+        bool isReady;
         
         int groundedWheels = 0; 
         float effectPower;
@@ -321,7 +321,7 @@ namespace KerbalFoundries
                     torque /= 100;
 				
                 wheelCount = 0;
-				this.part.force_activate(); // Force the part active or OnFixedUpate is not called
+				
 				foreach (WheelCollider wc in this.part.GetComponentsInChildren<WheelCollider>()) // Set colliders to values chosen in editor and activate
                 {
                     wheelCount++;
@@ -341,7 +341,7 @@ namespace KerbalFoundries
 				
                 if (isRetracted)
                     RetractDeploy("retract");
-				
+                isReady = true;
 			} // End scene is flight
 			DestroyBounds();
 		}
@@ -366,8 +366,10 @@ namespace KerbalFoundries
         }
 
         /// <summary>Physics critical stuff.</summary>
-        public override void OnFixedUpdate()
+        public void FixedUpdate()
         {
+            if (!isReady)
+                return;
 			// User input
             float steeringTorque;
             float brakeSteering;
@@ -419,9 +421,10 @@ namespace KerbalFoundries
 		//End OnFixedUpdate
 
         /// <summary>Stuff that doesn't need to happen every physics frame.</summary>
-        public override void OnUpdate()
+        public void Update()
         {
-            base.OnUpdate();
+            if (!isReady)
+                return;
             commandId = this.vessel.referenceTransformId;
 			if (!Equals(commandId, lastCommandId))
             {
@@ -625,7 +628,7 @@ namespace KerbalFoundries
             {
 				UnityEngine.Object.Destroy(bounds.gameObject);
                 //boundsDestroyed = true; //remove the bounds object to let the wheel colliders take over
-                print("Destroying Bounds.");
+                print("KFMW Destroying Bounds.");
             }
         }
 

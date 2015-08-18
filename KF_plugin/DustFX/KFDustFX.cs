@@ -103,7 +103,7 @@ namespace KerbalFoundries
 		/// <summary>KSP path to the effect being used here.  Made into a field so that it can be customized in the future.</summary>
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
-		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
+		public string dustEffectObject = "Effects/fx_smokeTrail_light";
 		
 		bool isPaused;
 		GameObject kfdustFx;

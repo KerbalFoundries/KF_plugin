@@ -45,7 +45,7 @@ namespace KerbalFoundries
         Vector3 _gridScale;
         
         //float effectPower; 
-        const float effectPowerMax = 50f;
+        float effectPowerMax = 50f;
         float appliedRideHeight;
         float currentRideHeight;
         float repulsorCount = 0;
@@ -190,7 +190,7 @@ namespace KerbalFoundries
 			if (!Equals(bounds, null))
             {
 				UnityEngine.Object.Destroy(bounds.gameObject);
-				print("Destroying Bounds.");
+				print("KFR Destroying Bounds.");
             }
         }
 

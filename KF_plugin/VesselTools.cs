@@ -75,12 +75,12 @@ namespace KerbalFoundries
 	{
 		// disable RedundantDefaultFieldInitializer
 		
-		const int resWidth = 6;
-		const int resHeight = 6;
+		int resWidth = 6;
+		int resHeight = 6;
 		public Color _averageColour = new Color(1f, 1f, 1f, 1f);
 		
         int frameCount = 0;
-		const int threshHold = 10;
+		int threshHold = 10;
 		Vessel _vessel;
 		GameObject _cameraObject;
 		Camera _camera;
@@ -157,7 +157,7 @@ namespace KerbalFoundries
                 float r = texColors[0].r;
                 float g = texColors[0].g;
                 float b = texColors[0].b;
-				const float alpha = 0.014f;
+				float alpha = 0.014f;
 
 				for (int i = 0; i < total; i++)
 				{

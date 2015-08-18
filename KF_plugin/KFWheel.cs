@@ -107,8 +107,8 @@ namespace KerbalFoundries
 			{
 				// Do absolutely nothing!
 			}
-            
-			if (HighLogic.LoadedSceneIsFlight)
+
+            if (HighLogic.LoadedSceneIsFlight && vessel.vesselType != VesselType.Debris && vessel.parts.Count > 1)
 			{
 
 				GameEvents.onGamePause.Add(new EventVoid.OnEvent(OnPause));

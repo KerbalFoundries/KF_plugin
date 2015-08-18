@@ -25,7 +25,7 @@ namespace KerbalFoundries
             _trackSurface = _smr.gameObject;
             _track = part.GetComponentInChildren<KFModuleWheel>();
 
-            if (HighLogic.LoadedSceneIsFlight)
+            if (HighLogic.LoadedSceneIsFlight && vessel.vesselType != VesselType.Debris && vessel.parts.Count > 1)
             {
                 trackMaterial = _trackSurface.renderer.material;
                 Vector2 trackTiling = trackMaterial.mainTextureScale;

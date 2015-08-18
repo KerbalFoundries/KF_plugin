@@ -39,7 +39,7 @@ namespace KerbalFoundries
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
-			if (HighLogic.LoadedSceneIsFlight)
+            if (HighLogic.LoadedSceneIsFlight && vessel.vesselType != VesselType.Debris && vessel.parts.Count > 1)
 			{
 				GameEvents.onGamePause.Add(new EventVoid.OnEvent(this.OnPause));
 				GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(this.OnUnPause));
