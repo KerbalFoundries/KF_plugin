@@ -32,7 +32,7 @@ namespace KerbalFoundries
 		#endregion Initialization
 		
 		#region MonoBehavior life cycle events
-
+		
 		/// <summary>Called when the Behavior wakes up.</summary>
         /// <remarks>
         /// The MonoBehavior only wakes up during the loading scene at the start of the game.
@@ -40,10 +40,10 @@ namespace KerbalFoundries
         /// </remarks>
 		void Awake()
 		{
-            KFLog.Log("Awake()");
-
-            DontDestroyOnLoad(this); // makes sure this MonoBehavior doesn't get destroyed on game scene switch
-
+            //KFLog.Log("Awake()");
+			
+            DontDestroyOnLoad(this); // makes sure this MonoBehavior doesn't get destroyed on game scene switch.
+			
             GameEvents.onGUIApplicationLauncherReady.Add(OnGUIReady);
             GameEvents.onGUIApplicationLauncherUnreadifying.Add(OnGUIUnready);
 		}
@@ -54,7 +54,7 @@ namespace KerbalFoundries
         /// <param name="data"></param>
         void OnGUIUnready(GameScenes data)
         {
-            KFLog.Log("OnGUIUnready()");
+            //KFLog.Log("OnGUIUnready()");
             DestroyAppButton();
         }
 		
@@ -163,17 +163,15 @@ namespace KerbalFoundries
                 float windowHeight = 160f; // assume 4 toggles will be displayed
 
 				if (HighLogic.LoadedSceneIsFlight)
-				{
 					windowHeight -= 32f; // remove the space of 1 toggles, because only 3 toggles need to be displayed.
-				}
-
+				
                 if (HighLogic.LoadedSceneIsEditor)
                 {
                     windowHeight -= 64f; // remove the space of 2 toggles, because only 1 toggle needs to be displayed
                     // in the editor the toolbar is at the bottom of the screen, so let's move it down
                     windowTop = Screen.height - 42f - windowHeight; // 42f is the height of the toolbar buttons + 2 units of space
                 }
-
+				
                 // shift the window to the left until the left window border has the same x value as the button sprite or at least so far it won't clip out the edge of the monitor
                 windowLeft = Screen.width + Mathf.Min(appButton.sprite.TopLeft.x - 260, windowLeft);
 
@@ -187,17 +185,17 @@ namespace KerbalFoundries
 		void DrawWindow(int windowID)
 		{
 			GUI.skin = HighLogic.Skin;
-
+			
             if (HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
                 KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
-
+			
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");
 				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
 				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, 24f), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
 			}
-
+			
 			if (Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
 			{
 				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, 24f), KFPersistenceManager.isDustEnabled, "Enable DustFX");

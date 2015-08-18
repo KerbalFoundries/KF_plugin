@@ -55,6 +55,10 @@ namespace KerbalFoundries
 
         WheelCollider _wheelCollider;
 
+        /// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("OverrideWheelCollider");
+        
         public override void OnStart(PartModule.StartState state)
         {
             GameObject _susTrav = part.FindModelTransform(susTravName).gameObject;
@@ -63,7 +67,7 @@ namespace KerbalFoundries
                 if (wc.name.Equals(colliderName, StringComparison.Ordinal))
                     _wheelCollider = wc;
                 else
-                    Debug.LogError("Wheel collider not found.");
+                    KFLog.Error("Wheel collider not found.");
             }
 
 			if (HighLogic.LoadedSceneIsFlight && moveCollider)

@@ -9,6 +9,10 @@ namespace KerbalFoundries
         [KSPField]
         public string objectName;
 
+        /// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("ObjectDestroy");
+        
         public override void OnStart(PartModule.StartState state)
         {
             base.OnStart(state);
@@ -17,10 +21,10 @@ namespace KerbalFoundries
 			{
 				UnityEngine.Object.Destroy(destroyedObject.gameObject);
 				//boundsDestroyed = true; //remove the bounds object to let the wheel colliders take over
-				print(string.Format("Destroying: {0}", objectName));
+				KFLog.Log(string.Format("Destroying: {0}", objectName));
 			}
 			else
-				Debug.LogWarning(string.Format("Could not find object named \"{0}\" to destroy.", objectName)); 
+				KFLog.Warning(string.Format("Could not find object named \"{0}\" to destroy.", objectName)); 
         }
     }
 }

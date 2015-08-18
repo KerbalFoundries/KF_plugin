@@ -67,9 +67,7 @@ namespace KerbalFoundries
 				UpdatePosition();
 			colliderHeight = Mathf.Clamp((colliderHeight -= 0.1f), -10, 2.5f);
 		}
-
     }
-     
 
 	public class ModuleCameraShot : PartModule
 	{
@@ -171,6 +169,5 @@ namespace KerbalFoundries
 			}
 			frameCount++;
 		}
-
 	}
 }

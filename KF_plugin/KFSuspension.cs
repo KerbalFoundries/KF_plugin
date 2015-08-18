@@ -35,6 +35,10 @@ namespace KerbalFoundries
 		float tweakScaleCorrector = 1;
 
 		bool isReady;
+		
+		/// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("KFSuspension");
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -46,7 +50,7 @@ namespace KerbalFoundries
                 KFMW = this.part.GetComponentInChildren<KFModuleWheel>();
 				if (!Equals(KFMW, null))
 					tweakScaleCorrector = KFMW.tweakScaleCorrector;
-				Debug.LogWarning(string.Format("TS Corrector: {0}", tweakScaleCorrector));
+				KFLog.Warning(string.Format("TS Corrector: {0}", tweakScaleCorrector));
 
 				colliderList = Extensions.SplitString(colliderNames);
                 
@@ -63,11 +67,11 @@ namespace KerbalFoundries
                 MoveSuspension(susTravIndex, -lastFrameTraverse, susTrav); //to get the initial stuff correct
                 if (objectCount > 0)
                 {
-                    //Debug.LogError("lastFrameTraverse " + lastFrameTraverse);
+					//KFLog.Error(string.Format("lastFrameTraverse {0}", lastFrameTraverse));
                     StartCoroutine("WaitAndStart");
                 }
                 else
-                    Debug.LogError("KFSuspension not configured correctly");
+                    KFLog.Error("KFSuspension not configured correctly");
             }
         }
 
@@ -79,7 +83,7 @@ namespace KerbalFoundries
                 i++;
                 yield return new WaitForFixedUpdate();
             }
-            //Debug.LogError("Ready to start " + lastFrameTraverse);
+			//KFLog.Error(string.Format("Ready to start {0}", lastFrameTraverse));
             isReady = true;
         }
 
@@ -113,7 +117,7 @@ namespace KerbalFoundries
 
             frameTraverse = suspensionMovement / objectCount; //average the movement.
             lastFrameTraverse = frameTraverse;
-            //Debug.Log("frameTraverse " + frameTraverse);
+			//KFLog.Log(string.Format("frameTraverse {0}", frameTraverse));
             susTrav.localPosition = initialPosition;
             MoveSuspension(susTravIndex, -frameTraverse, susTrav);
         }
@@ -127,13 +131,13 @@ namespace KerbalFoundries
 
         public void OnPause()
         {
-            //Debug.LogWarning("OnPause " + lastFrameTraverse);
+			//KFLog.Warning(string.Format("OnPause {0}", lastFrameTraverse));
             isReady = false;
         }
 
         public void OnUnPause()
         {
-            //Debug.LogWarning("OnUnPause " + lastFrameTraverse);
+			//KFLog.Warning(string.Format("OnUnPause {0}", lastFrameTraverse));
             isReady = true;
         }
 

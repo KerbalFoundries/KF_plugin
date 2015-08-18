@@ -10,6 +10,10 @@ namespace KerbalFoundries
         public string markerName;
         Transform marker;
         bool isMarkerEnabled;
+        
+        /// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("OrientationMarker");
 
         public override void OnStart(PartModule.StartState state)
         {
@@ -17,16 +21,13 @@ namespace KerbalFoundries
             marker = part.transform.Search(markerName);
             isMarkerEnabled = KFPersistenceManager.isMarkerEnabled;
 
-            if (!Equals(marker, null) && !isMarkerEnabled)
-                UnityEngine.Object.Destroy(marker.gameObject);
-
-            if (!Equals(marker, null) && HighLogic.LoadedSceneIsFlight)
-            {
-                UnityEngine.Object.Destroy(marker.gameObject);
-                Debug.LogWarning("Marker destroyed.");
-            }
+			if (!Equals(marker, null) && (!isMarkerEnabled || HighLogic.LoadedSceneIsFlight))
+			{
+				UnityEngine.Object.Destroy(marker.gameObject);
+				KFLog.Warning("Marker destroyed.");
+			}
             else
-                Debug.LogWarning("Marker not found.");
+                KFLog.Warning("Marker not found.");
         }
     }
 }

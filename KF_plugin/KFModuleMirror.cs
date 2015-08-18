@@ -39,11 +39,11 @@ namespace KerbalFoundries
 			//Debug.LogError(string.Format("{0} {1}", leftList[0], leftList.Count()));
 			//Debug.LogError(string.Format("{0} {1}", rightList[0], rightList.Count()));
 
-            //some defaults
-            //if (leftObjectName == "")
-              //  leftObjectName = "Left";
-            //if (rightObjectName == "")
-              //  leftObjectName = "Right";
+			//some defaults
+			//if (leftObjectName == "")
+			//  leftObjectName = "Left";
+			//if (rightObjectName == "")
+			//  leftObjectName = "Right";
 
             for (int i = 0; i < leftList.Count(); i++)
             {

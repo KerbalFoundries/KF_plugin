@@ -38,6 +38,10 @@ namespace KerbalFoundries
 
 		//ModuleWaterSlider mws;
 		KFModuleWheel _moduletrack;
+		
+		/// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("RepulsorWheel");
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -53,7 +57,7 @@ namespace KerbalFoundries
 
 			if (HighLogic.LoadedSceneIsFlight)
 			{
-				print("Repulsor Wheel started");
+				KFLog.Log("Repulsor Wheel started");
 
 				foreach (ModuleAnimateGeneric ma in part.FindModulesImplementing<ModuleAnimateGeneric>())
 					ma.Events["Toggle"].guiActive = false;
@@ -87,7 +91,7 @@ namespace KerbalFoundries
 				if (!repulsorMode)
 					UpdateColliders("wheel");
 				effectPowerMax = 1 * chargeConsumptionRate * Time.deltaTime;
-				print(effectPowerMax);
+				KFLog.Log(string.Format("{0}", effectPowerMax));
 			}
 			// End isInFlight
 		}
@@ -100,14 +104,14 @@ namespace KerbalFoundries
 			{
 				float chargeConsumption = (repulsorHeight / 2) * (1 + _moduletrack.springRate) * Time.deltaTime * chargeConsumptionRate;
 				effectPower = chargeConsumption / effectPowerMax;
-				print(effectPower);
+				KFLog.Log(string.Format("{0}", effectPower));
 
 				float electricCharge = part.RequestResource("ElectricCharge", chargeConsumption);
-				//print(electricCharge);
+				//KFLog.Log(string.Format("{0}", electricCharge));
 				// = Extensions.GetBattery(this.part);
 				if (electricCharge < (chargeConsumption * 0.9f))
 				{
-					print("Retracting due to low Electric Charge");
+					KFLog.Log("Retracting due to low Electric Charge");
 					lowEnergy = true;
 					repulsorHeight = 0;
 					UpdateColliders("wheel");
@@ -124,7 +128,7 @@ namespace KerbalFoundries
 			
 			RepulsorSound();
 			effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
-			//print(effectPower);
+			//KFLog.Log(string.Format("{0}", effectPower));
 		}
 
 		public void RepulsorSound()
@@ -172,7 +176,7 @@ namespace KerbalFoundries
 					}
 					break;
 				default:
-					print("incorrect command passed to UpdateColliders");
+					KFLog.Log("incorrect command passed to UpdateColliders");
 					break;
 			}
 		}

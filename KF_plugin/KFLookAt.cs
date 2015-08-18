@@ -16,7 +16,7 @@ namespace KerbalFoundries
 		public bool activeEditor;
 
 		readonly List<Transform> rotators = new List<Transform>();
-		readonly List<Transform> targets = new List<Transform>(); 
+		readonly List<Transform> targets = new List<Transform>();
 
 		string[] rotatorList;
 		string[] targetList;

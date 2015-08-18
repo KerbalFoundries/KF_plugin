@@ -10,6 +10,7 @@
 
 using System;
 using System.Linq;
+using UnityEngine;
 using KerbalFoundries.Log;
 
 namespace KerbalFoundries
@@ -143,15 +144,15 @@ namespace KerbalFoundries
 			switch (logType)
 			{
 				case LogType.Error:
-					UnityEngine.Debug.LogError(strOutput);
+					Debug.LogError(strOutput);
 					break;
 				case LogType.Warning:
-					UnityEngine.Debug.LogWarning(strOutput);
+					Debug.LogWarning(strOutput);
 					break;
 				// disable once RedundantCaseLabel
 				case LogType.Log:
 				default:
-					UnityEngine.Debug.Log(strOutput);
+					Debug.Log(strOutput);
 					break;
 			}
 
@@ -168,7 +169,7 @@ namespace KerbalFoundries
 			if (KFLog.Ready)
 			{
 				string strOutput = string.Format("{0} {1,-7} {2}: {3}", DateTime.Now.ToString("hh:mm:ss.fff"), logType.ToString().ToUpper(), strObjName, strText);
-				KerbalFoundries.Log.KFLog.WriteToFile(strOutput);
+				KFLog.WriteToFile(strOutput);
 			}
 		}
 
@@ -177,9 +178,12 @@ namespace KerbalFoundries
 		/// <returns>type name</returns>
 		static string nameof(object obj)
 		{
+			string strOutput;
 			if (Equals(obj, null))
-				return string.Empty;
-
+			{
+				strOutput = string.Empty;
+				return strOutput;
+			}
 			return obj.GetType().ToString();
 		}
 	}
