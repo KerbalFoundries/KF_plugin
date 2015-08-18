@@ -38,12 +38,14 @@ namespace KerbalFoundries
         public bool startRetracted;
         [KSPField(isPersistant = false, guiActive = true, guiName = "Status")]
         public string status = "Nominal";
+        [KSPField(isPersistant = false, guiActive = true, guiName = "RPM", guiFormat = "F1")] 
+        public float averageTrackRPM;
         
 		// Set the suspension travel increment dynamically.
-		[KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Susp. Step Value")]
+		[KSPField(isPersistant = false, guiActive = false, guiActiveEditor = true, guiName = "Susp. Step Value")]
         public string suspsettings = string.Empty;
-		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#"), UI_FloatRange(minValue = 1, maxValue = 20f, stepIncrement = 1f)]
-		public float suspentionIncrementAmmount = 5f;
+		[KSPField(isPersistant = false, guiActive = false, guiActiveEditor = true, guiName = "Step Value"), UI_FloatRange(minValue = 1, maxValue = 20f, stepIncrement = 1f)]
+		public float suspensionIncrementAmmount = 5f;
 		UI_FloatRange stepInc;
         
 		// Config fields
@@ -180,8 +182,7 @@ namespace KerbalFoundries
         public float lastVesselMass;
         [KSPField(isPersistant = false, guiActive = false, guiName = "Vessel Mass", guiFormat = "F1")]
         public float vesselMass;
-        [KSPField(isPersistant = false, guiActive = false, guiName = "RPM", guiFormat = "F1")]
-        public float averageTrackRPM;
+        
         [KSPField(isPersistant = false, guiActive = false, guiName = "Colliders", guiFormat = "F0")]
         public int _colliderCount = 0;
         [KSPField(isPersistant = false, guiActive = false, guiName = "Collider Mass", guiFormat = "F2")]
@@ -453,7 +454,7 @@ namespace KerbalFoundries
             
 			// Keeping track of the increment value for the sustravel in both the GUI slider and the action groups.
 			stepInc = (UI_FloatRange)Fields["rideHeight"].uiControlFlight;
-			stepInc.stepIncrement = suspentionIncrementAmmount;
+			stepInc.stepIncrement = suspensionIncrementAmmount;
 		}
 		//end OnUpdate
 
@@ -691,7 +692,7 @@ namespace KerbalFoundries
         public void LowerRideHeight(KSPActionParam param)
         {
             if (rideHeight > 0)
-                rideHeight -= Mathf.Clamp(suspentionIncrementAmmount, 0, 100f);
+                rideHeight -= Mathf.Clamp(suspensionIncrementAmmount, 0, 100f);
 
             ApplySettings(true);
         }
@@ -700,7 +701,7 @@ namespace KerbalFoundries
         public void RaiseRideHeight(KSPActionParam param)
         {
             if (rideHeight < 100)
-            	rideHeight += Mathf.Clamp(suspentionIncrementAmmount, 0, 100f);
+            	rideHeight += Mathf.Clamp(suspensionIncrementAmmount, 0, 100f);
 
             ApplySettings(true);
         }
@@ -828,7 +829,7 @@ namespace KerbalFoundries
                     mt.currentTravel = rideHeight;
                     mt.rideHeight = rideHeight;
                     mt.torque = torque;
-					mt.suspentionIncrementAmmount = suspentionIncrementAmmount;
+					mt.suspensionIncrementAmmount = suspensionIncrementAmmount;
                 }
 				if (actionGroup || Equals(groupNumber, 0))
                     currentTravel = rideHeight;

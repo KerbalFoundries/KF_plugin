@@ -29,10 +29,10 @@ namespace KerbalFoundries
         public float DamperRate;
         
         // Set the suspension travel increment dynamically.
-		[KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Susp. Step Value")]
+		[KSPField(isPersistant = false, guiActive = false, guiActiveEditor = true, guiName = "Susp. Step Value")]
         public string suspsettings = string.Empty;
-		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = ""), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
-		public float suspentionIncrementAmmount = 5f;
+		[KSPField(isPersistant = false, guiActive = false, guiActiveEditor = true, guiName = "Adjust Step Value"), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
+		public float suspensionIncrementAmmount = 5f;
 		UI_FloatRange stepInc;
         
         [KSPField]
@@ -291,7 +291,7 @@ namespace KerbalFoundries
             
             // Keeping track of the increment value for the sustravel in both the GUI slider and the action groups.
 			stepInc = (UI_FloatRange)Fields["rideHeight"].uiControlFlight;
-			stepInc.stepIncrement = suspentionIncrementAmmount;
+			stepInc.stepIncrement = suspensionIncrementAmmount;
         }
 
         IEnumerator UpdateHeight()
@@ -327,7 +327,7 @@ namespace KerbalFoundries
         {
             if (rideHeight > 0)
             {
-                rideHeight -= Mathf.Clamp(suspentionIncrementAmmount, 0f, 100f);
+                rideHeight -= Mathf.Clamp(suspensionIncrementAmmount, 0f, 100f);
                 //KFLog.Log("Retracting...");
 				ApplySettingsAction();
             }
@@ -338,7 +338,7 @@ namespace KerbalFoundries
         {
             if (rideHeight < 100)
             {
-                rideHeight += Mathf.Clamp(suspentionIncrementAmmount, 0f, 100f);
+                rideHeight += Mathf.Clamp(suspensionIncrementAmmount, 0f, 100f);
 				//KFLog.Log("Extending...");
 				ApplySettingsAction();
             }
@@ -404,7 +404,7 @@ namespace KerbalFoundries
                     mt.rideHeight = rideHeight;
                     mt.appliedRideHeight = rideHeight;
                     mt.StartCoroutine("UpdateHeight");
-					mt.suspentionIncrementAmmount = suspentionIncrementAmmount;
+					mt.suspensionIncrementAmmount = suspensionIncrementAmmount;
                 }
             }
             //StartCoroutine("UpdateHeight");
