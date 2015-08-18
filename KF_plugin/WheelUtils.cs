@@ -71,10 +71,8 @@ namespace KerbalFoundries
                 orientationIndex = 2;
             }
             /*
-            if (referenceDirection == 0)
-            {
+            if (Equals(referenceDirection, 0))
                 referenceTranformVector.x = Math.Abs(referenceTranformVector.x);
-            }
              */
             return orientationIndex;
         }

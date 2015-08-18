@@ -20,7 +20,7 @@ namespace KerbalFoundries
 
         public override void OnStart(PartModule.StartState state)
         {
-            if (HighLogic.LoadedSceneIsFlight && vessel.vesselType != VesselType.Debris && vessel.parts.Count > 1)
+            if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris) && vessel.parts.Count > 1)
             {
                 _KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
                 _steering = part.FindModelTransform(steeringObject);

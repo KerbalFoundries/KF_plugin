@@ -7,7 +7,6 @@
 using System;
 using System.Linq;
 using UnityEngine;
-using System.Collections;
 
 namespace KerbalFoundries
 {
@@ -16,8 +15,9 @@ namespace KerbalFoundries
         public float colliderHeight = -2.5f;
 
         GameObject _collider;
+		// disable once ConvertToConstant.Local
 		float triggerDistance = 25f;
-		bool isActive;
+		//bool isActive; // never used.
 		Vessel _vessel;
 		Vector3 boxSize = new Vector3(300f, .5f, 300f);
 		
@@ -32,17 +32,17 @@ namespace KerbalFoundries
 			_vessel = GetComponent<Vessel>();
 
             _collider = new GameObject("ModuleWaterSlider.Collider");
-            Debug.LogError("Continuing...");
+            KFLog.Log("Continuing...");
 
             var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
             visible.transform.parent = _collider.transform;
             visible.transform.localScale = boxSize;
-            visible.renderer.enabled = true; // enable to see collider
+            visible.renderer.enabled = false; // enable to see collider.  This keeps getting enabled.  I suggest we start using a define for debug builds so that release builds never get this turned on.
 
-            BoxCollider box = _collider.AddComponent("BoxCollider") as BoxCollider;
+            var box = (BoxCollider)_collider.AddComponent("BoxCollider");
             box.size = boxSize; // Probably should encapsulate other colliders in real code
 
-            Rigidbody rb = _collider.AddComponent("Rigidbody") as Rigidbody;
+            var rb = (Rigidbody)_collider.AddComponent("Rigidbody");
             rb.rigidbody.isKinematic = true;
 
             _collider.SetActive(true);
@@ -72,6 +72,7 @@ namespace KerbalFoundries
 	public class ModuleCameraShot : PartModule
 	{
 		// disable RedundantDefaultFieldInitializer
+		// disable ConvertToConstant.Local
 		
 		int resWidth = 6;
 		int resHeight = 6;
@@ -132,7 +133,7 @@ namespace KerbalFoundries
 		public void Update()
 		{
 			dustCam = KFPersistenceManager.isDustCameraEnabled;
-			if (frameCount >= threshHold && _vessel == FlightGlobals.ActiveVessel && dustCam && isReady)
+			if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCam && isReady)
 			{
 				frameCount = 0;
 

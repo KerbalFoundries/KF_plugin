@@ -176,7 +176,7 @@ namespace KerbalFoundries
 					}
 					break;
 				default:
-					KFLog.Log("incorrect command passed to UpdateColliders");
+					KFLog.Log("Incorrect command passed to UpdateColliders.");
 					break;
 			}
 		}

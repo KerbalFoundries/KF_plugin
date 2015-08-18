@@ -33,7 +33,7 @@ namespace KerbalFoundries
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
-			print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+			KFLog.Log(string.Format("{0}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version));
 			FindEngine(); 
 			if (HighLogic.LoadedSceneIsFlight)
 				part.force_activate();
@@ -60,7 +60,7 @@ namespace KerbalFoundries
 		{
 			foreach (ModuleEnginesFX me in part.GetComponentsInChildren<ModuleEnginesFX>())
 			{
-				KFLog.Log("Found an engine.");
+				KFLog.Log("Found an engine module.");
 				thisEngine = me;
 			}
 		}
@@ -99,14 +99,14 @@ namespace KerbalFoundries
 		public void AutoAPU(KSPActionParam param)
 		{
 			autoThrottle = true;
-			KFLog.Log("APU Automatic.");
+			KFLog.Log("APU set to Automatic.");
 		}
 
 		[KSPAction("APU Manual")]
 		public void ManualAPU(KSPActionParam param)
 		{
 			autoThrottle = false;
-			KFLog.Log("APU Manual.");
+			KFLog.Log("APU set to Manual.");
 		}
 	}
 }
