@@ -32,7 +32,7 @@ namespace KerbalFoundries
 		[KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Susp. Step Value")]
         public string suspsettings = string.Empty;
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#"), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
-		public float suspentionIncrementAmmount = 5f;
+		public float suspensionIncrementAmmount = 5f;
         
         [KSPField]
         public bool lowEnergy;
@@ -324,7 +324,7 @@ namespace KerbalFoundries
         {
             if (rideHeight > 0)
             {
-                rideHeight -= Mathf.Clamp(suspentionIncrementAmmount, 0f, 100f);
+                rideHeight -= Mathf.Clamp(suspensionIncrementAmmount, 0f, 100f);
                 //KFLog.Log("Retracting...");
 				ApplySettingsAction();
             }
@@ -335,7 +335,7 @@ namespace KerbalFoundries
         {
             if (rideHeight < 100)
             {
-                rideHeight += Mathf.Clamp(suspentionIncrementAmmount, 0f, 100f);
+                rideHeight += Mathf.Clamp(suspensionIncrementAmmount, 0f, 100f);
 				//KFLog.Log("Extending...");
 				ApplySettingsAction();
             }
@@ -400,7 +400,7 @@ namespace KerbalFoundries
                 {
                     mt.rideHeight = rideHeight;
                     mt.appliedRideHeight = rideHeight;
-					mt.suspentionIncrementAmmount = suspentionIncrementAmmount;
+					mt.suspensionIncrementAmmount = suspensionIncrementAmmount;
                     mt.StartCoroutine("UpdateHeight");
                 }
             }
