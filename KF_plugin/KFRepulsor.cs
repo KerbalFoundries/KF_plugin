@@ -72,6 +72,7 @@ namespace KerbalFoundries
 		/// <remarks>This can be overridden in the part config for this module due to its KSPField status.</remarks>
 		[KSPField]
         public string strPartInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.\n\n<b><color=#99ff00ff>Requires:</color></b>\n- {ResourceName}: {ConsumptionRate}/sec @ max height";
+        
         public override string GetInfo()
 		{
             return UpdateInfoText(strPartInfo, resourceName, resourceConsumptionRate);            
@@ -81,28 +82,19 @@ namespace KerbalFoundries
         {
             return strPartInfo.Replace("{ResourceName}", strResourceName).Replace("{ConsumptionRate}", consumptionRate.ToString("0.00"));
         }
+
+
         
         //begin start
         public override void OnStart(PartModule.StartState state)  //when started
         {
             base.OnStart(state);
-           
-            _dustFX = part.GetComponent<KFDustFX>(); //see if it's been added by MM. MM deprecated in favor of adding the module manually. - Gaalidas 
-            if (Equals(_dustFX, null)) //add if not... sets some defaults.
-            {
-                part.AddModule("KFDustFX");
-                _dustFX = part.GetComponent<KFDustFX>();
-                _dustFX.isRepulsor = true;
-                _dustFX.maxDustEmission = 28; // Not really necessary to set this, a reasonable default exists in the modukle. - Gaalidas
-                _dustFX.OnStart(state);
-            }
 
-            if (HighLogic.LoadedSceneIsFlight)
+            if (HighLogic.LoadedSceneIsFlight && vessel.vesselType != VesselType.Debris && vessel.parts.Count > 1)
             {
                 _grid = transform.Search(gridName);
                 _gridScale = _grid.transform.localScale;
                 _gimbal = transform.Search(gimbalName);
-                SetupWaterSlider();
 
                 foreach (WheelCollider b in part.GetComponentsInChildren<WheelCollider>())
                 {
@@ -123,15 +115,36 @@ namespace KerbalFoundries
                 }
                 appliedRideHeight = rideHeight;
                 StartCoroutine("UpdateHeight"); //start updating to height set before launch
-                isReady = true;
+
+                    SetupDust(state);
+                    SetupWaterSlider();
+                    isReady = true;
             }
             DestroyBounds();
 		}
 		// End start
+        void SetupDust(PartModule.StartState state)
+        {
 
-		void SetupWaterSlider()
+            _dustFX = part.GetComponent<KFDustFX>(); //see if it's been added by MM. MM deprecated in favor of adding the module manually. - Gaalidas 
+            if (_dustFX == null) //add if not... sets some defaults.
+            {
+                _dustFX = part.gameObject.AddComponent<KFDustFX>();
+                 //part.GetComponent<KFDustFX>();
+                _dustFX.isRepulsor = true;
+                _dustFX.maxDustEmission = 28; // Not really necessary to set this, a reasonable default exists in the modukle. - Gaalidas
+                _dustFX.OnStart(state);
+            }
+        }
+        void SetupWaterSlider()
 		{
-			_MWS = vessel.GetComponent<ModuleWaterSlider>();
+			_MWS = vessel.rootPart.GetComponent<ModuleWaterSlider>();
+            if (Equals(_MWS, null)) //add if not... sets some defaults.
+            {
+                _MWS =  vessel.rootPart.gameObject.AddComponent<ModuleWaterSlider>();
+                 //vessel.rootPart.GetComponent<ModuleWaterSlider>();
+                _MWS.StartUp();
+            }
 		}
 
         /// <summary>A "Shrink" coroutine for the animation.</summary>

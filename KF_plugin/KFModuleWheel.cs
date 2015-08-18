@@ -92,6 +92,10 @@ namespace KerbalFoundries
         [KSPField]
         public bool hasRetract = false;
 
+        /// <summary>Scaling factor for dust</summary>
+        [KSPField]
+        public float dustScale = 1;
+
         /// <summary>Does the part have an animation to be triggered when retracting.</summary>
         [KSPField]
         public bool hasRetractAnimation = false;
@@ -210,17 +214,10 @@ namespace KerbalFoundries
 			base.OnStart(state);
 
 			CustomResourceTextSetup(); // Calls a method to set up the statusLowResource text for resource alternatives.
-            
-            _dustFX = this.part.GetComponent<KFDustFX>(); //see if it's been added by MM.  Actually, it's being added directly to the configs now. - Gaalidas
-            if (Equals(_dustFX, null)) //add if not... sets some defaults.
-            {
-                this.part.AddModule("KFDustFX");
-                _dustFX = this.part.GetComponent<KFDustFX>();
-                _dustFX.maxDustEmission = 28; // This actually has a default setting in the module, so setting it here like this is rather redundant unless we can set this value from a part-size detection method. - Gaalidas.
-                _dustFX.OnStart(state);
-            }
+
+
 			
-            _colliderMass = 10; //jsut a beginning value to stop stuff going crazy before it's all calculated properly.
+            _colliderMass = 10; //just a beginning value to stop stuff going crazy before it's all calculated properly.
             
             var partOrientationForward = new Vector3(0,0,0);
             var partOrientationRight = new Vector3(0, 0, 0);
@@ -295,8 +292,16 @@ namespace KerbalFoundries
                 Fields["startRetracted"].guiActiveEditor = false;
             } 
 
-            if (HighLogic.LoadedSceneIsFlight)
+            if (HighLogic.LoadedSceneIsFlight && vessel.vesselType != VesselType.Debris && vessel.parts.Count > 1)
             {
+                _dustFX = this.part.gameObject.GetComponent<KFDustFX>();
+                if (Equals(_dustFX, null)) //add if not... sets some defaults.
+                {
+                    _dustFX = this.part.gameObject.AddComponent<KFDustFX>();
+                    _dustFX.scaleCorrector = dustScale;
+                    _dustFX.OnStart(state);
+                }
+
                 appliedTravel = rideHeight / 100; // need to be here if no KFWheel or everything gets set to zero as below.
                 StartCoroutine(StartupStuff());
                 maxRPM /= tweakScaleCorrector;
