@@ -109,7 +109,7 @@ namespace KerbalFoundries
 		/// <summary>KSP path to the effect being used here.  Made into a field so that it can be customized in the future.</summary>
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
-		public const string dustEffectObject = "Effects/fx_smokeTrail_light";
+		public string dustEffectObject = "Effects/fx_smokeTrail_light";
 		//public const string dustEffectObject = "Effects/fx_smokeTrail_medium";
 		
 		/// <summary>Added or subracted from the individual color parameters (rgb) to create a variance in the dust colors.</summary>
@@ -270,9 +270,9 @@ namespace KerbalFoundries
 		public void DustParticles(float speed, Vector3 contactPoint, Collider col) //(float force, Vector3 contactPoint, Collider col, Vector3 normal, Vector3 direction)
 		{
 			bool cameraEnabled = KFPersistenceManager.isDustCameraEnabled;
-			const float randomthreshold = 2f;
-			const int randomMin = 1;
-			const int randomMax = 3;
+			float randomthreshold = 2f;
+			int randomMin = 1;
+			int randomMax = 3;
 			colorWater = new Color(0.65f, 0.65f, 0.65f, 0.025f);
 			
 			if (!dustEffects || speed < minScrapeSpeed || Equals(dustAnimator, null) || !KFPersistenceManager.isDustEnabled)
@@ -322,7 +322,7 @@ namespace KerbalFoundries
 				// Energy is the thickness of the particles.
 				kfdustFx.particleEmitter.maxEmission = Mathf.Clamp((speed * (maxDustEmissionMult * tweakScaleCorrector)), minDustEmission, (maxDustEmission * tweakScaleCorrector));
 				// Emission is the number of particles emitted per second.
-				kfdustFx.particleEmitter.maxSize = Mathf.Clamp((speed * tweakScaleCorrector), minDustSize, maxDustSize);
+				kfdustFx.particleEmitter.maxSize = Mathf.Clamp((speed * tweakScaleCorrector), minDustSize, maxDustSize); // why try and up the size when you don't up the clamped value? Ain't gonna do much.
 				// Size is self explanatory.  For wheels, I suggest values between 0.1 and 2.
 				kfdustFx.particleEmitter.Emit();
 			}

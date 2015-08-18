@@ -310,7 +310,7 @@ namespace KerbalFoundries
                 if (Equals(_dustFX, null)) //add if not... sets some defaults.
                 {
                     _dustFX = this.part.gameObject.AddComponent<KFDustFX>();
-                    _dustFX.scaleCorrector = dustScale;
+                    _dustFX.tweakScaleCorrector = dustScale;
                     _dustFX.OnStart(state);
                 }
 
