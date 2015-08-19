@@ -13,7 +13,7 @@ namespace KerbalFoundries
 		/// <summary>Local name of the KFLogUtil class.</summary>
 		static KFLogUtil KFLog;
 
-        /// <summary>Path\KFGlobals.cfg</summary>
+        /// <summary>Path\KFGlobals.txt</summary>
         static string configFileName;
 
         /// <summary>Path\DustColors.cfg</summary>
@@ -37,7 +37,7 @@ namespace KerbalFoundries
 		static void ReadConfigFile()
 		{
 			// KFGlobals.cfg
-            configFileName = string.Format("{0}GameData/KerbalFoundries/KFGlobals.cfg", KSPUtil.ApplicationRootPath);
+            configFileName = string.Format("{0}GameData/KerbalFoundries/KFGlobals.txt", KSPUtil.ApplicationRootPath);
 
             ConfigNode configFile = ConfigNode.Load(configFileName);
             if (Equals(configFile, null) || !configFile.HasNode("KFGlobals")) // KFGlobals-node doesn't exist
@@ -64,6 +64,14 @@ namespace KerbalFoundries
 			bool _isMarkerEnabled = false;
 			if (bool.TryParse(configNode.GetValue("isMarkerEnabled"), out _isMarkerEnabled))
 				isMarkerEnabled = _isMarkerEnabled;
+			
+			bool _isRepLightEnabled = false;
+			if (bool.TryParse(configNode.GetValue("isRepLightEnabled"), out _isRepLightEnabled))
+				isRepLightEnabled = _isRepLightEnabled;
+
+            float _dustAmount = 1;
+            if (float.TryParse(configNode.GetValue("dustAmount"), out _dustAmount))
+                dustAmount = _dustAmount;
 
 			bool _writeToLogFile = false;
 			if (bool.TryParse(configNode.GetValue("writeToLogFile"), out _writeToLogFile))
@@ -77,6 +85,7 @@ namespace KerbalFoundries
 			KFLog.Log(string.Format("isDustEnabled = {0}", isDustEnabled));
 			KFLog.Log(string.Format("isDustCameraEnabled = {0}", isDustCameraEnabled));
 			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled));
+			KFLog.Log(string.Format("isRepLightEnabled = {0}", isRepLightEnabled));
 			KFLog.Log(string.Format("writeToLogFile = {0}", writeToLogFile));
 			KFLog.Log(string.Format("LogFile = {0}", logFile));
         }
@@ -132,13 +141,15 @@ namespace KerbalFoundries
 			// KFGlobals.cfg
             System.IO.File.Delete(configFileName);
             
-			ConfigNode configFile = new ConfigNode();
+			var configFile = new ConfigNode();
             configFile.AddNode("KFGlobals");
             ConfigNode configNode = configFile.GetNode("KFGlobals");
             
 			configNode.SetValue("isDustEnabled", string.Format("{0}", isDustEnabled), true);
 			configNode.SetValue("isDustCameraEnabled", string.Format("{0}", isDustCameraEnabled), true);
 			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
+			configNode.SetValue("isRepLightEnabled", string.Format("{0}", isRepLightEnabled), true);
+            configNode.SetValue("dustAmount", string.Format("{0}", dustAmount), true);
 			configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
 			configNode.SetValue("logFile", logFile, true);
 
@@ -153,6 +164,8 @@ namespace KerbalFoundries
             isDustEnabled = true;
             isDustCameraEnabled = true;
             isMarkerEnabled = true;
+			isRepLightEnabled = true;
+            dustAmount = 1;
             writeToLogFile = false;
             logFile = "KF.log";
 
@@ -181,6 +194,19 @@ namespace KerbalFoundries
 			get;
 			set;
 		}
+		
+		/// <summary>If repulsor lighting is enabled.</summary>
+		public static bool isRepLightEnabled
+		{
+			get;
+			set;
+		}
+
+        public static float dustAmount
+        {
+            get;
+            set;
+        }
 
 		/// <summary>If all KF log messages should also be written to a log file.</summary>
 		/// <remarks>logFile must be specified in the config!</remarks>
@@ -387,6 +413,8 @@ namespace KerbalFoundries
 						smrBounds.Encapsulate(m.MultiplyPoint3x4(vertices[i]));
 
 					Destroy(mesh);
+                    if (r.tag == "Icon_Hidden") //KSP ignores Icon_Hidden tag for Skined Mesh renderers. 
+                        Destroy(r);
 					boundsList.Add(smrBounds);
 				}
 				else if (r is MeshRenderer)

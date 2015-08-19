@@ -13,6 +13,8 @@ namespace KerbalFoundries
 {
 	public class RepulsorWheel : PartModule
 	{
+		// disable RedundantDefaultFieldInitializer
+		
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Repulsor Height %"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5)]
 		public float repulsorHeight = 50;
 
@@ -36,6 +38,10 @@ namespace KerbalFoundries
 
 		//ModuleWaterSlider mws;
 		KFModuleWheel _moduletrack;
+		
+		/// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("RepulsorWheel");
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -51,7 +57,7 @@ namespace KerbalFoundries
 
 			if (HighLogic.LoadedSceneIsFlight)
 			{
-				print("Repulsor Wheel started");
+				KFLog.Log("Repulsor Wheel started");
 
 				foreach (ModuleAnimateGeneric ma in part.FindModulesImplementing<ModuleAnimateGeneric>())
 					ma.Events["Toggle"].guiActive = false;
@@ -85,7 +91,7 @@ namespace KerbalFoundries
 				if (!repulsorMode)
 					UpdateColliders("wheel");
 				effectPowerMax = 1 * chargeConsumptionRate * Time.deltaTime;
-				print(effectPowerMax);
+				KFLog.Log(string.Format("{0}", effectPowerMax));
 			}
 			// End isInFlight
 		}
@@ -98,14 +104,14 @@ namespace KerbalFoundries
 			{
 				float chargeConsumption = (repulsorHeight / 2) * (1 + _moduletrack.springRate) * Time.deltaTime * chargeConsumptionRate;
 				effectPower = chargeConsumption / effectPowerMax;
-				print(effectPower);
+				KFLog.Log(string.Format("{0}", effectPower));
 
 				float electricCharge = part.RequestResource("ElectricCharge", chargeConsumption);
-				//print(electricCharge);
+				//KFLog.Log(string.Format("{0}", electricCharge));
 				// = Extensions.GetBattery(this.part);
 				if (electricCharge < (chargeConsumption * 0.9f))
 				{
-					print("Retracting due to low Electric Charge");
+					KFLog.Log("Retracting due to low Electric Charge");
 					lowEnergy = true;
 					repulsorHeight = 0;
 					UpdateColliders("wheel");
@@ -122,7 +128,7 @@ namespace KerbalFoundries
 			
 			RepulsorSound();
 			effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
-			//print(effectPower);
+			//KFLog.Log(string.Format("{0}", effectPower));
 		}
 
 		public void RepulsorSound()
@@ -137,8 +143,8 @@ namespace KerbalFoundries
 				case "repulsor":
 					if (lowEnergy)
 						return;
-					_moduletrack.UpdateColliders("retract");
-					_moduletrack.currentRideHeight = repulsorHeight * replusorHeightMultiplier;
+					_moduletrack.RetractDeploy("retract");
+					_moduletrack.currentTravel = repulsorHeight * replusorHeightMultiplier;
 					repulsorMode = true;
 					for (int i = 0; i < wcList.Count(); i++)
 					{
@@ -152,9 +158,9 @@ namespace KerbalFoundries
 					}
 					break;
 				case "wheel":
-					_moduletrack.currentRideHeight = _moduletrack.rideHeight;
-					_moduletrack.smoothedRideHeight = _moduletrack.currentRideHeight;
-					_moduletrack.UpdateColliders("deploy");
+					_moduletrack.currentTravel = _moduletrack.rideHeight;
+					_moduletrack.smoothedTravel = _moduletrack.currentTravel;
+					_moduletrack.RetractDeploy("deploy");
 					repulsorMode = false;
 					for (int i = 0; i < wcList.Count(); i++)
 					{
@@ -170,7 +176,7 @@ namespace KerbalFoundries
 					}
 					break;
 				default:
-					print("incorrect command passed to UpdateColliders");
+					KFLog.Log("Incorrect command passed to UpdateColliders.");
 					break;
 			}
 		}
@@ -186,8 +192,8 @@ namespace KerbalFoundries
 				{
 					if (repulsorMode) // Similiarly, only apply settings when inreplusor mode.
 					{
-						_moduletrack.currentRideHeight = repulsorHeight * replusorHeightMultiplier;
-						mt.currentRideHeight = repulsorHeight * replusorHeightMultiplier;
+						_moduletrack.currentTravel = repulsorHeight * replusorHeightMultiplier;
+						mt.currentTravel = repulsorHeight * replusorHeightMultiplier;
 					}
 				}
 			}
@@ -214,7 +220,7 @@ namespace KerbalFoundries
 				return; // The Log.Error line fails syntax check with 'The name 'Log' does not appear in the current context.
 			myAnimation.Toggle();
 		}
-
+		
 		[KSPAction("Wheel Mode")]
 		public void toWheel(KSPActionParam param)
 		{
@@ -226,7 +232,7 @@ namespace KerbalFoundries
 			}
 		}
 		// End Deploy All
-
+		
 		[KSPAction("Repulsor Mode")]
 		public void toRepulsor(KSPActionParam param)
 		{

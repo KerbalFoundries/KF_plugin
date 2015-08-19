@@ -20,13 +20,16 @@ namespace KerbalFoundries
 
         public override void OnStart(PartModule.StartState state)
         {
-            _KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
-            _steering = part.FindModelTransform(steeringObject);
-            initialSteeringAngle = _steering.transform.localEulerAngles;
-            steeringIndex = Extensions.SetAxisIndex(steeringAxis);
+            if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris) && vessel.parts.Count > 1)
+            {
+                _KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
+                _steering = part.FindModelTransform(steeringObject);
+                initialSteeringAngle = _steering.transform.localEulerAngles;
+                steeringIndex = Extensions.SetAxisIndex(steeringAxis);
 
-            base.OnStart(state);
-            StartCoroutine(Steering());
+                base.OnStart(state);
+                StartCoroutine(Steering());
+            }
         }
 
         // disable FunctionNeverReturns

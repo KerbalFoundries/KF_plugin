@@ -6,6 +6,10 @@ namespace KerbalFoundries
 {
     public static class WheelUtils
     {
+    	/// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		static readonly KFLogUtil KFLog = new KFLogUtil("WheelUtils");
+    	
 		public static int GetCorrector(Vector3 transformVector, Transform referenceVector, int directionIndex) // Takes a vector (usually from a parts axis) and a transform, plus an index giving which axis to   
 		{                                                                                               	   // Use for the scalar product of the two. Returns a value of -1 or 1, depending on whether the product is positive or negative.
             int corrector = 1;
@@ -24,7 +28,7 @@ namespace KerbalFoundries
 					break;
             }
 
-            //print(dot);
+			KFLog.Log(string.Format("{0}", dot));
 			/*
 			if (dot < 0) // below 0 means the engine is on the left side of the craft
             {
@@ -43,34 +47,32 @@ namespace KerbalFoundries
 		{                                                                   	   // Uses scalar products to determine which axis is closest to the axis specified in refDirection, return an index value 0 = X, 1 = Y, 2 = Z.
 			//orgpos = this.part.orgPos; // Debugguing
             float dotx = Math.Abs(Vector3.Dot(refDirection, refTransform.right)); // up is forward
-			//print(dotx); // Debugging
+			//KFLog.Log(string.Format("{0}", dotx)); // Debugging
             float doty = Math.Abs(Vector3.Dot(refDirection, refTransform.up));
-			//print(doty); // Debugging
+			//KFLog.Log(string.Format("{0}", doty)); // Debugging
             float dotz = Math.Abs(Vector3.Dot(refDirection, refTransform.forward));
-			//print(dotz); // Debugging
+			//KFLog.Log(string.Format("{0}", dotz)); // Debugging
 
             int orientationIndex = 0;
 
             if (dotx > doty && dotx > dotz)
             {
-                //print("root part mounted right");
+                //KFLog.Log("root part mounted right");
                 orientationIndex = 0;
             }
             if (doty > dotx && doty > dotz)
             {
-                //print("root part mounted forward");
+                //KFLog.Log("root part mounted forward");
                 orientationIndex = 1;
             }
             if (dotz > doty && dotz > dotx)
             {
-                //print("root part mounted up");
+                //KFLog.Log("root part mounted up");
                 orientationIndex = 2;
             }
             /*
-            if (referenceDirection == 0)
-            {
+            if (Equals(referenceDirection, 0))
                 referenceTranformVector.x = Math.Abs(referenceTranformVector.x);
-            }
              */
             return orientationIndex;
         }
@@ -105,8 +107,8 @@ namespace KerbalFoundries
 
 			if (Equals(ratio, 0) || float.IsNaN(ratio)) // Check is we managed to evaluate to zero or infinity somehow. Happens with less than three wheels, or all wheels mounted at the same position.
                 ratio = 1;
-            //print("ratio"); //Debugging
-            //print(ratio);
+            //KFLog.Log("ratio"); //Debugging
+            //KFLog.Log(string.Format("{0}", ratio));
             return ratio;
         }
 	}

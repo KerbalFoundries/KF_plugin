@@ -5,6 +5,6 @@ namespace KerbalFoundries
 {
     public static class Version
     {
-        public const string versionNumber = "Kerbal Foundries 1.7.200";
+        public const string versionNumber = "Kerbal Foundries 1.9b";
     }
 }

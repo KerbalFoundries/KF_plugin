@@ -32,7 +32,7 @@ namespace KerbalFoundries
 			rotatorList = rotatorsName.Split(new[] { ',', ' ', '|' }, StringSplitOptions.RemoveEmptyEntries); //Thanks, Mihara!
 			targetList = targetName.Split(new[] { ',', ' ', '|' }, StringSplitOptions.RemoveEmptyEntries);
 
-			if ((HighLogic.LoadedSceneIsEditor && activeEditor) || HighLogic.LoadedSceneIsFlight)
+			if ((HighLogic.LoadedSceneIsEditor && activeEditor) || (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris) && vessel.parts.Count > 1))
 				StartCoroutine(Setup());
 		}
 

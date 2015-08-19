@@ -9,14 +9,14 @@ namespace KerbalFoundries
 	{
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Throttle"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5f)]
 		public float throttleSetting = 50;
-		public ModuleEnginesFX thisEngine;
+        public ModuleEnginesFX thisEngine;
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Mode"), UI_Toggle(disabledText = "Manual", enabledText = "Auto")]
 		public bool autoThrottle = true;
 		public float lastRatio = .5f;
 		[KSPField]
 		public float reactionSpeed = 5;
-		[KSPField]
-		public float targetBatteryRatio = 0.75f;
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Target Charge %"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5f)]
+		public float targetBatteryRatio = 75f;
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Ratio Adjustment", guiFormat = "F8")]
 		public float ratioAdjustment;
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Usage Adjustment", guiFormat = "F8")]
@@ -33,7 +33,7 @@ namespace KerbalFoundries
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
-			print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+			KFLog.Log(string.Format("{0}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version));
 			FindEngine(); 
 			if (HighLogic.LoadedSceneIsFlight)
 				part.force_activate();
@@ -46,7 +46,7 @@ namespace KerbalFoundries
 			{
 				batteryRatio = Extensions.GetBattery(this.part);
 				usageAdjustment = (lastRatio - batteryRatio) * reactionSpeed;
-				ratioAdjustment = Mathf.Clamp((targetBatteryRatio - batteryRatio), -0.001f, 0.001f);
+				ratioAdjustment = Mathf.Clamp(((targetBatteryRatio /100) - batteryRatio), -0.001f, 0.001f);
 				float tempThrottle = Mathf.Clamp(autoThrottleSetting + ratioAdjustment + usageAdjustment, 0.01f, 1);
 				autoThrottleSetting = tempThrottle;
 				thisEngine.currentThrottle = autoThrottleSetting;
@@ -60,7 +60,7 @@ namespace KerbalFoundries
 		{
 			foreach (ModuleEnginesFX me in part.GetComponentsInChildren<ModuleEnginesFX>())
 			{
-				KFLog.Log("Found an engine.");
+				KFLog.Log("Found an engine module.");
 				thisEngine = me;
 			}
 		}
@@ -99,14 +99,14 @@ namespace KerbalFoundries
 		public void AutoAPU(KSPActionParam param)
 		{
 			autoThrottle = true;
-			KFLog.Log("APU Automatic.");
+			KFLog.Log("APU set to Automatic.");
 		}
 
 		[KSPAction("APU Manual")]
 		public void ManualAPU(KSPActionParam param)
 		{
 			autoThrottle = false;
-			KFLog.Log("APU Manual.");
+			KFLog.Log("APU set to Manual.");
 		}
 	}
 }

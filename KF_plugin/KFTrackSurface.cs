@@ -21,11 +21,11 @@ namespace KerbalFoundries
             base.OnStart(state);
             print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
 
-            _smr = this.part.GetComponentInChildren<SkinnedMeshRenderer>(); //this is the track
+            _smr = part.GetComponentInChildren<SkinnedMeshRenderer>(); //this is the track
             _trackSurface = _smr.gameObject;
-            _track = this.part.GetComponentInChildren<KFModuleWheel>();
+            _track = part.GetComponentInChildren<KFModuleWheel>();
 
-            if (HighLogic.LoadedSceneIsFlight)
+            if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris) && vessel.parts.Count > 1)
             {
                 trackMaterial = _trackSurface.renderer.material;
                 Vector2 trackTiling = trackMaterial.mainTextureScale;
