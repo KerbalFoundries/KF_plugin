@@ -165,6 +165,7 @@ namespace KerbalFoundries
             isDustCameraEnabled = true;
             isMarkerEnabled = true;
 			isRepLightEnabled = true;
+            dustAmount = 1;
             writeToLogFile = false;
             logFile = "KF.log";
 
