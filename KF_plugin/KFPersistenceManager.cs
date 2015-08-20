@@ -91,7 +91,7 @@ namespace KerbalFoundries
 			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled));
 			KFLog.Log(string.Format("isRepLightEnabled = {0}", isRepLightEnabled));
 			KFLog.Log(string.Format("dustamount = {0}", dustAmount));
-			KFLog.Log(string.Format("suspensionIncrement = {0}", suspensionIncrement));
+			KFLog.Log(string.Format("suspensionIncrement = {0}", Mathf.Round(suspensionIncrement)));
 			KFLog.Log(string.Format("writeToLogFile = {0}", writeToLogFile));
 			KFLog.Log(string.Format("LogFile = {0}", logFile));
         }
@@ -156,7 +156,7 @@ namespace KerbalFoundries
 			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
 			configNode.SetValue("isRepLightEnabled", string.Format("{0}", isRepLightEnabled), true);
             configNode.SetValue("dustAmount", string.Format("{0}", dustAmount), true);
-			configNode.SetValue("suspensionIncrement", string.Format("{0}", suspensionIncrement), true);
+            configNode.SetValue("suspensionIncrement", string.Format("{0}", Mathf.Round(suspensionIncrement)), true);
 			configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
 			configNode.SetValue("logFile", logFile, true);
 
@@ -218,6 +218,7 @@ namespace KerbalFoundries
         }
 
 		/// <summary>The incremental value to change the ride height by when using action groups.</summary>
+		/// <remarks>Should be rounded to the nearest whole number before the setter is called.</remarks>
         public static float suspensionIncrement
         {
             get;

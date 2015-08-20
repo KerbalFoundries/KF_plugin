@@ -20,12 +20,12 @@ namespace KerbalFoundries
 		const string strIconColor = "KFIconColor";
 		
 		// GUI height constants
-		const float titleHeight = 24f;
+		const float titleHeight = 12f;
 		const float toggleHeight = 24f;
-		const float sliderHeight = 30f;
+		const float sliderHeight = 16f;
 		const float spacerHeight = 8f;
 		const float labelHeight = 24f;
-		const float endHeight = 16f;
+		const float endHeight = 8f;
 		
 		// GUI Constants
 		public Rect settingsRect;
@@ -149,7 +149,7 @@ namespace KerbalFoundries
                  *  be a space of 8 units between the toogles.
                  * 
                  * Window height calculates like this:
-                 *   24 units - space for title bar (automatically drawn) (titleHeight)
+                 *   12 units - space for title bar (automatically drawn) (titleHeight)
                  *  +24 units - space for first toggle. (toggleHeight)
                  * (+ 8 units - space between the elements) (spacerHeight)
                  *  +24 units - space for second toggle. (toggleHeight)
@@ -158,18 +158,18 @@ namespace KerbalFoundries
                  * (+ 8 units - space between the elements) (spacerHeight)
                  *  +24 units - space for the fourth toggle. (toggleHeight)
 				 * (+ 8 units - space between the elements) (spacerHeight)
-				 *  +30 units - space for the slider. (sliderHeight)
+				 *  +16 units - space for the slider. (sliderHeight)
 				 * (+ 8 units - space between the elements) (spacerHeight)
-				 *  +30 units - space for another slider. (sliderHeight)
-				 *  +16 units - space till end of window. (endHeight)
+				 *  +16 units - space for another slider. (sliderHeight)
+				 *   +8 units - space till end of window. (endHeight)
                  * 
                  * =>
-                 *   Window height (1 toogle) :  64 (titleHeight + toggleHeight + spacerHeight)
-                 *   Window height (2 toogles):  96 (titleHeight + (toggleHeight * 2) + (spacerHeight * 2))
-                 *   Window height (3 toogles): 128 (titleHeight + (toggleHeight * 3) + (spacerHeight * 3))
-                 *   Window height (4 toggles): 160 (titleHeight + (toggleHeight * 4) + (spacerHeight * 4))
-                 *   Window height (1 slider) : 198 (titleHeight + (toggleHeight * 4) + (spacerHeight * 5) + sliderHeight)
-                 *   Window height (2 sliders): 236 (titleHeight + (toggleHeight * 4) + (spacerHeight * 6) + (sliderHeight * 2))
+                 *   Window height (1 toogle) :  40 (titleHeight(12) + toggleHeight(24) + spacerHeight(8))
+                 *   Window height (2 toogles):  76 (titleHeight(12) + (toggleHeight(24) * 2) + (spacerHeight(8) * 2))
+                 *   Window height (3 toogles): 106 (titleHeight(12) + (toggleHeight(24) * 3) + (spacerHeight(8) * 3))
+                 *   Window height (4 toggles): 140 (titleHeight(12) + (toggleHeight(24) * 4) + (spacerHeight(8) * 4))
+                 *   Window height (1 slider) : 164 (titleHeight(12) + (toggleHeight(24) * 4) + (spacerHeight(8) * 5) + sliderHeight(16))
+                 *   Window height (ALL ELEMENTS): 188 (titleHeight(12) + (toggleHeight(24) * 4) + (spacerHeight(8) * 6) + (sliderHeight(16) * 2))
 				 *
 				 * Basically +32 for each toggle, and +38 for each slider.
 				 * Or do it the long way with floats and multiplication to
@@ -179,17 +179,20 @@ namespace KerbalFoundries
 				
                 float windowTop = 42f;
                 float windowLeft = -260f;
-                float windowHeight = 284f; // assume 4 toggles, 2 sliders, 2 labels, 5 spacers, one title, and one end.
+                float windowHeight = 236; // assume 1 title, 4 toggles, 2 sliders, 2 labels, 5 spacers, and 1 end.  (ALL ELEMENTS) (Never shown)
 				
 				if (HighLogic.LoadedSceneIsFlight)
-					windowHeight -= 32f; // remove the space of 1 toggle, and 1 spacer, because only 3 toggles, 2 sliders, 4 spacers, 2 labels, and the title/ends need to be displayed.
+					windowHeight = 204f; // assume 1 title, 3 toggles, 2 sliders, 2 labels, 4 spacers, and 1 end. (Flight Only)
 				
                 if (HighLogic.LoadedSceneIsEditor)
                 {
-					windowHeight -= 126f; // remove the space of 2 toggles (+ a slider), because only 1 toggle & slider needs to be displayed
+					windowHeight = 92f; // assume 1 title, 1 toggle, 1 slider, 1 label, 1 spacer, and 1 end. (Editor Only)
                     // in the editor the toolbar is at the bottom of the screen, so let's move it down
                     windowTop = Screen.height - 42f - windowHeight; // 42f is the height of the toolbar buttons + 2 units of space
                 }
+                
+                if (Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
+					windowHeight = 188f; // assume 1 top, 4 toggles, 1 slider. 1 label, 4 spacers, and 1 end. (Space Center Only)
 				
                 // shift the window to the left until the left window border has the same x value as the button sprite or at least so far it won't clip out the edge of the monitor
                 windowLeft = Screen.width + Mathf.Min(appButton.sprite.TopLeft.x - 260, windowLeft);
@@ -205,31 +208,56 @@ namespace KerbalFoundries
 		{
 			GUI.skin = HighLogic.Skin;
 			
-			if (HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
+			// Reference:
+			//	titleHeight = 12f;
+			//	toggleHeight = 24f;
+			//	sliderHeight = 16f;
+			//	spacerHeight = 8f;
+			//	labelHeight = 24f;
+			//	endHeight = 8f;
+			//	Format: Rect(left, top, width, height)
+			
+			if (HighLogic.LoadedSceneIsEditor) // No longer combined with space center. Was causing headaches when trying to position the elements for that scene and causing the editor window to be too high.
 			{
-				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, toggleHeight), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
-				GUI.Label(new Rect(8f, 56f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", KFPersistenceManager.suspensionIncrement));
-				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 88f, 240f, sliderHeight), KFPersistenceManager.suspensionIncrement, 1f, 20f);
+				// Non-element title (top: 0)
+				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 12f, 240f, toggleHeight), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
+				// Non-element spacer (top: 36)
+				GUI.Label(new Rect(8f, 44f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", Mathf.Round(KFPersistenceManager.suspensionIncrement)));
+				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 68f, 240f, sliderHeight), Mathf.Round(KFPersistenceManager.suspensionIncrement), 1f, 20f);
+				// Non-element end (top: 84)
 			}
 			
 			if (HighLogic.LoadedSceneIsFlight)
 			{
-				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, toggleHeight), KFPersistenceManager.isDustEnabled, "Enable DustFX");
-				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, toggleHeight), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
-				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
-				GUI.Label(new Rect(8f, 120f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount));
-				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 152f, 240f, sliderHeight), KFPersistenceManager.dustAmount, 0f, 3f);
-				GUI.Label(new Rect(8f, 190f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", KFPersistenceManager.suspensionIncrement));
-				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 230f, 240f, sliderHeight), KFPersistenceManager.suspensionIncrement, 1f, 20f);
+				// Non-element title (top: 0)
+				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 12f, 240f, toggleHeight), KFPersistenceManager.isDustEnabled, "Enable DustFX");
+				// Non-element spacer (top: 36)
+				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 44f, 240f, toggleHeight), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+				// Non-element spacer (top: 68)
+				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 76f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
+				// Non-element spacer (top: 100)
+				GUI.Label(new Rect(8f, 108f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount));
+				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 132f, 240f, sliderHeight), KFPersistenceManager.dustAmount, 0f, 3f);
+				// Non-element spacer (top: 148)
+				GUI.Label(new Rect(8f, 156f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", Mathf.Round(KFPersistenceManager.suspensionIncrement)));
+				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 180f, 240f, sliderHeight), Mathf.Round(KFPersistenceManager.suspensionIncrement), 1f, 20f);
+				// Non-element end (top: 196)
 			}
 			
 			if (Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
 			{
-				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 24f, 240f, toggleHeight), KFPersistenceManager.isDustEnabled, "Enable DustFX");
-				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 56f, 240f, toggleHeight), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
-				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 88f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
-				GUI.Label(new Rect(8f, 120f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount));
-				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 152f, 240f, sliderHeight), KFPersistenceManager.dustAmount, 0f, 3f);
+				// Non-element title (top: 0)
+				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 12f, 240f, toggleHeight), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
+				// Non-element spacer (top: 36)
+				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 44f, 240f, toggleHeight), KFPersistenceManager.isDustEnabled, "Enable DustFX");
+				// Non-element spacer (top: 68)
+				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 76f, 240f, toggleHeight), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+				// Non-element spacer (top: 100)
+				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 108f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
+				// Non-element spacer (top: 132)
+				GUI.Label(new Rect(8f, 140f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount));
+				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 164f, 240f, sliderHeight), KFPersistenceManager.dustAmount, 0f, 3f);
+				// Non-element end (top: 180)
 			}
 		}
 		
