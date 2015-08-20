@@ -58,6 +58,7 @@
     <Compile Include="KFConstrain.cs" />
     <Compile Include="KFCouplingEye.cs" />
     <Compile Include="KFCouplingHitch.cs" />
+    <Compile Include="KFHandler.cs" />
     <Compile Include="KFRepulsorLook.cs" />
     <Compile Include="Log\KFLog.cs" />
     <Compile Include="Log\KFLogWriter.cs" />

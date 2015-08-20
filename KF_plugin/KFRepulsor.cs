@@ -98,12 +98,12 @@ namespace KerbalFoundries
         {
 			base.OnStart(state);
 
+            _grid = transform.Search(gridName);
+            _gridScale = _grid.transform.localScale;
+            _gimbal = transform.Search(gimbalName);
+
 			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris)) // && vessel.parts.Count > 1) // Vessel could still be debris even with a part cound greater than one.
             {
-                _grid = transform.Search(gridName);
-                _gridScale = _grid.transform.localScale;
-                _gimbal = transform.Search(gimbalName);
-
                 foreach (WheelCollider b in part.GetComponentsInChildren<WheelCollider>())
                 {
                     repulsorCount ++;
@@ -128,6 +128,7 @@ namespace KerbalFoundries
 				SetupWaterSlider();
 				isReady = true;
             }
+            else StartCoroutine("Shrink");
             DestroyBounds();
 		}
 		// End start
