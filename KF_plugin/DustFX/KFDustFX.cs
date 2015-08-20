@@ -35,13 +35,13 @@ namespace KerbalFoundries
 		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
 		ModuleCameraShot _ModuleCameraShot;
 		
-		/// <summary>Config field to compensate for part size</summary>
-        [KSPField]
+		/// <summary>Config field to compensate for part size.</summary>
+		[KSPField]
 		public float partSizeFactor = 1;
 
-        /// <summary>Local copy of the tweakScaleCorrector parameter in the KFModuleWheel module.</summary>
-        /// <remarks>Passed here by the wheel module itself.</remarks>
-        public float tweakScalefactor = 1;
+		/// <summary>Local copy of the tweakScaleCorrector parameter in KFModuleWheel.</summary>
+		/// <remarks>Passed here by the wheel module itself.</remarks>
+		public float tweakScaleFactor = 1;
 		
 		/// <summary>Specifies if the module is to be used for repulsors.</summary>
 		/// <remarks>Default is "false"</remarks>
@@ -102,16 +102,11 @@ namespace KerbalFoundries
 		/// <remarks>Default is "Effects/fx_smokeTrail_light"</remarks>
 		[KSPField]
 		public string dustEffectObject = "Effects/fx_smokeTrail_light";
-		//public const string dustEffectObject = "Effects/fx_smokeTrail_medium";
 		
 		/// <summary>Added or subracted from the individual color parameters (rgb) to create a variance in the dust colors.</summary>
 		/// <remarks>Should be a number between "0" and "1" where "0" effectively disables the variance.</remarks>
 		[KSPField]
 		public float colorVariance = 0.24f;
-		
-		/// <summary>The intensity of the spark light.</summary>
-		[KSPField]
-		public float sparkLightIntensity = 0.2f;
 		
 		bool isPaused;
 		GameObject kfdustFx;
@@ -121,15 +116,12 @@ namespace KerbalFoundries
 		Color colorAverage;
 		Color colorCam;
 		Color colorWater;
-		Color colorPlus;
-		Color colorMinus;
-		//Color colorFinal;
-        Queue<Color> colorFIFO = new Queue<Color>();
+		Queue<Color> colorFIFO = new Queue<Color>();
 		
 		bool isColorOverrideActive;
-        float sizeFactor = 1;
+		float sizeFactor = 1;
 
-        bool isReady;
+		bool isReady;
 		
 		GameObject _kfRepLight;
 		Light _repLight;
@@ -145,6 +137,8 @@ namespace KerbalFoundries
 			return strPartInfo;
 		}
 		
+		/// <summary>Standard startup routine.</summary>
+		/// <param name="state">state of the startup stuff.</param>
 		public override void OnStart(StartState state)
 		{
 			if (!KFPersistenceManager.isDustEnabled)
@@ -152,27 +146,28 @@ namespace KerbalFoundries
 
 			if (HighLogic.LoadedSceneIsFlight)
 			{
-                _ModuleCameraShot = vessel.rootPart.gameObject.GetComponent<ModuleCameraShot>();
-                if (Equals(_ModuleCameraShot, null)) //add if not... sets some defaults.
-                {
-                    _ModuleCameraShot = vessel.rootPart.gameObject.AddComponent<ModuleCameraShot>();
-                    _ModuleCameraShot.StartUp();
-                }
+				_ModuleCameraShot = vessel.rootPart.gameObject.GetComponent<ModuleCameraShot>();
+				if (Equals(_ModuleCameraShot, null)) //add if not... sets some defaults.
+				{
+					_ModuleCameraShot = vessel.rootPart.gameObject.AddComponent<ModuleCameraShot>();
+					_ModuleCameraShot.StartUp();
+				}
 				if (KFPersistenceManager.isDustEnabled)
 					SetupParticles(isRepulsor);
 			}
 			
 			GameEvents.onGamePause.Add(OnPause);
 			GameEvents.onGameUnpause.Add(OnUnpause);
-            isReady = true;
+			isReady = true;
 		}
 
-        public void Update()
-        {
-            if (!isReady)
-                return;
-            sizeFactor = tweakScalefactor * partSizeFactor * KFPersistenceManager.dustAmount;
-        }
+		/// <summary>Updates stuff.</summary>
+		public void Update()
+		{
+			if (!isReady)
+				return;
+			sizeFactor = tweakScaleFactor * partSizeFactor * KFPersistenceManager.dustAmount;
+		}
 		
 		/// <summary>Defines the particle effects used in this module.</summary>
 		public void SetupParticles(bool repulsor)
@@ -180,7 +175,6 @@ namespace KerbalFoundries
 			if (!KFPersistenceManager.isDustEnabled)
 				return;
 			kfdustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectObject));
-			//kfdustFx.transform.parent = part.transform;
 			kfdustFx.transform.position = part.transform.position;
 			kfdustFx.particleEmitter.localVelocity = Vector3.zero;
 			kfdustFx.particleEmitter.useWorldSpace = true;
@@ -235,6 +229,9 @@ namespace KerbalFoundries
 			DustParticles(force, hitPoint + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
 		}
 		
+		/// <summary>Sets up the repulsor lights.</summary>
+		/// <param name="enabled">Are we enabled?</param>
+		/// <param name="squish">How squishy are we?</param>
 		public void RepulsorLight(bool enabled, float squish)
 		{
 			if (KFPersistenceManager.isRepLightEnabled && enabled)
@@ -258,9 +255,6 @@ namespace KerbalFoundries
 		{
 			// disable ConvertToConstant.Local
 			bool cameraEnabled = KFPersistenceManager.isDustCameraEnabled;
-			//int randomthreshold = 2;
-			//int randomMin = 1;
-			//int randomMax = 3;
 			colorWater = new Color(0.65f, 0.65f, 0.65f, 0.025f);
 			
 			if (speed < minScrapeSpeed || Equals(dustAnimator, null) || !KFPersistenceManager.isDustEnabled)
@@ -272,41 +266,38 @@ namespace KerbalFoundries
 			colorBiome = KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
 			
 			cameraEnabled |= Equals(colorBiome, null);
-            Color colorTemp = Color.black;
+			Color colorTemp = Color.black;
 			
 			if (cameraEnabled)
 			{
 				colorCam = _ModuleCameraShot._averageColour;
 				colorTemp = (colorCam / 2) + (colorBiome / 2); // Make the camera colour dominant.
-                colorTemp.a = colorBiome.a;
+				colorTemp.a = colorBiome.a;
 			}
 			else
-                colorTemp = colorBiome;
+				colorTemp = colorBiome;
 			
-			colorPlus = new Color(colorTemp.r + colorVariance, colorTemp.g + colorVariance, colorTemp.b + colorVariance, colorTemp.a);
-			colorMinus = new Color(colorTemp.r - colorVariance, colorTemp.g - colorVariance, colorTemp.b - colorVariance, colorTemp.a);
+			colorFIFO.Enqueue(colorTemp);
 
-            colorFIFO.Enqueue(colorTemp);
+			if (colorFIFO.Count > 100)
+				colorFIFO.Dequeue();
 
-            if (colorFIFO.Count > 100)
-                colorFIFO.Dequeue();
+			Color[] colorArray = colorFIFO.ToArray();
 
-            Color[] colorArray = colorFIFO.ToArray();
+			float r = 0;
+			float g = 0;
+			float b = 0;
+			float a = 0;
 
-            float r = 0;
-            float g = 0;
-            float b = 0;
-            float a = 0;
+			for (int i = 0; i < colorArray.Count(); i++)
+			{
+				r += colorArray[i].r;
+				g += colorArray[i].g;
+				b += colorArray[i].b;
+				a += colorArray[i].a;
+			}
 
-            for (int i = 0; i < colorArray.Count(); i++)
-            {
-                r += colorArray[i].r;
-                g += colorArray[i].g;
-                b += colorArray[i].b;
-                a += colorArray[i].a;
-            }
-
-            colorAverage = new Color(r / 100, g / 100, b / 100, a / 100);
+			colorAverage = new Color(r / 100, g / 100, b / 100, a / 100);
 
 			if (isColorOverrideActive)
 				colorAverage = colorWater;
@@ -322,14 +313,15 @@ namespace KerbalFoundries
 					colors[3] = colorAverage;
 					colors[4] = colorAverage;
 					dustAnimator.colorAnimation = colors;
-					colorPrevious = colorAverage; 
+					colorPrevious = colorAverage;
 				}
 				kfdustFx.transform.position = contactPoint;
-                kfdustFx.particleEmitter.maxEnergy = Mathf.Clamp(((speed / maxDustEnergyDiv) * sizeFactor), minDustEnergy, maxDustEnergy * sizeFactor);
+				kfdustFx.particleEmitter.maxEnergy = Mathf.Clamp(((speed / maxDustEnergyDiv) * sizeFactor), minDustEnergy, maxDustEnergy * sizeFactor);
 				// Energy is the thickness of the particles.
 				kfdustFx.particleEmitter.maxEmission = Mathf.Clamp((speed * (maxDustEmissionMult * sizeFactor)), minDustEmission, (maxDustEmission * sizeFactor));
 				// Emission is the number of particles emitted per second.
-                kfdustFx.particleEmitter.maxSize = Mathf.Clamp((speed * sizeFactor), minDustSize, maxDustSize * sizeFactor); // Size is self explanatory.  For wheels, I suggest values between 0.1 and 2.
+				kfdustFx.particleEmitter.maxSize = Mathf.Clamp((speed * sizeFactor), minDustSize, maxDustSize * sizeFactor);
+				// Size is self explanatory.  For wheels, I suggest values between 0.1 and 2.
 				kfdustFx.particleEmitter.Emit();
 			}
 			return;

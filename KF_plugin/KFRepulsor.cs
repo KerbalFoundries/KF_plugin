@@ -1,7 +1,7 @@
 ﻿/*
  * KSP [0.23.5] Anti-Grav Repulsor plugin by Lo-Fi
  * Much inspiration and a couple of code snippets for deployment taken from BahamutoD's Critter Crawler mod. Huge respect, it's a fantastic mod :)
- * 
+ *
  */
 
 using System;
@@ -27,13 +27,7 @@ namespace KerbalFoundries
         public float SpringRate;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Damping"), UI_FloatRange(minValue = 0, maxValue = 0.3f, stepIncrement = 0.05f)]
         public float DamperRate;
-        
-        // Set the suspension travel increment dynamically.
-		[KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Susp. Step Value")]
-        public string suspsettings = string.Empty;
-		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#"), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
-		public float suspensionIncrementAmmount = 5f;
-        
+
         [KSPField]
         public bool lowEnergy;
         [KSPField]
@@ -49,9 +43,9 @@ namespace KerbalFoundries
         Transform _gimbal;
 
         Vector3 _gridScale;
-        
-        //float effectPower; 
-        // disable once ConvertToConstant.Local
+
+        //float effectPower;
+        // disable ConvertToConstant.Local
         float effectPowerMax = 50f;
         float appliedRideHeight;
         float currentRideHeight;
@@ -61,7 +55,7 @@ namespace KerbalFoundries
 
         KFDustFX _dustFX;
         float dir;
-        
+
         public List<WheelCollider> wcList = new List<WheelCollider>();
         public bool deployed = true;
         //public List<float> susDistList = new List<float>();
@@ -74,30 +68,34 @@ namespace KerbalFoundries
 		/// <summary>The name of the resource to consume.</summary>
         [KSPField]
 		public string resourceName = "ElectricCharge";
-        
+		
+		public float susInc;
+
         /// <summary>This is the info string that will display when the part info is shown.</summary>
 		/// <remarks>This can be overridden in the part config for this module due to its KSPField status.</remarks>
 		[KSPField]
         public string strPartInfo = "This part allows the craft to hover above the ground.  Steering mechanism not included.\n\n<b><color=#99ff00ff>Requires:</color></b>\n- {ResourceName}: {ConsumptionRate}/sec @ max height";
         public override string GetInfo()
 		{
-            return UpdateInfoText(strPartInfo, resourceName, resourceConsumptionRate);            
+            return UpdateInfoText(strPartInfo, resourceName, resourceConsumptionRate);
 		}
 
         static string UpdateInfoText(string strPartInfo, string strResourceName, float consumptionRate)
         {
             return strPartInfo.Replace("{ResourceName}", strResourceName).Replace("{ConsumptionRate}", consumptionRate.ToString("0.00"));
         }
-        
+
         /// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFRepulsor");
-        
+
         //begin start
         public override void OnStart(PartModule.StartState state)  //when started
         {
 			base.OnStart(state);
-
+			
+			susInc = KFPersistenceManager.suspensionIncrement;
+			
 			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris)) // && vessel.parts.Count > 1) // Vessel could still be debris even with a part cound greater than one.
             {
                 _grid = transform.Search(gridName);
@@ -133,7 +131,7 @@ namespace KerbalFoundries
 		// End start
         void SetupDust(PartModule.StartState state)
         {
-            _dustFX = part.GetComponent<KFDustFX>(); //see if it's been added by MM. MM deprecated in favor of adding the module manually. - Gaalidas 
+            _dustFX = part.GetComponent<KFDustFX>(); //see if it's been added by MM. MM deprecated in favor of adding the module manually. - Gaalidas
             if (!Equals(_dustFX, null)) //add if not... sets some defaults.
             {
                 _dustFX = part.gameObject.AddComponent<KFDustFX>();
@@ -289,6 +287,8 @@ namespace KerbalFoundries
             //KFLog.Log(effectPower);
 			
             dir += UnityEngine.Random.Range(20,60);
+
+			susInc = KFPersistenceManager.suspensionIncrement;
         }
 
         IEnumerator UpdateHeight()
@@ -312,7 +312,7 @@ namespace KerbalFoundries
             {
 				for (int i = 0; i < wcList.Count(); i++)
 					wcList[i].enabled = false;
-                
+
                 StopCoroutine("Grow");
                 StartCoroutine("Shrink");
             }
@@ -324,7 +324,7 @@ namespace KerbalFoundries
         {
             if (rideHeight > 0)
             {
-                rideHeight -= Mathf.Clamp(suspensionIncrementAmmount, 0f, 100f);
+                rideHeight -= Mathf.Clamp(susInc, 0f, 100f);
                 //KFLog.Log("Retracting...");
 				ApplySettingsAction();
             }
@@ -335,12 +335,12 @@ namespace KerbalFoundries
         {
             if (rideHeight < 100)
             {
-                rideHeight += Mathf.Clamp(suspensionIncrementAmmount, 0f, 100f);
+                rideHeight += Mathf.Clamp(susInc, 0f, 100f);
 				//KFLog.Log("Extending...");
 				ApplySettingsAction();
             }
 		}
-        
+
         #region Presets
 		/// <summary>Handles preset rideHeight values.</summary>
 		/// <param name="value">The height being requested. (0-100 float)</param>
@@ -381,9 +381,9 @@ namespace KerbalFoundries
         {
 			Presetter(100);
         }
-        
+
         #endregion Presets
-        
+
 		public void ApplySettingsAction()
 		{
 			appliedRideHeight = rideHeight;
@@ -400,7 +400,6 @@ namespace KerbalFoundries
                 {
                     mt.rideHeight = rideHeight;
                     mt.appliedRideHeight = rideHeight;
-					mt.suspensionIncrementAmmount = suspensionIncrementAmmount;
                     mt.StartCoroutine("UpdateHeight");
                 }
             }

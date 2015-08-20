@@ -41,12 +41,6 @@ namespace KerbalFoundries
         [KSPField(isPersistant = false, guiActive = true, guiName = "RPM", guiFormat = "F1")] 
         public float averageTrackRPM;
         
-		// Set the suspension travel increment dynamically.
-		[KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Susp. Step Value")]
-        public string suspsettings = string.Empty;
-		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#"), UI_FloatRange(minValue = 1, maxValue = 20f, stepIncrement = 1f)]
-		public float suspensionIncrementAmmount = 5f;
-        
 		// Config fields
 		/// <summary>Torque applied to wheel colliders.</summary>
         [KSPField]
@@ -139,22 +133,23 @@ namespace KerbalFoundries
 		/// <summary>Saves the brake state.</summary>
         [KSPField(isPersistant = true)]
 		public bool brakesApplied;
+		
 		/// <summary>Saves the retracted state.</summary>
         [KSPField(isPersistant = true)]
         public bool isRetracted = false;
 
 		// Global variables
-        int rootIndexLong;      
+        int rootIndexLong;
         int rootIndexLat;
         int rootIndexUp;
-        int controlAxisIndex;  
+        int controlAxisIndex;
         uint commandId;
         uint lastCommandId;
         float brakeTorque;
         float motorTorque;
         bool isReady;
 
-        int groundedWheels = 0; 
+        int groundedWheels = 0;
         float effectPower;
         float trackRPM = 0;
         float lastPartCount;
@@ -174,6 +169,7 @@ namespace KerbalFoundries
         public float degreesPerTick;
         public float currentTravel;
         public float smoothedTravel;
+		public float susInc;
 
         //Visible fields (debug)
         [KSPField(isPersistant = true, guiActive = false, guiName = "TS", guiFormat = "F1")] //debug only.
@@ -221,7 +217,9 @@ namespace KerbalFoundries
 		public override void OnStart(PartModule.StartState state)  //when started
         {
 			base.OnStart(state);
-
+			
+			susInc = KFPersistenceManager.suspensionIncrement;
+			
 			CustomResourceTextSetup(); // Calls a method to set up the statusLowResource text for resource alternatives.
 
             _colliderMass = 10; //just a beginning value to stop stuff going crazy before it's all calculated properly.
@@ -307,7 +305,7 @@ namespace KerbalFoundries
                     _dustFX = this.part.gameObject.AddComponent<KFDustFX>();
                     _dustFX.OnStart(state);
                 }
-                _dustFX.tweakScalefactor = tweakScaleCorrector;
+                _dustFX.tweakScaleFactor = tweakScaleCorrector;
 
                 appliedTravel = rideHeight / 100; // need to be here if no KFWheel or everything gets set to zero as below.
                 StartCoroutine(StartupStuff());
@@ -424,6 +422,8 @@ namespace KerbalFoundries
 
             smoothedTravel = Mathf.Lerp(smoothedTravel, currentTravel, Time.deltaTime * 2);
             appliedTravel = smoothedTravel / 100;
+			
+			susInc = KFPersistenceManager.suspensionIncrement;
 		}
 		//End OnFixedUpdate
 
@@ -455,7 +455,6 @@ namespace KerbalFoundries
         /// <summary>
         /// Applies calculated torque, braking and steering to the wheel colliders,
         /// gathers some information such as RPM and invokes the DustFX where appropriate.
-        /// Also keeps track of suspension travel interval variables.
         /// </summary>
         /// <remarks>This is a major chunk of what happens in FixedUpdate if the part is deployed.</remarks>
         void UpdateColliders()
@@ -685,7 +684,7 @@ namespace KerbalFoundries
         public void LowerRideHeight(KSPActionParam param)
         {
             if (rideHeight > 0)
-                rideHeight -= Mathf.Clamp(suspensionIncrementAmmount, 0f, 100f);
+                rideHeight -= Mathf.Clamp(susInc, 0f, 100f);
 
             ApplySettings(true);
         }
@@ -694,7 +693,7 @@ namespace KerbalFoundries
         public void RaiseRideHeight(KSPActionParam param)
         {
             if (rideHeight < 100)
-            	rideHeight += Mathf.Clamp(suspensionIncrementAmmount, 0f, 100f);
+            	rideHeight += Mathf.Clamp(susInc, 0f, 100f);
 
             ApplySettings(true);
         }
@@ -822,7 +821,6 @@ namespace KerbalFoundries
                     mt.currentTravel = rideHeight;
                     mt.rideHeight = rideHeight;
                     mt.torque = torque;
-					mt.suspensionIncrementAmmount = suspensionIncrementAmmount;
                 }
 				if (actionGroup || Equals(groupNumber, 0))
                     currentTravel = rideHeight;

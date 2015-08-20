@@ -72,6 +72,10 @@ namespace KerbalFoundries
             float _dustAmount = 1;
             if (float.TryParse(configNode.GetValue("dustAmount"), out _dustAmount))
                 dustAmount = _dustAmount;
+            
+			float _suspensionIncrement = 5;
+			if (float.TryParse(configNode.GetValue("suspensionIncrement"), out _suspensionIncrement))
+				suspensionIncrement = _suspensionIncrement;
 
 			bool _writeToLogFile = false;
 			if (bool.TryParse(configNode.GetValue("writeToLogFile"), out _writeToLogFile))
@@ -86,10 +90,12 @@ namespace KerbalFoundries
 			KFLog.Log(string.Format("isDustCameraEnabled = {0}", isDustCameraEnabled));
 			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled));
 			KFLog.Log(string.Format("isRepLightEnabled = {0}", isRepLightEnabled));
+			KFLog.Log(string.Format("dustamount = {0}", dustAmount));
+			KFLog.Log(string.Format("suspensionIncrement = {0}", suspensionIncrement));
 			KFLog.Log(string.Format("writeToLogFile = {0}", writeToLogFile));
 			KFLog.Log(string.Format("LogFile = {0}", logFile));
         }
-
+		
         /// <summary>Retrieves the dust colors which are stored in the DustColors-file and are auto-loaded by KSP.</summary>
         static void ReadDustColor()
         {
@@ -150,6 +156,7 @@ namespace KerbalFoundries
 			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
 			configNode.SetValue("isRepLightEnabled", string.Format("{0}", isRepLightEnabled), true);
             configNode.SetValue("dustAmount", string.Format("{0}", dustAmount), true);
+			configNode.SetValue("suspensionIncrement", string.Format("{0}", suspensionIncrement), true);
 			configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
 			configNode.SetValue("logFile", logFile, true);
 
@@ -166,6 +173,7 @@ namespace KerbalFoundries
             isMarkerEnabled = true;
 			isRepLightEnabled = true;
             dustAmount = 1;
+			suspensionIncrement = 5;
             writeToLogFile = false;
             logFile = "KF.log";
 
@@ -202,7 +210,15 @@ namespace KerbalFoundries
 			set;
 		}
 
+		/// <summary>The amount of dust to be emitted.</summary>
         public static float dustAmount
+        {
+            get;
+            set;
+        }
+
+		/// <summary>The incremental value to change the ride height by when using action groups.</summary>
+        public static float suspensionIncrement
         {
             get;
             set;
