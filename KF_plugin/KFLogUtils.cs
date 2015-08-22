@@ -24,11 +24,13 @@ namespace KerbalFoundries
 		{
 			Log,
 			Warning,
-			Error
+			Error,
+			DebugLog
 		}
 
 		public static string strModName = "Kerbal Foundries";
-		static Log.KFLog KFLog = null; // In this case, the object complains about not being initialized, so I leave the redundant "null" intact.
+		// disable once RedundantDefaultFieldInitializer
+		static KFLog KFLog = null; // In this case, the object complains about not being initialized, so I leave the redundant "null" intact.
 
 		string strObjName = string.Empty;
 
@@ -49,7 +51,7 @@ namespace KerbalFoundries
 		/// <param name="obj">Calling class which type name will be included automatically in log messages.</param>
 		public KFLogUtil(object obj) : this(nameof(obj))
 		{
-			// Empty, and quite depressed to be.  It's all my fault!
+			// Empty, and quite depressed to be.  "It's all my fault!"
 		}
 
 		/// <summary>A standard-level log utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
@@ -130,6 +132,32 @@ namespace KerbalFoundries
 			CreateUnityEngineLog(LogType.Error, strText, strObjName);
 		}
 
+		/// <summary>A debug-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+		/// <param name="strText">(Required) The text to be sent to the log.</param>
+		/// <param name="strClassName">(Optional) Name of the specific class that is being logged from.  Does not show if not specified.</param>
+		/// <remarks>Debug log entry.</remarks>
+		public static void DebugLog(string strText, string strClassName)
+		{
+			CreateUnityEngineLog(LogType.DebugLog, strText, strClassName);
+		}
+
+		/// <summary>A debug-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+		/// <param name="strText">(Required) The text to be sent to the log.</param>
+		/// <param name="obj">(Optional) Name of the specific class that is being logged from.  Does not show if not specified.</param>
+		/// <remarks>Debug log entry.</remarks>
+		public static void DebugLog(string strText, object obj)
+		{
+			DebugLog(strText, nameof(obj));
+		}
+
+		/// <summary>A debug-level logging utility that prefixes the logged text with the name of the mod it is being sent from.</summary>
+		/// <param name="strText">(Required) The text to be sent to the log.</param>
+		/// <remarks>Debug log entry.</remarks>
+		internal void DebugLog(string strText)
+		{
+			CreateUnityEngineLog(LogType.DebugLog, strText, strObjName);
+		}
+
 		/// <summary>Builds the log entry and passes it to the UnityEngine log utility.</summary>
 		/// <param name="logType">what kind of log entry</param>
 		/// <param name="strText">message</param>
@@ -139,6 +167,8 @@ namespace KerbalFoundries
 			string strOutput = string.Format("[{0}", strModName);
 			if (!string.IsNullOrEmpty(strObjName))
 				strOutput += string.Format(" - {0}", strObjName);
+			if (Equals(logType, LogType.DebugLog))
+				strOutput += " - DEBUG";
 			strOutput += string.Format("]: {0}", strText);
 
 			switch (logType)
@@ -148,6 +178,9 @@ namespace KerbalFoundries
 					break;
 				case LogType.Warning:
 					Debug.LogWarning(strOutput);
+					break;
+				case LogType.DebugLog:
+					PrintDebugLog(strOutput);
 					break;
 				// disable once RedundantCaseLabel
 				case LogType.Log:
@@ -185,6 +218,13 @@ namespace KerbalFoundries
 				return strOutput;
 			}
 			return obj.GetType().ToString();
+		}
+		
+		static void PrintDebugLog(string input)
+		{
+			#if DEBUG
+			Debug.Log(input);
+			#endif
 		}
 	}
 }

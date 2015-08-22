@@ -30,6 +30,8 @@ namespace KerbalFoundries
 		// disable AccessToStaticMemberViaDerivedType
 		// disable RedundantDefaultFieldInitializer
 		
+		KFRepulsor _repModule;
+		
 		readonly KFLogUtil KFLog = new KFLogUtil("KFDustFX");
 		
 		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
@@ -143,6 +145,8 @@ namespace KerbalFoundries
 		{
 			if (!KFPersistenceManager.isDustEnabled)
 				return;
+			
+			_repModule = part.GetComponent<KFRepulsor>();
 
 			if (HighLogic.LoadedSceneIsFlight)
 			{
@@ -192,7 +196,7 @@ namespace KerbalFoundries
 			if (!KFPersistenceManager.isRepLightEnabled)
 				return;
 			_kfRepLight = new GameObject("Rep Light");
-			_kfRepLight.transform.parent = this.part.transform;
+			_kfRepLight.transform.parent = part.transform;
 			_kfRepLight.transform.position = Vector3.zero;
 			
 			_repLight = _kfRepLight.AddComponent<Light>();
@@ -202,6 +206,7 @@ namespace KerbalFoundries
 			_repLight.range = 4.0f;
 			_repLight.color = Color.blue;
 			_repLight.intensity = 0.0f;
+			_repLight.enabled = false;
 		}
 		
 		/// <summary>Called when the part is scraping over a surface.</summary>
@@ -234,10 +239,10 @@ namespace KerbalFoundries
 		/// <param name="squish">How squishy are we?</param>
 		public void RepulsorLight(bool enabled, float squish)
 		{
-			if (KFPersistenceManager.isRepLightEnabled && enabled)
+			if (enabled && KFPersistenceManager.isRepLightEnabled && _repModule.rideHeight >= 1f)
 			{
 				_kfRepLight.transform.localPosition = Vector3.zero;
-				_repLight.intensity = Mathf.Clamp(squish, 0, 0.5f);
+				_repLight.intensity = Mathf.Clamp(squish, 0f, 0.5f);
 				_repLight.enabled = true;
 			}
 			else
@@ -281,14 +286,14 @@ namespace KerbalFoundries
 
 			if (colorFIFO.Count > 100)
 				colorFIFO.Dequeue();
-
+			
 			Color[] colorArray = colorFIFO.ToArray();
-
+			
 			float r = 0;
 			float g = 0;
 			float b = 0;
 			float a = 0;
-
+			
 			for (int i = 0; i < colorArray.Count(); i++)
 			{
 				r += colorArray[i].r;
@@ -296,9 +301,9 @@ namespace KerbalFoundries
 				b += colorArray[i].b;
 				a += colorArray[i].a;
 			}
-
-			colorAverage = new Color(r / 100, g / 100, b / 100, a / 100);
-
+			
+			colorAverage = new Color(r / 100, g / 100, b / 100, a / 50);
+			
 			if (isColorOverrideActive)
 				colorAverage = colorWater;
 			

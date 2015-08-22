@@ -37,7 +37,7 @@ namespace KerbalFoundries
             var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
             visible.transform.parent = _collider.transform;
             visible.transform.localScale = boxSize;
-            visible.renderer.enabled = false; // enable to see collider.  This keeps getting enabled.  I suggest we start using a define for debug builds so that release builds never get this turned on.
+            visible.renderer.enabled = KFPersistenceManager.debugIsWaterColliderVisible; // NEW: Enabled and disabled via a debug option in the GUI settings window.  Turns off if debug is turned off, otherwise stays persistent.
 
             var box = (BoxCollider)_collider.AddComponent("BoxCollider");
             box.size = boxSize; // Probably should encapsulate other colliders in real code

@@ -145,7 +145,7 @@ namespace KerbalFoundries
 			_MWS = vessel.rootPart.GetComponent<ModuleWaterSlider>();
             if (Equals(_MWS, null)) //add if not... sets some defaults.
             {
-                _MWS =  vessel.rootPart.gameObject.AddComponent<ModuleWaterSlider>();
+                _MWS = vessel.rootPart.gameObject.AddComponent<ModuleWaterSlider>();
                  //vessel.rootPart.GetComponent<ModuleWaterSlider>();
                 _MWS.StartUp();
             }
@@ -281,13 +281,14 @@ namespace KerbalFoundries
             }
 			
             RepulsorSound(hitForce);
-			if (deployed && KFPersistenceManager.isRepLightEnabled)
+			if (deployed && KFPersistenceManager.isRepLightEnabled && rideHeight > 0f)
 				_dustFX.RepulsorLight(deployed, squish);
             //effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //KFLog.Log(effectPower);
 			
             dir += UnityEngine.Random.Range(20,60);
 
+            // Updates the suspention increment value for the action groups.
 			susInc = KFPersistenceManager.suspensionIncrement;
         }
 
@@ -349,13 +350,11 @@ namespace KerbalFoundries
 			rideHeight = Mathf.Clamp(value, 0f, 100f);
 			ApplySettingsAction();
 		}
-		
 		[KSPAction("Repulsor Off")]
         public void HeightZero(KSPActionParam param)
         {
 			Presetter(0);
         }
-		
         [KSPAction("Height 10")]
         public void HeightMinimal(KSPActionParam param)
         {

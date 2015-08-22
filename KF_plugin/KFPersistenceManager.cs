@@ -76,25 +76,39 @@ namespace KerbalFoundries
 			float _suspensionIncrement = 5;
 			if (float.TryParse(configNode.GetValue("suspensionIncrement"), out _suspensionIncrement))
 				suspensionIncrement = _suspensionIncrement;
-
+			
+			bool _isDebugEnabled = false;
+			if (bool.TryParse(configNode.GetValue("isDebugEnabled"), out _isDebugEnabled))
+				isDebugEnabled = _isDebugEnabled;
+			
 			bool _writeToLogFile = false;
 			if (bool.TryParse(configNode.GetValue("writeToLogFile"), out _writeToLogFile))
 				writeToLogFile = _writeToLogFile;
-
+			
 			logFile = configNode.GetValue("logFile");
             
 			if (writeToLogFile)
 				KerbalFoundries.Log.KFLog.StartWriter();
+			
+			LogConfigValues();
+        }
 
+		static void LogConfigValues()
+		{
 			KFLog.Log(string.Format("isDustEnabled = {0}", isDustEnabled));
 			KFLog.Log(string.Format("isDustCameraEnabled = {0}", isDustCameraEnabled));
 			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled));
 			KFLog.Log(string.Format("isRepLightEnabled = {0}", isRepLightEnabled));
 			KFLog.Log(string.Format("dustamount = {0}", dustAmount));
-			KFLog.Log(string.Format("suspensionIncrement = {0}", Mathf.Round(suspensionIncrement)));
+			KFLog.Log(string.Format("suspensionIncrement = {0}", suspensionIncrement));
+			KFLog.Log(string.Format("isDebugEnabled = {0}", isDebugEnabled));
+			if (isDebugEnabled)
+			{
+				KFLog.Log(string.Format("debugIsWaterColliderVisible = {0}", debugIsWaterColliderVisible));
+			}
 			KFLog.Log(string.Format("writeToLogFile = {0}", writeToLogFile));
 			KFLog.Log(string.Format("LogFile = {0}", logFile));
-        }
+		}
 		
         /// <summary>Retrieves the dust colors which are stored in the DustColors-file and are auto-loaded by KSP.</summary>
         static void ReadDustColor()
@@ -109,14 +123,14 @@ namespace KerbalFoundries
                 KFLog.Log("DustColors.cfg is missing or damaged!");
                 return;
             }
-
+			
             ConfigNode configNode = configFile.GetNode("DustColorDefinitions");
             if (Equals(configNode, null) || Equals(configNode.CountNodes, 0)) // DustColorDefinitions-node is empty
             {
                 KFLog.Warning("Dust color definitions not found or damaged!");
                 return;
             }
-
+			
 			foreach (ConfigNode celestialNode in configNode.GetNodes()) // for each celestial
 			{
 				var biomes = new Dictionary<string, Color>();
@@ -147,6 +161,12 @@ namespace KerbalFoundries
 			// KFGlobals.cfg
             System.IO.File.Delete(configFileName);
             
+            // Sync debug state with debug options.
+            if (!isDebugEnabled && debugIsWaterColliderVisible)
+            {
+				debugIsWaterColliderVisible = false;
+            }
+            
 			var configFile = new ConfigNode();
             configFile.AddNode("KFGlobals");
             ConfigNode configNode = configFile.GetNode("KFGlobals");
@@ -155,14 +175,17 @@ namespace KerbalFoundries
 			configNode.SetValue("isDustCameraEnabled", string.Format("{0}", isDustCameraEnabled), true);
 			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
 			configNode.SetValue("isRepLightEnabled", string.Format("{0}", isRepLightEnabled), true);
-            configNode.SetValue("dustAmount", string.Format("{0}", dustAmount), true);
-            configNode.SetValue("suspensionIncrement", string.Format("{0}", Mathf.Round(suspensionIncrement)), true);
+			configNode.SetValue("dustAmount", string.Format("{0}", Mathf.Clamp(Extensions.RoundToNearestValue(dustAmount, 0.25f), 0f, 3f)), true);
+			configNode.SetValue("suspensionIncrement", string.Format("{0}", Mathf.Clamp(Extensions.RoundToNearestValue(suspensionIncrement, 5f), 5f, 20f)), true);
+			configNode.SetValue("isDebugEnabled", string.Format("{0}", isDebugEnabled), true);
+			configNode.SetValue("debugIsWaterColliderVisible", string.Format("{0}", debugIsWaterColliderVisible), true);
 			configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
 			configNode.SetValue("logFile", logFile, true);
-
+			
 			configFile.Save(configFileName);
 
 			KFLog.Log("Global Settings Saved.");
+			LogConfigValues();
 		}
 
         /// <summary>Creates configuration file with default values.</summary>
@@ -172,11 +195,17 @@ namespace KerbalFoundries
             isDustCameraEnabled = true;
             isMarkerEnabled = true;
 			isRepLightEnabled = true;
-            dustAmount = 1;
-			suspensionIncrement = 5;
-            writeToLogFile = false;
+			
+            dustAmount = 1.5f; // I found this to be more like the original density, while 1 seems way too sparse.
+			suspensionIncrement = 5f;
+			
+			isDebugEnabled = false;
+			debugIsWaterColliderVisible = false;
+            
+			writeToLogFile = false;
             logFile = "KF.log";
-
+			
+			KFLog.Log("Default Config Created.");
             SaveConfig();
         }
 		#endregion
@@ -223,6 +252,19 @@ namespace KerbalFoundries
         {
             get;
             set;
+        }
+        
+        /// <summary>Tracks whether or not the debug options should be made visible or not.</summary>
+        public static bool isDebugEnabled
+        {
+			get;
+			set;
+        }
+        
+        public static bool debugIsWaterColliderVisible
+        {
+			get;
+			set;
         }
 
 		/// <summary>If all KF log messages should also be written to a log file.</summary>
@@ -317,14 +359,12 @@ namespace KerbalFoundries
 			if (HasIconOverrideRotation(partToFix))
 				rotation = KSPUtil.ParseVector3(partToFix.partConfig.GetNode("IconOverride").GetValue("Rotation"));
 
-            
 			// apply icon fixes
 			partToFix.iconScale = max; // affects only the meter scale in the tooltip
             
 			partToFixIconPrefab.transform.GetChild(0).localScale *= factor;
 			partToFixIconPrefab.transform.GetChild(0).Rotate(rotation, Space.Self);
 
-            
 			// after applying the fixes the part could be off-center, correct this now
 			if (string.IsNullOrEmpty(pivot))
 			{
@@ -441,14 +481,12 @@ namespace KerbalFoundries
 				}
 			});
 
-
 			Bounds bounds = boundsList[0];
 			boundsList.RemoveAt(0);
             // disable ConvertClosureToMethodGroup
             boundsList.ForEach(b => bounds.Encapsulate(b)); // Do not change that to boundsList.ForEach(bounds.Encapsulate)!
 
 			return bounds;
-
 		}
 		#endregion Part sizes fix
 	}
