@@ -186,7 +186,7 @@ namespace KerbalFoundries
 				
                 if (HighLogic.LoadedSceneIsEditor)
                 {
-					windowHeight = 96f; // assume 1 title, 1 toggle, 1 slider, 1 label, 1 spacer, and 1 end. (Editor Only)
+					windowHeight = 48f; // assume 1 title, 1 toggle, and 1 end. (Editor Only)
                     // in the editor the toolbar is at the bottom of the screen, so let's move it down
                     windowTop = Screen.height - 42f - windowHeight; // 42f is the height of the toolbar buttons + 2 units of space
                 }
@@ -196,7 +196,7 @@ namespace KerbalFoundries
 					windowHeight = 192f; // assume 1 top, 4 toggles, 1 slider. 1 label, 4 spacers, and 1 end. (Space Center Only)
 				}
 				
-				if (KFPersistenceManager.isDebugEnabled)
+				if (KFPersistenceManager.isDebugEnabled && Equals(HighLogic.LoadedScene, GameScenes.FLIGHT))
 					windowHeight += 32f; // Add a spacerHeight and toggleHeight for every new option available in the debug menu.
 				
                 // shift the window to the left until the left window border has the same x value as the button sprite or at least so far it won't clip out the edge of the monitor
@@ -229,10 +229,10 @@ namespace KerbalFoundries
 				// Non-element title (top: 0)
 				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 16f, 240f, toggleHeight), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
 				// Non-element spacer (top: 40)
-				GUI.Label(new Rect(8f, 48f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f)));
-				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 72f, 240f, sliderHeight), Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f), 5f, 20f);
+				//GUI.Label(new Rect(8f, 48f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f)));
+				//KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 72f, 240f, sliderHeight), Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f), 5f, 20f);
 				// Non-element end (top: 88)
-				endHeight = 96f; // end top height + spacerHeight.
+				endHeight = 48f; // end top height + spacerHeight.
 			}
 			
 			if (HighLogic.LoadedSceneIsFlight)
@@ -274,8 +274,8 @@ namespace KerbalFoundries
 			
 			if (KFPersistenceManager.isDebugEnabled && Equals(HighLogic.LoadedScene, GameScenes.FLIGHT)) // Only during flight for now.
 			{
-				// Add debug option here and indent them by 4, while shortening them by 4 as well.
-				KFPersistenceManager.debugIsWaterColliderVisible = GUI.Toggle(new Rect(12f, endHeight, 236f, toggleHeight), KFPersistenceManager.debugIsWaterColliderVisible, "Waterslider Visible");
+				// Add debug option here and indent them by 6, while shortening them by 6 as well.
+				KFPersistenceManager.debugIsWaterColliderVisible = GUI.Toggle(new Rect(14f, endHeight, 234f, toggleHeight), KFPersistenceManager.debugIsWaterColliderVisible, "Waterslider Visible");
 			}
 			else if (!KFPersistenceManager.isDebugEnabled) // Add an entry for each debug toggle option so that they will disable themselves when debug mode is disabled.
 				KFPersistenceManager.debugIsWaterColliderVisible = false;

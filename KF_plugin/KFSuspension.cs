@@ -143,8 +143,8 @@ namespace KerbalFoundries
 
         public void OnDestroy()
         {
-             GameEvents.onGamePause.Remove(new EventVoid.OnEvent(this.OnPause));
-             GameEvents.onGameUnpause.Remove(new EventVoid.OnEvent(this.OnUnPause));
+             GameEvents.onGamePause.Remove(new EventVoid.OnEvent(OnPause));
+             GameEvents.onGameUnpause.Remove(new EventVoid.OnEvent(OnUnPause));
         }
     }
 }

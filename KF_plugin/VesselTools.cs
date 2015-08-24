@@ -26,6 +26,8 @@ namespace KerbalFoundries
 		/// <summary>Local name of the KFLogUtil class.</summary>
 		readonly KFLogUtil KFLog = new KFLogUtil("ModuleWaterSlider");
 
+		GameObject visibleSliderSurface;
+		
 		public void StartUp()
 		{
 			KFLog.Log("WaterSlider start.");
@@ -34,10 +36,10 @@ namespace KerbalFoundries
             _collider = new GameObject("ModuleWaterSlider.Collider");
             KFLog.Log("Continuing...");
 
-            var visible = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            visible.transform.parent = _collider.transform;
-            visible.transform.localScale = boxSize;
-            visible.renderer.enabled = KFPersistenceManager.debugIsWaterColliderVisible; // NEW: Enabled and disabled via a debug option in the GUI settings window.  Turns off if debug is turned off, otherwise stays persistent.
+			visibleSliderSurface = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            visibleSliderSurface.transform.parent = _collider.transform;
+            visibleSliderSurface.transform.localScale = boxSize;
+			visibleSliderSurface.renderer.enabled = false;
 
             var box = (BoxCollider)_collider.AddComponent("BoxCollider");
             box.size = boxSize; // Probably should encapsulate other colliders in real code
@@ -66,6 +68,7 @@ namespace KerbalFoundries
 			if (Vector3.Distance(_collider.transform.position, _vessel.transform.position) > triggerDistance)
 				UpdatePosition();
 			colliderHeight = Mathf.Clamp((colliderHeight -= 0.1f), -10, 2.5f);
+			visibleSliderSurface.renderer.enabled = KFPersistenceManager.debugIsWaterColliderVisible; // NEW: Enabled and disabled via a debug option in the GUI settings window.  Turns off if debug is turned off, otherwise stays persistent.
 		}
     }
 
