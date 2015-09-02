@@ -20,9 +20,9 @@ namespace KerbalFoundries
         [KSPField(isPersistant = false, guiActive = true, guiName = "Status")]
         public string status = "Nominal";
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group Number"), UI_FloatRange(minValue = 0, maxValue = 10f, stepIncrement = 1f)]
-        public float groupNumber = 1;
+        public float groupNumber = 1f;
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Height"), UI_FloatRange(minValue = 0, maxValue = 100f, stepIncrement = 5f)]
-        public float rideHeight = 25;
+        public float rideHeight = 25f;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Strength"), UI_FloatRange(minValue = 0, maxValue = 6.00f, stepIncrement = 0.2f)]
         public float SpringRate;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Damping"), UI_FloatRange(minValue = 0, maxValue = 0.3f, stepIncrement = 0.05f)]
@@ -46,18 +46,19 @@ namespace KerbalFoundries
 
         //float effectPower;
         // disable ConvertToConstant.Local
+        // disable RedundantDefaultFieldInitializer
         float effectPowerMax = 50f;
         float appliedRideHeight;
         float currentRideHeight;
-        float repulsorCount = 0;
-        float compression = 0;
+        float repulsorCount = 0f;
+        float compression = 0f;
         float squish;
 
         KFDustFX _dustFX;
         float dir;
 
         public List<WheelCollider> wcList = new List<WheelCollider>();
-        public bool deployed = true;
+        public bool deployed;
         //public List<float> susDistList = new List<float>();
         ModuleWaterSlider _MWS;
 
@@ -68,7 +69,7 @@ namespace KerbalFoundries
 		/// <summary>The name of the resource to consume.</summary>
         [KSPField]
 		public string resourceName = "ElectricCharge";
-		
+
 		public float susInc;
 
         /// <summary>This is the info string that will display when the part info is shown.</summary>
@@ -93,15 +94,16 @@ namespace KerbalFoundries
         public override void OnStart(PartModule.StartState state)  //when started
         {
 			base.OnStart(state);
+			deployed = true;
 			
 			susInc = KFPersistenceManager.suspensionIncrement;
 			
-			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris)) // && vessel.parts.Count > 1) // Vessel could still be debris even with a part cound greater than one.
+			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris))
             {
                 _grid = transform.Search(gridName);
                 _gridScale = _grid.transform.localScale;
                 _gimbal = transform.Search(gimbalName);
-
+				
                 foreach (WheelCollider b in part.GetComponentsInChildren<WheelCollider>())
                 {
                     repulsorCount ++;
@@ -109,7 +111,7 @@ namespace KerbalFoundries
                     userspring.spring = SpringRate;
                     userspring.damper = DamperRate;
                     b.suspensionSpring = userspring;
-                    b.suspensionDistance = 2.5f; //default to low setting to save stupid shenanigans on takeoff
+                    b.suspensionDistance = 2.5f; //default to low setting to save stupid shenanigans on takeoff.
                     wcList.Add(b);
                 }
                 KFLog.Log(string.Format("Repulsor Count: {0}", repulsorCount));
@@ -121,7 +123,7 @@ namespace KerbalFoundries
                 }
                 appliedRideHeight = rideHeight;
                 StartCoroutine("UpdateHeight"); //start updating to height set before launch
-
+				
 				SetupDust(state);
 				SetupWaterSlider();
 				isReady = true;
@@ -129,10 +131,11 @@ namespace KerbalFoundries
             DestroyBounds();
 		}
 		// End start
+		
         void SetupDust(PartModule.StartState state)
         {
-            _dustFX = part.GetComponent<KFDustFX>(); //see if it's been added by MM. MM deprecated in favor of adding the module manually. - Gaalidas
-            if (!Equals(_dustFX, null)) //add if not... sets some defaults.
+            _dustFX = part.GetComponent<KFDustFX>(); // Check to see if it exists.
+            if (Equals(_dustFX, null)) // Add it if not.
             {
                 _dustFX = part.gameObject.AddComponent<KFDustFX>();
                 _dustFX.isRepulsor = true;
@@ -282,7 +285,7 @@ namespace KerbalFoundries
 			
             RepulsorSound(hitForce);
 			if (deployed && KFPersistenceManager.isRepLightEnabled && rideHeight > 0f)
-				_dustFX.RepulsorLight(deployed, squish);
+				_dustFX.RepulsorLight(squish);
             //effectPower = 0;    //reset to make sure it doesn't play when it shouldn't.
             //KFLog.Log(effectPower);
 			

@@ -32,7 +32,6 @@ namespace KerbalFoundries
         string[] moverList;
         int objectCount = 0;
 
-
         public override void OnStart(PartModule.StartState state)
         {
             base.OnStart(state);
@@ -58,7 +57,7 @@ namespace KerbalFoundries
 
             objectCount = movers.Count();
         }
-
+        
         System.Collections.IEnumerator Setup()
         {
             //Debug.LogWarning(string.Format("Waiting a frame {0}.", Time.frameCount));
@@ -75,7 +74,7 @@ namespace KerbalFoundries
 
             yield break;
         }
-
+        
         System.Collections.IEnumerator ConstrainRotation()
         {
             while (true)
@@ -89,6 +88,7 @@ namespace KerbalFoundries
                 yield return null;
             }
         }
+        
         System.Collections.IEnumerator ConstrainPosition()
         {
             while (true)

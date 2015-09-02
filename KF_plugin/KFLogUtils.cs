@@ -28,8 +28,8 @@ namespace KerbalFoundries
 			DebugLog
 		}
 
-		public static string strModName = "Kerbal Foundries";
-		// disable once RedundantDefaultFieldInitializer
+		public static string strModName = "KF";
+		// disable RedundantDefaultFieldInitializer
 		static KFLog KFLog = null; // In this case, the object complains about not being initialized, so I leave the redundant "null" intact.
 
 		string strObjName = string.Empty;
@@ -161,7 +161,7 @@ namespace KerbalFoundries
 		/// <summary>Builds the log entry and passes it to the UnityEngine log utility.</summary>
 		/// <param name="logType">what kind of log entry</param>
 		/// <param name="strText">message</param>
-		/// <param name="strObjName">name of calling class</param>
+		/// <param name="strObjName">name of calling class (optional)</param>
 		static void CreateUnityEngineLog(LogType logType, string strText, string strObjName = "")
 		{
 			string strOutput = string.Format("[{0}", strModName);
@@ -182,8 +182,9 @@ namespace KerbalFoundries
 				case LogType.DebugLog:
 					PrintDebugLog(strOutput);
 					break;
-				// disable once RedundantCaseLabel
 				case LogType.Log:
+					Debug.Log(strOutput);
+					break;
 				default:
 					Debug.Log(strOutput);
 					break;

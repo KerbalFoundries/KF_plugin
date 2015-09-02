@@ -38,9 +38,9 @@ namespace KerbalFoundries
         public override void OnUpdate()
         {
             base.OnUpdate();
-            float distanceTravelled = (float)((_track.averageTrackRPM * 2 * Math.PI) / 60) * Time.deltaTime * _track.directionCorrector; //calculate how far the track will need to move
+            float distanceTravelled = (float)((_track.averageTrackRPM * 2f * Math.PI) / 60f) * Time.deltaTime * _track.directionCorrector; //calculate how far the track will need to move
             textureOffset = trackMaterial.mainTextureOffset;
-            textureOffset = textureOffset + new Vector2(-distanceTravelled / trackLength, 0); //tracklength is used to fine tune the speed of movement.
+            textureOffset = textureOffset + new Vector2(-distanceTravelled / trackLength, 0f); //tracklength is used to fine tune the speed of movement.
             trackMaterial.SetTextureOffset("_MainTex", textureOffset);
             trackMaterial.SetTextureOffset("_BumpMap", textureOffset);
         }

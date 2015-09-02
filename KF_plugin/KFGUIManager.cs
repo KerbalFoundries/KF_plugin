@@ -62,7 +62,9 @@ namespace KerbalFoundries
         /// <param name="data"></param>
         void OnGUIUnready(GameScenes data)
         {
-            //KFLog.Log("OnGUIUnready()");
+        	#if DEBUG
+            KFLog.Log("OnGUIUnready()");
+            #endif
             DestroyAppButton();
         }
 		
@@ -71,8 +73,9 @@ namespace KerbalFoundries
         /// </summary>
         void OnGUIReady()
         {
-            //KFLog.Log("OnGUIReady()");
-
+        	#if DEBUG
+            KFLog.Log("OnGUIReady()");
+			#endif
             if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
                 SetupAppButton();
         }
@@ -187,7 +190,7 @@ namespace KerbalFoundries
                 if (HighLogic.LoadedSceneIsEditor)
                 {
 					windowHeight = 48f; // assume 1 title, 1 toggle, and 1 end. (Editor Only)
-                    // in the editor the toolbar is at the bottom of the screen, so let's move it down
+                    // In the editor the toolbar is at the bottom of the screen, so let's move it down
                     windowTop = Screen.height - 42f - windowHeight; // 42f is the height of the toolbar buttons + 2 units of space
                 }
                 

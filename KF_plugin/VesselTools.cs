@@ -12,12 +12,12 @@ namespace KerbalFoundries
 {
 	public class ModuleWaterSlider : PartModule
 	{
+		// disable ConvertToConstant.Local
+		
         public float colliderHeight = -2.5f;
 
         GameObject _collider;
-		// disable once ConvertToConstant.Local
 		float triggerDistance = 25f;
-		//bool isActive; // never used.
 		Vessel _vessel;
 		Vector3 boxSize = new Vector3(300f, .5f, 300f);
 		
@@ -26,7 +26,7 @@ namespace KerbalFoundries
 		/// <summary>Local name of the KFLogUtil class.</summary>
 		readonly KFLogUtil KFLog = new KFLogUtil("ModuleWaterSlider");
 
-		GameObject visibleSliderSurface;
+		GameObject waterSliderSurface;
 		
 		public void StartUp()
 		{
@@ -34,15 +34,15 @@ namespace KerbalFoundries
 			_vessel = GetComponent<Vessel>();
 
             _collider = new GameObject("ModuleWaterSlider.Collider");
-            KFLog.Log("Continuing...");
+            //KFLog.Log("Continuing...");
 
-			visibleSliderSurface = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            visibleSliderSurface.transform.parent = _collider.transform;
-            visibleSliderSurface.transform.localScale = boxSize;
-			visibleSliderSurface.renderer.enabled = false;
+			waterSliderSurface = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            waterSliderSurface.transform.parent = _collider.transform;
+            waterSliderSurface.transform.localScale = boxSize;
+			waterSliderSurface.renderer.enabled = false;
 
             var box = (BoxCollider)_collider.AddComponent("BoxCollider");
-            box.size = boxSize; // Probably should encapsulate other colliders in real code
+            box.size = boxSize; // Probably should encapsulate other colliders in real code.
 
             var rb = (Rigidbody)_collider.AddComponent("Rigidbody");
             rb.rigidbody.isKinematic = true;
@@ -50,7 +50,7 @@ namespace KerbalFoundries
             _collider.SetActive(true);
 
             UpdatePosition();
-     	       isReady = true;
+     	    isReady = true;
 		}
 
 		void UpdatePosition()
@@ -68,7 +68,7 @@ namespace KerbalFoundries
 			if (Vector3.Distance(_collider.transform.position, _vessel.transform.position) > triggerDistance)
 				UpdatePosition();
 			colliderHeight = Mathf.Clamp((colliderHeight -= 0.1f), -10, 2.5f);
-			visibleSliderSurface.renderer.enabled = KFPersistenceManager.debugIsWaterColliderVisible; // NEW: Enabled and disabled via a debug option in the GUI settings window.  Turns off if debug is turned off, otherwise stays persistent.
+			waterSliderSurface.renderer.enabled = KFPersistenceManager.debugIsWaterColliderVisible; // NEW: Enabled and disabled via a debug option in the GUI settings window.  Turns off if debug is turned off, otherwise stays persistent.
 		}
     }
 
@@ -88,7 +88,7 @@ namespace KerbalFoundries
 		Camera _camera;
 		Texture2D groundShot;
 		RenderTexture renderTexture;
-		bool dustCam;
+		bool dustCamEnabled;
         int kFPartCount;
         bool isReady;
 
@@ -104,6 +104,7 @@ namespace KerbalFoundries
             _vessel = GetComponent<Vessel>();
             foreach (Part PA in _vessel.parts)
             {
+                // disable UnusedVariable.Compiler
                 foreach (KFRepulsor RA in PA.GetComponentsInChildren<KFRepulsor>())
                     kFPartCount++;
                 foreach (KFModuleWheel RA in PA.GetComponentsInChildren<KFModuleWheel>())
@@ -128,15 +129,15 @@ namespace KerbalFoundries
                 _camera.enabled = false;
                 renderTexture = new RenderTexture(resWidth, resHeight, 24);
                 groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
-                dustCam = KFPersistenceManager.isDustCameraEnabled;
+                dustCamEnabled = KFPersistenceManager.isDustCameraEnabled;
                 isReady = true;
             }
 		}
 
 		public void Update()
 		{
-			dustCam = KFPersistenceManager.isDustCameraEnabled;
-			if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCam && isReady)
+			dustCamEnabled = KFPersistenceManager.isDustCameraEnabled;
+			if (frameCount >= threshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCamEnabled && isReady)
 			{
 				frameCount = 0;
 

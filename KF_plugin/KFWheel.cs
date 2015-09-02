@@ -26,7 +26,7 @@ namespace KerbalFoundries
 		[KSPField]
 		public bool hasSuspension = true;
 		[KSPField]
-		public float smoothSpeed = 40;
+		public float smoothSpeed = 40; // Odd, I found that this isn't being referenced anywhere.
 		[KSPField]
 		public float rotationCorrection = 1;
 		[KSPField]

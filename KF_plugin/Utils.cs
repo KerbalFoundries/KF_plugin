@@ -129,7 +129,6 @@ namespace KerbalFoundries
 			return index;
 		}
 
-		// I had to rename "parta" to "thePart" so it wouldn't look so much like a typo.  I always had issues when looking over it before. - Gaalidas
 		/// <summary>Plays a sound.</summary>
 		/// <param name="thePart">The part to play from.</param>
 		/// <param name="effectName">The effect name to work out of.</param>
@@ -182,7 +181,7 @@ namespace KerbalFoundries
 			if (roundto < 1f && roundto > 0f)
 			{
 				roundto *= 10f;
-				output = (float)((Math.Round(((input * 10) / roundto), MidpointRounding.AwayFromZero) * roundto) / 10);
+				output = (float)((Math.Round(((input * 10f) / roundto), MidpointRounding.AwayFromZero) * roundto) / 10f);
 			}
 			else if (roundto >= 1f)
 				output = (float)(Math.Round(input / roundto, MidpointRounding.AwayFromZero) * roundto);
