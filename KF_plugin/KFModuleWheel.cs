@@ -376,10 +376,10 @@ namespace KerbalFoundries
         {
             yield return new WaitForFixedUpdate();
             lastPartCount = this.vessel.Parts.Count();
-            #if DEBUG
+			#if DEBUG
 			KFLog.Log(string.Format("Part Count: {0}", lastPartCount));
-            KFLog.Log("Checking vessel mass.");
-            #endif
+			KFLog.Log(string.Format("Checking vessel mass.  Mass = {0}", this.vesselMass));
+			#endif
             _colliderMass = ChangeColliderMass();
         }
 
