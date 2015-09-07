@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Controls the orientation marker for the editor scenes which helps reduce reports of non-functional wheels due to user-error.</summary>
     public class OrientationMarker : PartModule
     {
         [KSPField]
@@ -24,10 +25,17 @@ namespace KerbalFoundries
 			if (!Equals(marker, null) && (!isMarkerEnabled || HighLogic.LoadedSceneIsFlight))
 			{
 				UnityEngine.Object.Destroy(marker.gameObject);
+				#if DEBUG
 				KFLog.Warning("Marker destroyed.");
+				#endif
 			}
-            else
-                KFLog.Warning("Marker not found.");
+			// disable once RedundantIfElseBlock
+			else
+			{
+				#if DEBUG
+				KFLog.Warning("Marker not found.");
+				#endif
+			}
         }
     }
 }

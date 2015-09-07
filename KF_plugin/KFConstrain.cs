@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>A KF-specific position-constrain module similar to the stock position constrainers.</summary>
     public class KFConstrain : PartModule
     {
         // disable FieldCanBeMadeReadOnly.Local

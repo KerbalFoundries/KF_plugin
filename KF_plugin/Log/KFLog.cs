@@ -4,6 +4,8 @@ using System.Threading;
 namespace KerbalFoundries.Log
 {
 	// disable once ConvertToStaticType
+	
+	/// <summary>Utility used in the KF Logging system.</summary>
 	public class KFLog
 	{
 		/// <summary>helper object to synchronize queue access</summary>

@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Control module for the KF suspension system.</summary>
 	public class KFSuspension : PartModule
 	{
 		[KSPField]

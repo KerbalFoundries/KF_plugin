@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Handles the track-surface skinned-meshes.</summary>
     public class KFTrackSurface : PartModule
     {
         GameObject _trackSurface;

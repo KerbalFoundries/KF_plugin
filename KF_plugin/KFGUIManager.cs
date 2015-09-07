@@ -2,7 +2,7 @@
 
 namespace KerbalFoundries
 {
-	/// <summary>This class adds a button to the stock toolbar and displays a configuration window.</summary>
+	/// <summary>Manager class for everything having to do with the KF Config GUI.</summary>
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
 	public class KFGUIManager : MonoBehaviour
 	{

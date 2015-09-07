@@ -4,18 +4,26 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Various extension utilities for use with the wheel modules.</summary>
     public static class WheelUtils
     {
+		static string strClassName = "WheelUtils";
+
     	/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		static readonly KFLogUtil KFLog = new KFLogUtil("WheelUtils");
+		static readonly KFLogUtil KFLog = new KFLogUtil(strClassName);
     	
-		public static int GetCorrector(Vector3 transformVector, Transform referenceVector, int directionIndex) // Takes a vector (usually from a parts axis) and a transform, plus an index giving which axis to   
-		{                                                                                               	   // Use for the scalar product of the two. Returns a value of -1 or 1, depending on whether the product is positive or negative.
+		/// <summary>Takes a vector (usually from a parts axis) and a transform, plus an index giving which axis to use for the scalar product of the two.</summary>
+		/// <param name="transformVector">Vector of the transform.</param>
+		/// <param name="referenceVector">Reference vector.</param>
+		/// <param name="directionIndex">Direction index.</param>
+		/// <returns>A value of -1 or 1, depending on whether the product is positive or negative.</returns>
+		public static int GetCorrector(Vector3 transformVector, Transform referenceVector, int directionIndex)    
+		{ 
             int corrector = 1;
             float dot = 0;
 
-			switch (directionIndex) // Three if checks to see if a single variable is equal to a different number.  This is so much cleaner as a single switch with three cases. - Gaalidas
+			switch (directionIndex)
             {
 				case 0:
 					dot = Vector3.Dot(transformVector, referenceVector.right);
@@ -29,45 +37,49 @@ namespace KerbalFoundries
             }
 
 			KFLog.Log(string.Format("{0}", dot));
-			/*
-			if (dot < 0) // below 0 means the engine is on the left side of the craft
-            {
-                corrector = -1;
-            }
-            else
-            {
-                corrector = 1;
-            }
-			*/
 			corrector = dot < 0 ? -1 : 1;
             return corrector;
         }
 
-		public static int GetRefAxis(Vector3 refDirection, Transform refTransform) // Takes a vector 3 derived from the axis of the parts transform (typically), and the transform of the part to compare to (usually the root part).
-		{                                                                   	   // Uses scalar products to determine which axis is closest to the axis specified in refDirection, return an index value 0 = X, 1 = Y, 2 = Z.
+		/// <summary>Takes a vector3 derived from the axis of the parts transform (typically), and the transform of the part to compare to (usually the root part).</summary>
+		/// <param name="refDirection">Reference direction.</param>
+		/// <param name="refTransform">Reference transform.</param>
+		/// <returns>The index of the orientation.</returns>
+		/// <remarks>Uses scalar products to determine which axis is closest to the axis specified in refDirection, return an index value 0 = X, 1 = Y, 2 = Z.</remarks>
+		public static int GetRefAxis(Vector3 refDirection, Transform refTransform)
+		{
 			//orgpos = this.part.orgPos; // Debugguing
             float dotx = Math.Abs(Vector3.Dot(refDirection, refTransform.right)); // up is forward
-			//KFLog.Log(string.Format("{0}", dotx)); // Debugging
             float doty = Math.Abs(Vector3.Dot(refDirection, refTransform.up));
-			//KFLog.Log(string.Format("{0}", doty)); // Debugging
             float dotz = Math.Abs(Vector3.Dot(refDirection, refTransform.forward));
-			//KFLog.Log(string.Format("{0}", dotz)); // Debugging
+			
+			#if DEBUG
+			KFLog.Log(string.Format("\"dotx\" = {0}", dotx));
+			KFLog.Log(string.Format("\"doty\" = {0}", doty));
+			KFLog.Log(string.Format("\"dotz\" = {0}", dotz));
+			#endif
 
             int orientationIndex = 0;
 
             if (dotx > doty && dotx > dotz)
             {
-                //KFLog.Log("root part mounted right");
+            	#if DEBUG
+                KFLog.Log("Root part mounted rightwards.");
+                #endif
                 orientationIndex = 0;
             }
             if (doty > dotx && doty > dotz)
             {
-                //KFLog.Log("root part mounted forward");
+                #if DEBUG
+                KFLog.Log("Root part mounted forwards.");
+                #endif
                 orientationIndex = 1;
             }
             if (dotz > doty && dotz > dotx)
             {
-                //KFLog.Log("root part mounted up");
+                #if DEBUG
+                KFLog.Log("Root part mounted upwards.");
+                #endif
                 orientationIndex = 2;
             }
             /*
@@ -77,8 +89,15 @@ namespace KerbalFoundries
             return orientationIndex;
         }
 
-        public static float SetupRatios(int refIndex, Part thisPart, Vessel thisVessel, float groupNumber)      // Determines how much this wheel should be steering according to its position in the craft. Returns a value -1 to 1.
+		/// <summary>Determines how much this wheel should be steering according to its position in the craft.</summary>
+		/// <param name="refIndex">Reference index.</param>
+		/// <param name="thisPart">Reference part.</param>
+		/// <param name="thisVessel">Reference vessel.</param>
+		/// <param name="groupNumber">Reference group number.</param>
+		/// <returns>A value of -1 to 1.</returns>
+        public static float SetupRatios(int refIndex, Part thisPart, Vessel thisVessel, float groupNumber)
         {
+			strClassName += ": SetupRatios()";
             float myPosition = thisPart.orgPos[refIndex];
             float maxPos = thisPart.orgPos[refIndex];
             float minPos = thisPart.orgPos[refIndex];
@@ -107,8 +126,11 @@ namespace KerbalFoundries
 
 			if (Equals(ratio, 0) || float.IsNaN(ratio)) // Check is we managed to evaluate to zero or infinity somehow. Happens with less than three wheels, or all wheels mounted at the same position.
                 ratio = 1;
-            //KFLog.Log("ratio"); //Debugging
-            //KFLog.Log(string.Format("{0}", ratio));
+			
+			#if DEBUG
+            KFLog.Log(string.Format("\"ratio\" = {0}", ratio));
+            #endif
+            
             return ratio;
         }
 	}

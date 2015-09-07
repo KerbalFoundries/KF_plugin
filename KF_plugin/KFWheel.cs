@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>A replacement for the stock "Wheel" module geared towards KF-related wheels.</summary>
 	public class KFWheel : PartModule
 	{
 		[KSPField(isPersistant = false, guiActive = false, guiName = "Suspension travel")]
@@ -106,22 +107,21 @@ namespace KerbalFoundries
 			{
 				//KFLog.Error("Already configured - skipping.");
 			}
-            
-			if (HighLogic.LoadedSceneIsEditor)
-			{
-				// Do absolutely nothing!
-			}
+			
+			// Removed unnecessary if/else check for the editor scenes.  Nothing was being done within the check.
 
 			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris) && vessel.parts.Count > 1)
 			{
 				GameEvents.onGamePause.Add(new EventVoid.OnEvent(OnPause));
 				GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(OnUnPause));
+				
 				//find named onjects in part
 				foreach (WheelCollider wc in part.GetComponentsInChildren<WheelCollider>())
 				{
 					if (wc.name.StartsWith(colliderName, StringComparison.Ordinal))
 						_wheelCollider = wc;
 				}
+				
 				foreach (Transform tr in part.GetComponentsInChildren<Transform>())
 				{
 					if (tr.name.StartsWith(wheelName, StringComparison.Ordinal))
@@ -140,7 +140,9 @@ namespace KerbalFoundries
 				if (_KFModuleWheel.hasSteering)
 				{
 					initialSteeringAngles = _trackSteering.transform.localEulerAngles;
-					//KFLog.Log(initialSteeringAngles);
+					#if DEBUG
+					KFLog.Log(string.Format("initial steering angles are \"{0}\"", initialSteeringAngles));
+					#endif
 				}
 
 				// Again, if/else can be made into a single line. - Gaalidas
@@ -150,12 +152,14 @@ namespace KerbalFoundries
 
 				if (Equals(lastFrameTraverse, 0)) //check to see if we have a value in persistance
 				{
-					//KFLog.Error("Last frame = 0. Setting");
+					#if DEBUG
+					KFLog.Log("Last frame = 0. Setting suspension distance.");
+					#endif
 					lastFrameTraverse = _wheelCollider.suspensionDistance;
-					//KFLog.Error(lastFrameTraverse);
 				}
-				//KFLog.Error("Last frame =");
-				//KFLog.Error(lastFrameTraverse);
+				#if DEBUG
+				KFLog.Log(string.Format("Last frame = {0}", lastFrameTraverse));
+				#endif
 				couroutinesActive = true;
 
 				MoveSuspension(susTravIndex, -lastFrameTraverse, _susTrav); //to get the initial stuff correct
@@ -163,7 +167,9 @@ namespace KerbalFoundries
 				if (_KFModuleWheel.hasSteering)
 				{
 					StartCoroutine("Steering");
-					//KFLog.Error("starting steering coroutine");
+					#if DEBUG
+					KFLog.Log("Starting steering coroutine.");
+					#endif
 				}
 				if (trackedWheel)
 					StartCoroutine("TrackedWheel");
@@ -172,7 +178,7 @@ namespace KerbalFoundries
 
                 if (hasSuspension)
                 {
-                    KFLog.Error("WARNING: KFWheel suspension module is deprecated. Please use KFSuspension");
+                    KFLog.Warning("KFWheel suspension module is deprecated. Please use KFSuspension.");
                     StartCoroutine("Suspension");
                 }
 				

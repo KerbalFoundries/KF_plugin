@@ -6,6 +6,7 @@ using System.Threading;
 
 namespace KerbalFoundries.Log
 {
+	/// <summary>Utility used in the creation of a KF-specific log file to write log data to.</summary>
 	public class KFLogWriter
 	{
 		/// <summary>Helper object to synchronize queue access.</summary>

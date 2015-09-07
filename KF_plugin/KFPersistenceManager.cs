@@ -4,7 +4,8 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	// disable ConvertToStaticType
-	/// <summary>This class loads, provides and saves global configuration.</summary>
+	/// <summary>Loads, contains, and saves global configuration nodes.</summary>
+	/// <remarks>Brain-Child of *Aqua* and without which we would never have created a working GUI config system.</remarks>
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
 	public class KFPersistenceManager : MonoBehaviour
 	{
@@ -18,6 +19,8 @@ namespace KerbalFoundries
 
         /// <summary>Path\DustColors.cfg</summary>
         static string dustColorsFileName;
+        
+		static string strClassName = "KFPersistenceManager"; // Moved to the outer scope so I can manipulate it later.
 		
 		#endregion Log
 		
@@ -25,8 +28,8 @@ namespace KerbalFoundries
 		/// <remarks>This is a static constructor. It's called once when the class is loaded by Mono.</remarks>
 		static KFPersistenceManager()
 		{
-            writeToLogFile = false; // this makes sure that the logging thread can't start before all of the configuration is read or bad things will happen
-            KFLog = new KFLogUtil("KFPersistenceManager");
+            writeToLogFile = false; // This makes sure that the logging thread can't start before all of the configuration is read or bad things will happen
+            KFLog = new KFLogUtil(strClassName);
 
 			ReadConfigFile();
             ReadDustColor();
@@ -83,31 +86,34 @@ namespace KerbalFoundries
 			
 			bool _writeToLogFile = false;
 			if (bool.TryParse(configNode.GetValue("writeToLogFile"), out _writeToLogFile))
+			{
 				writeToLogFile = _writeToLogFile;
+				if (writeToLogFile)
+					KerbalFoundries.Log.KFLog.StartWriter();
+			}
 			
-			logFile = configNode.GetValue("logFile");
-            
-			if (writeToLogFile)
-				KerbalFoundries.Log.KFLog.StartWriter();
+			string _logfile = configNode.GetValue("logFile");
+			logFile = Equals(_logfile, string.Empty) || Equals(_logfile, null) ? "KF.log" : _logfile;
 			
 			LogConfigValues();
         }
 
 		static void LogConfigValues()
 		{
-			KFLog.Log(string.Format("isDustEnabled = {0}", isDustEnabled));
-			KFLog.Log(string.Format("isDustCameraEnabled = {0}", isDustCameraEnabled));
-			KFLog.Log(string.Format("isMarkerEnabled = {0}", isMarkerEnabled));
-			KFLog.Log(string.Format("isRepLightEnabled = {0}", isRepLightEnabled));
-			KFLog.Log(string.Format("dustamount = {0}", dustAmount));
-			KFLog.Log(string.Format("suspensionIncrement = {0}", suspensionIncrement));
-			KFLog.Log(string.Format("isDebugEnabled = {0}", isDebugEnabled));
+			KFLog.Log("Configuration Settings are:");
+			KFLog.Log(string.Format("  isDustEnabled = {0}", isDustEnabled));
+			KFLog.Log(string.Format("  isDustCameraEnabled = {0}", isDustCameraEnabled));
+			KFLog.Log(string.Format("  isMarkerEnabled = {0}", isMarkerEnabled));
+			KFLog.Log(string.Format("  isRepLightEnabled = {0}", isRepLightEnabled));
+			KFLog.Log(string.Format("  dustamount = {0}", dustAmount));
+			KFLog.Log(string.Format("  suspensionIncrement = {0}", suspensionIncrement));
+			KFLog.Log(string.Format("  isDebugEnabled = {0}", isDebugEnabled));
 			if (isDebugEnabled)
 			{
-				KFLog.Log(string.Format("debugIsWaterColliderVisible = {0}", debugIsWaterColliderVisible));
+				KFLog.Log(string.Format("    debugIsWaterColliderVisible = {0}", debugIsWaterColliderVisible));
 			}
-			KFLog.Log(string.Format("writeToLogFile = {0}", writeToLogFile));
-			KFLog.Log(string.Format("LogFile = {0}", logFile));
+			KFLog.Log(string.Format("  writeToLogFile = {0}", writeToLogFile));
+			KFLog.Log(string.Format("  logFile = {0}", logFile));
 		}
 		
         /// <summary>Retrieves the dust colors which are stored in the DustColors-file and are auto-loaded by KSP.</summary>
@@ -118,23 +124,23 @@ namespace KerbalFoundries
             DustColors = new Dictionary<string, Dictionary<string, Color>>();
             
 			ConfigNode configFile = ConfigNode.Load(dustColorsFileName);
-            if (Equals(configFile, null) || !configFile.HasNode("DustColorDefinitions"))  // DustColorDefinitions-node doesn't exist
+            if (Equals(configFile, null) || !configFile.HasNode("DustColorDefinitions"))  // DustColorDefinitions node doesn't exist.
             {
-                KFLog.Log("DustColors.cfg is missing or damaged!");
+                KFLog.Warning("DustColors.cfg is missing or damaged!");
                 return;
             }
 			
             ConfigNode configNode = configFile.GetNode("DustColorDefinitions");
-            if (Equals(configNode, null) || Equals(configNode.CountNodes, 0)) // DustColorDefinitions-node is empty
+            if (Equals(configNode, null) || Equals(configNode.CountNodes, 0)) // DustColorDefinitions node is empty.
             {
                 KFLog.Warning("Dust color definitions not found or damaged!");
                 return;
             }
 			
-			foreach (ConfigNode celestialNode in configNode.GetNodes()) // for each celestial
+			foreach (ConfigNode celestialNode in configNode.GetNodes()) // For each celestial body do this:
 			{
 				var biomes = new Dictionary<string, Color>();
-				foreach (ConfigNode biomeNode in celestialNode.GetNodes()) // for each biome of that celestial
+				foreach (ConfigNode biomeNode in celestialNode.GetNodes()) // For each biome of that celestial body do this:
 				{
 					float r = 0f;
 					float.TryParse(biomeNode.GetValue("Color").Split(',')[0], out r);
@@ -196,7 +202,7 @@ namespace KerbalFoundries
             isMarkerEnabled = true;
 			isRepLightEnabled = true;
 			
-            dustAmount = 1.5f; // I found this to be more like the original density, while 1 seems way too sparse.
+            dustAmount = 1f;
 			suspensionIncrement = 5f;
 			
 			isDebugEnabled = false;
@@ -268,7 +274,7 @@ namespace KerbalFoundries
         }
 
 		/// <summary>If all KF log messages should also be written to a log file.</summary>
-		/// <remarks>logFile must be specified in the config!</remarks>
+		/// <remarks>logFile must be specified in the global config!</remarks>
 		public static bool writeToLogFile
 		{
 			get;
@@ -285,7 +291,7 @@ namespace KerbalFoundries
 
 		#region DustFX
 		/// <summary>Dust colors for each biome.</summary>
-		/// <remarks>Key = celestial name, Value(s) = { Key = biome_name Value = color }</remarks>
+		/// <remarks>Key = celestial body name, Value(s) = { Key = biome_name, Value = color }</remarks>
 		public static Dictionary<string, Dictionary<string, Color>> DustColors
 		{
 			get;
@@ -303,16 +309,21 @@ namespace KerbalFoundries
 		}
 
 		/// <summary>Finds all KF parts which part icons need to be fixed</summary>
-		/// <returns>list of parts with IconOverride configNode</returns>
+		/// <returns>List of parts with IconOverride configNode</returns>
 		static List<AvailablePart> FindKFPartsToFix()
 		{
+			strClassName += ": Icon Fixer";
 			List<AvailablePart> KFPartsList = PartLoader.LoadedPartsList.FindAll(IsAKFPart);
-			//KFLog.Log("\nAll KF parts:", strClassName);
-			//KFPartsList.ForEach(part => KFLog.Log(part.name, strClassName));
+			#if DEBUG
+			KFLog.Log("\nAll KF Parts:");
+			KFPartsList.ForEach(part => KFLog.Log(string.Format("  {0}", part.name)));
+			#endif
 
 			List<AvailablePart> KFPartsToFixList = KFPartsList.FindAll(HasIconOverrideModule);
-			//KFLog.Log("\nKF parts which need a fix:", strClassName);
-			//KFPartsToFixList.ForEach(part => KFLog.Log(part.name, strClassName));
+			#if DEBUG
+			KFLog.Log("\nKF Parts which need an icon fix:");
+			KFPartsToFixList.ForEach(part => KFLog.Log(string.Format("  {0}", part.name)));
+			#endif
 
 			return KFPartsToFixList;
 		}
@@ -335,6 +346,7 @@ namespace KerbalFoundries
 		/// See https://bitbucket.org/xEvilReeperx/ksp_particonfixer/src/7f2ac4094c19?at=master for original code and license.</remarks>
 		static void FixPartIcon(AvailablePart partToFix)
 		{
+			strClassName += ": Icon Fixer";
 			KFLog.Log(string.Format("Fixing icon of \"{0}\"", partToFix.name));
 
 			// preparations

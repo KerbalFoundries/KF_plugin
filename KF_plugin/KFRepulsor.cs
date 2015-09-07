@@ -1,7 +1,7 @@
 ﻿/*
  * KSP [0.23.5] Anti-Grav Repulsor plugin by Lo-Fi
  * Much inspiration and a couple of code snippets for deployment taken from BahamutoD's Critter Crawler mod. Huge respect, it's a fantastic mod :)
- *
+ * (Update): Fully compatible with KSP [1.0.4].
  */
 
 using System;
@@ -12,6 +12,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Control module for the Anti-Gravity Repulsor.</summary>
     public class KFRepulsor : PartModule
     {
         public JointSpring userspring;

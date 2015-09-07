@@ -146,8 +146,8 @@ namespace KerbalFoundries
 			if (!KFPersistenceManager.isDustEnabled)
 				return;
 			
-			_repModule = part.GetComponent<KFRepulsor>();
-
+			_repModule = part.gameObject.GetComponent<KFRepulsor>();
+			
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				_ModuleCameraShot = vessel.rootPart.gameObject.GetComponent<ModuleCameraShot>();

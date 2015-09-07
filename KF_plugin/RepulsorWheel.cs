@@ -1,7 +1,6 @@
 ﻿/*
  * KSP [0.23.5] Anti-Grav Repulsor plugin by Lo-Fi
  * Much inspiration and a couple of code snippets for deployment taken from BahamutoD's Critter Crawler mod. Huge respect, it's a fantastic mod :)
- * 
  */
 
 using System;
@@ -11,6 +10,8 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Control module for the convertible repulsor-wheel system.</summary>
+	/// <remarks>Long overdue for a refactor and revival.</remarks>
 	public class RepulsorWheel : PartModule
 	{
 		// disable RedundantDefaultFieldInitializer
@@ -24,12 +25,16 @@ namespace KerbalFoundries
 		public bool repulsorMode = false;
 
 		//float repulsorDistance = 8;
+		
 		[KSPField]
-		public float chargeConsumptionRate = 1;
+		public string resourceName = "ElectricCharge";
+		
+		[KSPField]
+		public float resourceConsumptionRate = 1;
 
 		float effectPower;
 		float effectPowerMax;
-		bool lowEnergy = false;
+		bool lowResource = false;
 
 		List<WheelCollider> wcList = new List<WheelCollider>();
 		List<float> wfForwardList = new List<float>();
@@ -62,7 +67,7 @@ namespace KerbalFoundries
 				foreach (ModuleAnimateGeneric ma in part.FindModulesImplementing<ModuleAnimateGeneric>())
 					ma.Events["Toggle"].guiActive = false;
 
-				_moduletrack = this.part.GetComponentInChildren<KFModuleWheel>();
+				_moduletrack = part.GetComponentInChildren<KFModuleWheel>();
 				_moduletrack.Events["ApplySettings"].guiActive = false;
                 
 				//this.part.force_activate();
@@ -90,7 +95,7 @@ namespace KerbalFoundries
                     UpdateColliders("repulsor");
 				if (!repulsorMode)
 					UpdateColliders("wheel");
-				effectPowerMax = 1 * chargeConsumptionRate * Time.deltaTime;
+				effectPowerMax = resourceConsumptionRate * Time.deltaTime;
 				KFLog.Log(string.Format("{0}", effectPowerMax));
 			}
 			// End isInFlight
@@ -102,25 +107,27 @@ namespace KerbalFoundries
 			base.OnUpdate();
 			if (repulsorMode)
 			{
-				float chargeConsumption = (repulsorHeight / 2) * (1 + _moduletrack.springRate) * Time.deltaTime * chargeConsumptionRate;
-				effectPower = chargeConsumption / effectPowerMax;
+				float resourceConsumption = (repulsorHeight / 2) * (1 + _moduletrack.springRate) * Time.deltaTime * resourceConsumptionRate;
+				effectPower = resourceConsumption / effectPowerMax;
 				KFLog.Log(string.Format("{0}", effectPower));
 
-				float electricCharge = part.RequestResource("ElectricCharge", chargeConsumption);
+				float requestedResource = part.RequestResource(resourceName, resourceConsumption);
 				//KFLog.Log(string.Format("{0}", electricCharge));
 				// = Extensions.GetBattery(this.part);
-				if (electricCharge < (chargeConsumption * 0.9f))
+				if (requestedResource < (resourceConsumption * 0.9f))
 				{
-					KFLog.Log("Retracting due to low Electric Charge");
-					lowEnergy = true;
+					#if DEBUG
+					KFLog.Warning(string.Format("Retracting due to low \"{0}.\"", resourceName));
+					#endif
+					lowResource = true;
 					repulsorHeight = 0;
 					UpdateColliders("wheel");
-					_moduletrack.status = "Low Charge";
+					_moduletrack.status = Equals(resourceName, "ElectricCharge") ? "Low Charge" : _moduletrack.statusLowResource;
 				}
 				else
 				{
-					lowEnergy = false;
-					_moduletrack.status = "Nominal";
+					lowResource = false;
+					_moduletrack.status = _moduletrack.statusNominal;
 				}
 			}
 			else
@@ -141,7 +148,7 @@ namespace KerbalFoundries
 			switch (mode)
 			{
 				case "repulsor":
-					if (lowEnergy)
+					if (lowResource)
 						return;
 					_moduletrack.RetractDeploy("retract");
 					_moduletrack.currentTravel = repulsorHeight * replusorHeightMultiplier;
@@ -175,8 +182,11 @@ namespace KerbalFoundries
 						//wcList[i].enabled = true;
 					}
 					break;
+				// disable once RedundantEmptyDefaultSwitchBranch
 				default:
-					KFLog.Log("Incorrect command passed to UpdateColliders.");
+					#if DEBUG
+					KFLog.Error("Incorrect command passed to UpdateColliders.");
+					#endif
 					break;
 			}
 		}
@@ -236,7 +246,7 @@ namespace KerbalFoundries
 		[KSPAction("Repulsor Mode")]
 		public void toRepulsor(KSPActionParam param)
 		{
-			if (lowEnergy)
+			if (lowResource)
 				return;
 			if (!repulsorMode)
 			{

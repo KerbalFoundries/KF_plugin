@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Control module for the KF steering system.</summary>
     public class KFSteering : PartModule
     {
         [KSPField]

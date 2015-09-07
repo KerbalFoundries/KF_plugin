@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Handles mirroring of compatible parts where the model is not symmetrical.</summary>
     [KSPModule("ModuleMirror")]
     public class KFModuleMirror : PartModule
     {

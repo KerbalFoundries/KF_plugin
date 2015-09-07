@@ -3,12 +3,13 @@ using System.Linq;
 
 namespace KerbalFoundries
 {
+	/// <summary>Controls the ability for certain tracks and the Screw drive to propel the vessel through the water.</summary>
 	class ModulePropeller : PartModule
 	{
-		KFModuleWheel master;
+		KFModuleWheel _KFModuleWheel;
 
 		[KSPField]
-		public float propellerForce = 5;
+		public float propellerForce = 5f;
 
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
@@ -16,18 +17,21 @@ namespace KerbalFoundries
 		
 		public override void OnStart(PartModule.StartState state)
 		{
-			//KFLog.Log("ModulePropeller called.");
+			if (!HighLogic.LoadedSceneIsFlight)
+				return;
+			#if DEBUG
+			KFLog.Log("ModulePropeller called.");
+			#endif
+			_KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
 			base.OnStart(state);
-			if (HighLogic.LoadedSceneIsFlight)
-				master = part.GetComponentInChildren<KFModuleWheel>();
 		}
-
+		
 		public override void OnUpdate()
 		{
 			base.OnUpdate();
 			if (part.Splashed)
 			{
-				float forwardPropellorForce = master.directionCorrector * propellerForce * vessel.ctrlState.wheelThrottle;
+				float forwardPropellorForce = _KFModuleWheel.directionCorrector * propellerForce * vessel.ctrlState.wheelThrottle;
 				float turningPropellorForce = (propellerForce / 3f) * vessel.ctrlState.wheelSteer;
 				part.rigidbody.AddForce(part.GetReferenceTransform().forward * (forwardPropellorForce - turningPropellorForce));
 			}

@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Allows the override of a wheel collider already placed on the part when converting non-KF wheels to a KF control system.</summary>
     public class OverrideWheelCollider : PartModule
     {
         [KSPField]
@@ -64,18 +65,21 @@ namespace KerbalFoundries
             GameObject _susTrav = part.FindModelTransform(susTravName).gameObject;
             foreach (var wc in part.GetComponentsInChildren<WheelCollider>())
             {
-                if (wc.name.Equals(colliderName, StringComparison.Ordinal))
-                    _wheelCollider = wc;
-                else
-                    KFLog.Error("Wheel collider not found.");
+				if (wc.name.Equals(colliderName, StringComparison.Ordinal))
+					_wheelCollider = wc;
+				// disable once RedundantIfElseBlock
+				else
+				{
+					#if DEBUG
+					KFLog.Error("Wheel collider not found.");
+					#endif
+				}
             }
 
 			if (HighLogic.LoadedSceneIsFlight && moveCollider)
 			{
 				_wheelCollider.transform.Translate(0, moveColliderBy, 0, Space.Self);
-				// SharpDevelop suggested we use "var" instead of reiterating "Vector3" in this definition. - Gaalidas
 				var tempVector = new Vector3(0, 0, 0);
-				//Vector3 tempVector = new Vector3(0, 0, 0);
 				tempVector[susTravIndex] = moveColliderBy;
 				_susTrav.transform.Translate(tempVector, Space.Self);
 			}

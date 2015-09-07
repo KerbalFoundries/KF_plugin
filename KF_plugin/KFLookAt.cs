@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>A KF-specific LookAt controller similar to the stock LookAt.</summary>
 	public class KFLookAt : PartModule
 	{
 		[KSPField]

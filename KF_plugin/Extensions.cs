@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>A set of extension methods used frequently in the rest of the project.</summary>
 	public static class Extensions
 	{
 		// disable EmptyGeneralCatchClause
@@ -19,12 +20,15 @@ namespace KerbalFoundries
 			var lineDebugX = new GameObject("lineDebug");
 			var lineDebugY = new GameObject("lineDebug");
 			var lineDebugZ = new GameObject("lineDebug");
+			
 			lineDebugX.transform.position = position;
 			lineDebugY.transform.position = position;
 			lineDebugZ.transform.position = position;
+			
 			LineRenderer lineX = lineDebugX.AddComponent<LineRenderer>();
 			LineRenderer lineY = lineDebugY.AddComponent<LineRenderer>();
 			LineRenderer lineZ = lineDebugZ.AddComponent<LineRenderer>();
+			
 			//lineX.transform.parent = transform; // ...child to our part...
 			lineX.useWorldSpace = false; // ...and moving along with it (rather 
 			lineX.material = new Material(Shader.Find("Particles/Additive"));
@@ -57,7 +61,6 @@ namespace KerbalFoundries
 		{
 			//rotators.Clear();
 			String[] nameList = ObjectNames.Split(new[] { ',', ' ', '|' }, StringSplitOptions.RemoveEmptyEntries);
-
 			return nameList;
 		}
         
@@ -88,6 +91,7 @@ namespace KerbalFoundries
 			}
 			return null;
 		}
+		
 		//tr.name.StartsWith(rotatorsName, StringComparison.Ordinal
 
 		/// <summary>Gets a battery.  Names it "Jennifer" and gives it a good home.</summary>
@@ -96,7 +100,9 @@ namespace KerbalFoundries
 		{
 			PartResourceDefinition resourceDefinitions = PartResourceLibrary.Instance.GetDefinition("ElectricCharge");
 			var resources = new List<PartResource>();
+			
 			//List<PartResource> resources = new List<PartResource>();
+			
 			part.GetConnectedResources(resourceDefinitions.id, resourceDefinitions.resourceFlowMode, resources);
 			var ratio = (float)resources.Sum(r => r.amount) / (float)resources.Sum(r => r.maxAmount);
 			return ratio;
@@ -107,7 +113,7 @@ namespace KerbalFoundries
 		/// <returns>Integer axis index.</returns>
 		public static int SetAxisIndex(string axisString)
 		{
-			int index = 1; // Default to Y
+			int index = 1;
 			switch (axisString)
 			{
 				case "x":
@@ -122,20 +128,17 @@ namespace KerbalFoundries
 				case "Z":
 					index = 2;
 					break;
-				default: // Supposedly it's a good idea to always provide a default in these switches. - Gaalidas
-					index = 1;
-					break;
 			}
 			return index;
 		}
 
 		/// <summary>Plays a sound.</summary>
-		/// <param name="thePart">The part to play from.</param>
+		/// <param name="thisPart">The part to play from.</param>
 		/// <param name="effectName">The effect name to work out of.</param>
 		/// <param name="effectPower">The power factor of the sound.</param>
-		public static void PlaySound(Part thePart, string effectName, float effectPower)
+		public static void PlaySound(Part thisPart, string effectName, float effectPower)
 		{
-			thePart.Effect(effectName, effectPower);
+			thisPart.Effect(effectName, effectPower);
 		}
 
 		/// <summary>Disables the "animate" button in the part context menu.</summary>

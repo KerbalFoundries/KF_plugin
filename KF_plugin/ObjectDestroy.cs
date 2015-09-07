@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Allows for the desctruction of specific objects within the part/model before the part is used.</summary>
     public class ObjectDestroy : PartModule
     {
         [KSPField]
@@ -20,8 +21,9 @@ namespace KerbalFoundries
 			if (!Equals(destroyedObject, null))
 			{
 				UnityEngine.Object.Destroy(destroyedObject.gameObject);
-				//boundsDestroyed = true; //remove the bounds object to let the wheel colliders take over
+				#if DEBUG
 				KFLog.Log(string.Format("Destroying: {0}", objectName));
+				#endif
 			}
 			else
 				KFLog.Warning(string.Format("Could not find object named \"{0}\" to destroy.", objectName)); 

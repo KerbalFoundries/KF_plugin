@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Control module for the Auxilary Power Unit.</summary>
 	[KSPModule("APUController")]
 	class APUController : PartModule
 	{

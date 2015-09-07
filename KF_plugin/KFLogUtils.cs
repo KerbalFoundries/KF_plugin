@@ -15,7 +15,7 @@ using KerbalFoundries.Log;
 
 namespace KerbalFoundries
 {
-	/// <summary>A utility class for handling log calls.</summary>
+	/// <summary>A utility class for handling log calls for KF.</summary>
 	public class KFLogUtil
 	{
 		// disable MemberCanBeMadeStatic.Local

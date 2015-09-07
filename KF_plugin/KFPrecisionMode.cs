@@ -2,6 +2,7 @@
 
 namespace KerbalFoundries
 {
+	/// <summary>Control module for a "precision mode" which basically multiplies the smoothSpeed parameter and the resourceConsumptionRate parameter by a specified factor.</summary>
 	[KSPModule("KFPrecisionMode")]
 	public class KFPrecisionMode : PartModule
 	{

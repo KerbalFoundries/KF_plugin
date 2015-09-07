@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	/// <summary>Control module for the steering and driving force behind the wheel.</summary>
     public class KFModuleWheel : PartModule
     {
         // disable UnusedParameter
@@ -230,14 +231,18 @@ namespace KerbalFoundries
 			
             if (!string.Equals(orientationObjectName, "Default"))
             {
-                KFLog.Warning("Transformed part orientation.");
+            	#if DEBUG
+                KFLog.Warning("Setting transformed part orientation.");
+				#endif
                 partOrientationUp = transform.Search(orientationObjectName).up;
                 partOrientationForward = transform.Search(orientationObjectName).forward;
                 partOrientationRight = transform.Search(orientationObjectName).right;
             }
             else
             {
-                KFLog.Warning("Default part orientation.");
+            	#if DEBUG
+                KFLog.Warning("Setting default part orientation.");
+				#endif
                 partOrientationUp = this.part.transform.up;
                 partOrientationForward = this.part.transform.forward;
                 partOrientationRight = this.part.transform.right;
@@ -262,18 +267,24 @@ namespace KerbalFoundries
                 KFLog.Warning("Disabling tweakables.");
                 foreach (BaseField k in this.Fields)
                 {
+                	#if DEBUG
 					KFLog.Log(string.Format("Found {0}", k.guiName));
+					#endif
                     k.guiActive = false;
                     k.guiActiveEditor = false;
                 }
                 foreach (BaseAction a in this.Actions)
                 {
+                	#if DEBUG
 					KFLog.Log(string.Format("Found {0}", a.guiName));
+					#endif
                     a.active = false;
                 }
                 foreach (BaseEvent e in this.Events)
                 {
+                	#if DEBUG
 					KFLog.Log(string.Format("Found {0}", e.guiName));
+					#endif
                     e.active = false;
                 }
             }
@@ -365,8 +376,10 @@ namespace KerbalFoundries
         {
             yield return new WaitForFixedUpdate();
             lastPartCount = this.vessel.Parts.Count();
+            #if DEBUG
 			KFLog.Log(string.Format("Part Count: {0}", lastPartCount));
             KFLog.Log("Checking vessel mass.");
+            #endif
             _colliderMass = ChangeColliderMass();
         }
 
