@@ -4,6 +4,7 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	// disable ConvertToStaticType
+	
 	/// <summary>Loads, contains, and saves global configuration nodes.</summary>
 	/// <remarks>Brain-Child of *Aqua* and without which we would never have created a working GUI config system.</remarks>
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
@@ -24,6 +25,7 @@ namespace KerbalFoundries
 		
 		#endregion Log
 		
+		#region Initialization
 		/// <summary>Makes sure the global configuration is good to go.</summary>
 		/// <remarks>This is a static constructor. It's called once when the class is loaded by Mono.</remarks>
 		static KFPersistenceManager()
@@ -34,6 +36,8 @@ namespace KerbalFoundries
 			ReadConfigFile();
             ReadDustColor();
 		}
+		
+		#endregion Initialization
 		
 		#region Read & write
 		/// <summary>Retrieves the settings which are stored in the configuration file and are auto-loaded by KSP.</summary>
@@ -95,6 +99,14 @@ namespace KerbalFoundries
 			string _logfile = configNode.GetValue("logFile");
 			logFile = Equals(_logfile, string.Empty) || Equals(_logfile, null) ? "KF.log" : _logfile;
 			
+			int _cameraRes = 6;
+			if (int.TryParse(configNode.GetValue("cameraRes"), out _cameraRes))
+				cameraRes = _cameraRes;
+			
+			int _cameraFraterate = 10;
+			if (int.TryParse(configNode.GetValue("cameraFramerate"), out _cameraFraterate))
+				cameraFramerate = _cameraFraterate;
+			
 			LogConfigValues();
         }
 
@@ -109,11 +121,11 @@ namespace KerbalFoundries
 			KFLog.Log(string.Format("  suspensionIncrement = {0}", suspensionIncrement));
 			KFLog.Log(string.Format("  isDebugEnabled = {0}", isDebugEnabled));
 			if (isDebugEnabled)
-			{
 				KFLog.Log(string.Format("    debugIsWaterColliderVisible = {0}", debugIsWaterColliderVisible));
-			}
 			KFLog.Log(string.Format("  writeToLogFile = {0}", writeToLogFile));
 			KFLog.Log(string.Format("  logFile = {0}", logFile));
+			KFLog.Log(string.Format("  cameraRes = {0}", cameraRes));
+			KFLog.Log(string.Format("  cameraFramerate = {0}", cameraFramerate));
 		}
 		
         /// <summary>Retrieves the dust colors which are stored in the DustColors-file and are auto-loaded by KSP.</summary>
@@ -177,16 +189,18 @@ namespace KerbalFoundries
             configFile.AddNode("KFGlobals");
             ConfigNode configNode = configFile.GetNode("KFGlobals");
             
-			configNode.SetValue("isDustEnabled", string.Format("{0}", isDustEnabled), true);
-			configNode.SetValue("isDustCameraEnabled", string.Format("{0}", isDustCameraEnabled), true);
-			configNode.SetValue("isMarkerEnabled", string.Format("{0}", isMarkerEnabled), true);
-			configNode.SetValue("isRepLightEnabled", string.Format("{0}", isRepLightEnabled), true);
-			configNode.SetValue("dustAmount", string.Format("{0}", Mathf.Clamp(Extensions.RoundToNearestValue(dustAmount, 0.25f), 0f, 3f)), true);
-			configNode.SetValue("suspensionIncrement", string.Format("{0}", Mathf.Clamp(Extensions.RoundToNearestValue(suspensionIncrement, 5f), 5f, 20f)), true);
-			configNode.SetValue("isDebugEnabled", string.Format("{0}", isDebugEnabled), true);
-			configNode.SetValue("debugIsWaterColliderVisible", string.Format("{0}", debugIsWaterColliderVisible), true);
+			configNode.SetValue("isDustEnabled", isDustEnabled.ToString(), true);
+			configNode.SetValue("isDustCameraEnabled", isDustCameraEnabled.ToString(), true);
+			configNode.SetValue("isMarkerEnabled", isMarkerEnabled.ToString(), true);
+			configNode.SetValue("isRepLightEnabled", isRepLightEnabled.ToString(), true);
+			configNode.SetValue("dustAmount", Mathf.Clamp(Extensions.RoundToNearestValue(dustAmount, 0.25f), 0f, 3f).ToString(), true);
+			configNode.SetValue("suspensionIncrement", Mathf.Clamp(Extensions.RoundToNearestValue(suspensionIncrement, 5f), 5f, 20f).ToString(), true);
+			configNode.SetValue("isDebugEnabled", isDebugEnabled.ToString(), true);
+			configNode.SetValue("debugIsWaterColliderVisible", debugIsWaterColliderVisible.ToString(), true);
 			configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
 			configNode.SetValue("logFile", logFile, true);
+			configNode.SetValue("cameraRes", cameraRes.ToString(), true);
+			configNode.SetValue("cameraFramerate", cameraFramerate.ToString(), true);
 			
 			configFile.Save(configFileName);
 
@@ -210,6 +224,9 @@ namespace KerbalFoundries
             
 			writeToLogFile = false;
             logFile = "KF.log";
+            
+			cameraRes = 6;
+			cameraFramerate = 10;
 			
 			KFLog.Log("Default Config Created.");
             SaveConfig();
@@ -283,6 +300,20 @@ namespace KerbalFoundries
 
 		/// <summary>Path of the log file</summary>
 		public static string logFile
+		{
+			get;
+			set;
+		}
+		
+		/// <summary>Resolution for the camera in ModuleCameraShot.</summary>
+		public static int cameraRes
+		{
+			get;
+			set;
+		}
+		
+		/// <summary>Framerate for the camera is ModuleCameraShot.</summary>
+		public static int cameraFramerate
 		{
 			get;
 			set;

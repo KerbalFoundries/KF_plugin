@@ -273,7 +273,7 @@ namespace KerbalFoundries
 			bool cameraEnabled = KFPersistenceManager.isDustCameraEnabled;
 			colorWater = new Color(0.65f, 0.65f, 0.65f, 0.025f);
 			
-			if (Equals(sizeFactor, 0) || sizeFactor < 0)
+			if (Equals(sizeFactor, 0f) || sizeFactor < 0f)
 				sizeFactor = 1f;
 			
 			colorBiome = KFDustFXUtils.GetDustColor(vessel.mainBody, col, vessel.latitude, vessel.longitude);
@@ -281,14 +281,16 @@ namespace KerbalFoundries
 			cameraEnabled |= Equals(colorBiome, null);
 			Color colorTemp = Color.black;
 			
-			if (cameraEnabled)
+			if (isColorOverrideActive)
+				colorTemp = colorWater;
+			else if (!cameraEnabled)
+				colorTemp = colorBiome;
+			else
 			{
 				colorCam = _ModuleCameraShot._averageColour;
-				colorTemp = (colorCam / 2) + (colorBiome / 2); // Make the camera colour dominant.
+				colorTemp = (colorCam / 2f) + (colorBiome / 4f); // Make the camera colour dominant.
 				colorTemp.a = colorBiome.a;
 			}
-			else
-				colorTemp = colorBiome;
 			
 			colorFIFO.Enqueue(colorTemp);
 
@@ -297,10 +299,10 @@ namespace KerbalFoundries
 			
 			Color[] colorArray = colorFIFO.ToArray();
 			
-			float r = 0;
-			float g = 0;
-			float b = 0;
-			float a = 0;
+			float r = 0f;
+			float g = 0f;
+			float b = 0f;
+			float a = 0f;
 			
 			for (int i = 0; i < colorArray.Count(); i++)
 			{
@@ -310,10 +312,7 @@ namespace KerbalFoundries
 				a += colorArray[i].a;
 			}
 			
-			colorAverage = new Color(r / 100, g / 100, b / 100, a / 50);
-			
-			if (isColorOverrideActive)
-				colorAverage = colorWater;
+			colorAverage = new Color(r / 100f, g / 100f, b / 100f, a / 50f);
 			
 			if (speed >= minScrapeSpeed)
 			{

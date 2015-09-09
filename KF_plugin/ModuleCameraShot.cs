@@ -53,7 +53,6 @@ namespace KerbalFoundries
 				KFLog.Warning("Starting camera");
 				
 				_cameraObject = new GameObject("ColourCam");
-				
 				_cameraObject.transform.parent = _vessel.transform;
 				_cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
 				_cameraObject.transform.Translate(new Vector3(0, 0, -10));
@@ -70,6 +69,13 @@ namespace KerbalFoundries
 				dustCamEnabled = KFPersistenceManager.isDustCameraEnabled;
 				isReady = true;
 			}
+			if (!Equals(KFPersistenceManager.cameraRes, null))
+			{
+				resWidth = KFPersistenceManager.cameraRes;
+				resHeight = KFPersistenceManager.cameraRes;
+			}
+			if (!Equals(KFPersistenceManager.cameraFramerate, null))
+				frameThreshHold = KFPersistenceManager.cameraFramerate;
 		}
 		
 		public void Update()

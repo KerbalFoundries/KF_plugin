@@ -17,10 +17,11 @@ namespace KerbalFoundries
 		[KSPField]
 		public float ResourceConsumptionMult = 2f;
 		
+		// Following not suitable for configs.
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Precision")]
         public string status = "Off";
         
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Smooth Speed", guiFormat = "F1")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Smooth Speed", guiFormat = "F1")]
 		public float currentSmoothSpeed;
 		
 		float originalSmoothSpeed;
@@ -40,7 +41,7 @@ namespace KerbalFoundries
 		/// <summary>This is the info string that will display when the part info is shown.</summary>
 		/// <remarks>This can be overridden in the config for this module in the part file.</remarks>
 		[KSPField]
-		public string strPartInfo = "This part comes with a precision control mode which can be activated via an action group.  This enabled quicker turning speed for a greater resource consumption rate.";
+		public string strPartInfo = "This part comes with a precision control mode which can be activated via an action group.  This enables quicker turning speed for a greater resource consumption rate.";
 		public override string GetInfo()
 		{
 			return strPartInfo;
