@@ -27,28 +27,33 @@ namespace KerbalFoundries
 		[KSPField]
 		public bool hasSuspension = true;
 		[KSPField]
-		public float smoothSpeed = 40; // Odd, I found that this isn't being referenced anywhere.
-		[KSPField]
 		public float rotationCorrection = 1;
 		[KSPField]
 		public bool trackedWheel = true;
-		//default to tracked type (average of all colliders in contact with floor). This is OK for wheels, and will only need to be changed for multi wheeled parts that are not tracks.
-		//wheel rotation axis
+		
+		/// <summary>Wheel rotation X axis.</summary>
 		[KSPField]
 		public float wheelRotationX = 1;
+		
+		/// <summary>Wheel rotation Y axis.</summary>
 		[KSPField]
 		public float wheelRotationY;
+		
+		/// <summary>Wheel rotation Z axis.</summary>
 		[KSPField]
 		public float wheelRotationZ;
-		//suspension traverse axis
+		/// <summary>Suspension traverse axis.</summary>
 		[KSPField]
 		public string susTravAxis = "Y";
+		
+		/// <summary>Steering axis.</summary>
 		[KSPField]
 		public string steeringAxis = "Y";
+		
 		[KSPField(isPersistant = true)]
 		public float lastFrameTraverse;
 
-		//persistent fields. Not to be used for config
+		// Persistent fields. Not to be used for config
 		[KSPField(isPersistant = true)]
 		public float suspensionDistance;
 		[KSPField(isPersistant = true)]
@@ -57,17 +62,15 @@ namespace KerbalFoundries
 		public float suspensionDamper;
 		[KSPField(isPersistant = true)]
 		public bool isConfigured;
-        
-        float tweakScaleCorrector = 1;
 
-		//object types
+		// Object types
 		WheelCollider _wheelCollider;
 		Transform _susTrav;
 		Transform _wheel;
 		Transform _trackSteering;
 		KFModuleWheel _KFModuleWheel;
 
-		//gloabl variables
+		// Gloabl variables
 		Vector3 initialPosition;
 		Vector3 initialSteeringAngles;
 		Vector3 _wheelRotation;
@@ -78,6 +81,9 @@ namespace KerbalFoundries
         
 		float degreesPerTick;
 		bool couroutinesActive;
+		
+		/// <summary>Local reference for the tweakScaleCorrector parameter in KFModuleWheel.</summary>
+		public float tweakScaleCorrector;
 
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
@@ -97,25 +103,22 @@ namespace KerbalFoundries
 					{
 						_wheelCollider = wc;
 						suspensionDistance = wc.suspensionDistance;
-						//KFLog.Error(string.Format("SuspensionDistance is: {0}.", suspensionDistance));
+						
+						#if DEBUG
+						KFLog.Log(string.Format("SuspensionDistance is: {0}.", suspensionDistance));
+						#endif
+						
 						isConfigured = true;
 					}
 				}
 			}
-			// disable once RedundantIfElseBlock
-			else
-			{
-				//KFLog.Error("Already configured - skipping.");
-			}
-			
-			// Removed unnecessary if/else check for the editor scenes.  Nothing was being done within the check.
 
 			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris) && vessel.parts.Count > 1)
 			{
 				GameEvents.onGamePause.Add(new EventVoid.OnEvent(OnPause));
 				GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(OnUnPause));
 				
-				//find named onjects in part
+				// Find named onjects in part.
 				foreach (WheelCollider wc in part.GetComponentsInChildren<WheelCollider>())
 				{
 					if (wc.name.StartsWith(colliderName, StringComparison.Ordinal))
@@ -131,23 +134,21 @@ namespace KerbalFoundries
 					if (tr.name.StartsWith(sustravName, StringComparison.Ordinal))
 						_susTrav = tr;
 				}
-				//end find named objects
 
 				initialPosition = _susTrav.localPosition;
-				susTravIndex = Extensions.SetAxisIndex(susTravAxis);
-				steeringIndex = Extensions.SetAxisIndex(steeringAxis); 
+				susTravIndex = KFExtensions.SetAxisIndex(susTravAxis);
+				steeringIndex = KFExtensions.SetAxisIndex(steeringAxis); 
 
 				if (_KFModuleWheel.hasSteering)
 				{
 					initialSteeringAngles = _trackSteering.transform.localEulerAngles;
+					
 					#if DEBUG
 					KFLog.Log(string.Format("initial steering angles are \"{0}\"", initialSteeringAngles));
 					#endif
 				}
 
-				// Again, if/else can be made into a single line. - Gaalidas
 				directionCorrector = useDirectionCorrector ? _KFModuleWheel.directionCorrector : 1;
-
 				_wheelRotation = new Vector3(wheelRotationX, wheelRotationY, wheelRotationZ);
 
 				if (Equals(lastFrameTraverse, 0)) //check to see if we have a value in persistance
@@ -155,11 +156,13 @@ namespace KerbalFoundries
 					#if DEBUG
 					KFLog.Log("Last frame = 0. Setting suspension distance.");
 					#endif
+					
 					lastFrameTraverse = _wheelCollider.suspensionDistance;
 				}
 				#if DEBUG
 				KFLog.Log(string.Format("Last frame = {0}", lastFrameTraverse));
 				#endif
+				
 				couroutinesActive = true;
 
 				MoveSuspension(susTravIndex, -lastFrameTraverse, _susTrav); //to get the initial stuff correct
@@ -167,6 +170,7 @@ namespace KerbalFoundries
 				if (_KFModuleWheel.hasSteering)
 				{
 					StartCoroutine("Steering");
+					
 					#if DEBUG
 					KFLog.Log("Starting steering coroutine.");
 					#endif
@@ -176,19 +180,16 @@ namespace KerbalFoundries
 				else
 					StartCoroutine("IndividualWheel");
 
-                if (hasSuspension)
-                {
-                    KFLog.Warning("KFWheel suspension module is deprecated. Please use KFSuspension.");
-                    StartCoroutine("Suspension");
-                }
-				
+				if (hasSuspension)
+				{
+					KFLog.Warning("KFWheel suspension module is deprecated. Please use KFSuspension.");
+					StartCoroutine("Suspension");
+				}
 				part.force_activate();
-			}//end flight
+			}
 			base.OnStart(state);
 		}
-		//end OnStart
 		
-		//OnUpdate
 		// disable FunctionNeverReturns
 		IEnumerator Steering() //Coroutine for steering
 		{
@@ -223,69 +224,49 @@ namespace KerbalFoundries
 		}
 
 		/// <summary>Coroutine for wheels with suspension.</summary>
-        /// <remarks>DEPRECATED!!!!!!!!!!!!!! Use KFSuspension instead!</remarks>
+		/// <remarks>DEPRECATED!!!!!!!!!!!!!! Use KFSuspension instead!</remarks>
 		IEnumerator Suspension()
 		{
 			while (true)
 			{
-				
-				//suspension movement
-				WheelHit hit; //set this up to grab sollider raycast info
+				// Suspension movement
+				WheelHit hit;
 				float frameTraverse = 0;
-				bool grounded = _wheelCollider.GetGroundHit(out hit); //set up to pass out wheelhit coordinates
-				//float tempLastFrameTraverse = lastFrameTraverse; //we need the value, but will over-write shortly. Store it here.
-				if (grounded) //is it on the ground
+				bool grounded = _wheelCollider.GetGroundHit(out hit);
+				if (grounded)
 				{
-					frameTraverse = -_wheelCollider.transform.InverseTransformPoint(hit.point).y + _KFModuleWheel.raycastError - _wheelCollider.radius; //calculate suspension travel using the collider raycast.
+					frameTraverse = -_wheelCollider.transform.InverseTransformPoint(hit.point).y + _KFModuleWheel.raycastError - _wheelCollider.radius;
                     
-					if (frameTraverse > (_wheelCollider.suspensionDistance + _KFModuleWheel.raycastError)) //the raycast sometimes goes further than its max value. Catch and stop the mesh moving further
+					if (frameTraverse > (_wheelCollider.suspensionDistance + _KFModuleWheel.raycastError))
                         frameTraverse = _wheelCollider.suspensionDistance;
-					else if (frameTraverse < -0.1) //the raycast can be negative (!); catch this too
+					else if (frameTraverse < -0.1)
                         frameTraverse = 0;
 					
 					lastFrameTraverse = frameTraverse;
 				}
 				else
-					frameTraverse = lastFrameTraverse; //movement defaults back to last position when the collider is not grounded. Ungrounded collider returns suspension travel of zero!
+					frameTraverse = lastFrameTraverse;
 				
-				susTravel = frameTraverse; //debug only
-				_susTrav.localPosition = initialPosition; //use the 
+				susTravel = frameTraverse;
+				_susTrav.localPosition = initialPosition;
 				MoveSuspension(susTravIndex, -frameTraverse, _susTrav);
-				//end suspension movement
 				yield return null; 
 			}
 		}
 
 		public void OnPause()
 		{
-			couroutinesActive = false; // This will drop couroutines checking it out. StopCoroutine() will stop all instances, which is NOT good.
+			couroutinesActive = false;
 		}
 
 		public void OnUnPause()
 		{
-			//KFLog.Warning("unpaused");
 			couroutinesActive = true;
-			try
-			{
-				if (trackedWheel)
-					StartCoroutine("TrackedWheel");
-				else
-					StartCoroutine("IndividualWheel");
-			}
-			// disable once EmptyGeneralCatchClause
-            catch
-			{
-			}
+			if (trackedWheel)
+				StartCoroutine("TrackedWheel");
+			else
+				StartCoroutine("IndividualWheel");
 		}
-
-		// Completely unnecessary override!
-		/*public override void OnFixedUpdate()
-		 *{
-		 *	base.OnFixedUpdate();
-		 *	//not a lot in here since I moved it all into coroutines.
-		 *}
-		 * //end OnFixedUpdate
-		 */
 
 		public void MoveSuspension(int index, float movement, Transform movedObject) //susTrav Axis, amount to move, named object.
 		{
@@ -294,6 +275,4 @@ namespace KerbalFoundries
 			movedObject.transform.Translate(tempVector, Space.Self);
 		}
 	}
-	//end modele
 }
-//end class

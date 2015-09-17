@@ -17,7 +17,7 @@ namespace KerbalFoundries
 			if (!Equals(FlightGlobals.ActiveVessel, null) && IsColliding(col))
 			{
 				Dictionary<string, Color> biomeColors = KFPersistenceManager.DustColors[body.name];
-				if (biomeColors.Count > 0)// do we have biome color definitions for that body?
+				if (biomeColors.Count > 0)// Do we have biome color definitions for that body?
 				{
 					string biomeName = GetCurrentBiomeName(lat, lon);
 					// get biome name

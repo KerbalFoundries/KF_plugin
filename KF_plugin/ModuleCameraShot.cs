@@ -57,10 +57,8 @@ namespace KerbalFoundries
 				_cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
 				_cameraObject.transform.Translate(new Vector3(0, 0, -10));
 				_camera = _cameraObject.AddComponent<Camera>();
-                _camera.targetTexture = renderTexture;
-				cameraMask = 32784;	// Layers 4 and 15, or water and local scenery.
-									// Generated from the binary place value output of 4 and 15 added to each other.
-									// (1 << 4) | (1 << 15) = (16) | (32768) = 32784
+				_camera.targetTexture = renderTexture;
+				cameraMask = 32784;
 				_camera.cullingMask = cameraMask;
 				
 				_camera.enabled = false;
@@ -87,23 +85,21 @@ namespace KerbalFoundries
 
 				_cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
 				_camera.targetTexture = renderTexture;
-				//Extensions.DebugLine(_cameraObject.transform.position, _cameraObject.transform.eulerAngles);
 				_camera.enabled = true;
                 
 				_camera.Render();
-				//KFLog.Warning("Rendered something...");
 				RenderTexture.active = renderTexture;
 				groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
 				_camera.targetTexture = null;
 				_camera.enabled = false;
-				RenderTexture.active = null; // JC: added to avoid errors
+				RenderTexture.active = null;
 
 				Color[] texColors = groundShot.GetPixels();
 				int total = texColors.Length;
 
-                float r = texColors[0].r;
-                float g = texColors[0].g;
-                float b = texColors[0].b;
+				float r = texColors[0].r;
+				float g = texColors[0].g;
+				float b = texColors[0].b;
 				float alpha = 0.014f;
 
 				for (int i = 0; i < total; i++)
@@ -112,9 +108,7 @@ namespace KerbalFoundries
 					g += texColors[i].g;
 					b += texColors[i].b;
 				}
-				//KFLog.Log(string.Format("Color: {0}r {1}g {2}b ", r, g, b));
 				_averageColour = new Color(r / total, g / total, b / total, alpha);
-				//KFLog.Log(string.Format("Variable \"_averageColour\" = \"{0}.\"", _averageColour));
 			}
 			frameCount++;
 		}

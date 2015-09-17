@@ -20,8 +20,7 @@ namespace KerbalFoundries
 	{
 		// disable MemberCanBeMadeStatic.Local
 		
-		enum LogType
-		{
+		enum LogType {
 			Log,
 			Warning,
 			Error,
@@ -29,12 +28,12 @@ namespace KerbalFoundries
 		}
 
 		public static string strModName = "KF";
-		// disable RedundantDefaultFieldInitializer
-		static KFLog KFLog = null; // In this case, the object complains about not being initialized, so I leave the redundant "null" intact.
+		// disable once RedundantDefaultFieldInitializer
+		static KFLog KFLog = null;
 
 		string strObjName = string.Empty;
 
-		/// <summary>Creates an instance of KFLogUtil.</summary>
+		/// <summary>Creates an instance of KFLogUtil without an object definition.</summary>
 		public KFLogUtil()
 		{
 			// Empty, and proud of it!
@@ -221,6 +220,7 @@ namespace KerbalFoundries
 			return obj.GetType().ToString();
 		}
 		
+		// disable once UnusedParameter
 		static void PrintDebugLog(string input)
 		{
 			#if DEBUG

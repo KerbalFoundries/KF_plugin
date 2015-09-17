@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace KerbalFoundries
 {
+	// SharpDevelop Suppressions.
 	// disable ConvertToStaticType
 	
 	/// <summary>Loads, contains, and saves global configuration nodes.</summary>
@@ -10,31 +11,38 @@ namespace KerbalFoundries
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
 	public class KFPersistenceManager : MonoBehaviour
 	{
-		#region Log
+		#region Log Parameters
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
 		static KFLogUtil KFLog;
-
-        /// <summary>Path\KFGlobals.txt</summary>
-        static string configFileName;
-
-        /// <summary>Path\DustColors.cfg</summary>
-        static string dustColorsFileName;
-        
-		static string strClassName = "KFPersistenceManager"; // Moved to the outer scope so I can manipulate it later.
 		
-		#endregion Log
+		/// <summary>A KFLog definition for an initial log entry.</summary>
+		static KFLogUtil KFLogInit;
+
+		/// <summary>Path\Settings\KFGlobals.txt</summary>
+		static string configFileName = string.Format("{0}GameData/KerbalFoundries/Settings/KFGlobals.txt", KSPUtil.ApplicationRootPath);
+
+		/// <summary>Path\Settings\DustColors.cfg</summary>
+		static string dustColorsFileName = string.Format("{0}GameData/KerbalFoundries/Settings/DustColors.cfg", KSPUtil.ApplicationRootPath);
+        
+		/// <summary>Log related.  Moved to the outer scope so I can manipulate it later.</summary>
+		static string strClassName = "KFPersistenceManager";
+		
+		#endregion Log Parameters
 		
 		#region Initialization
 		/// <summary>Makes sure the global configuration is good to go.</summary>
 		/// <remarks>This is a static constructor. It's called once when the class is loaded by Mono.</remarks>
 		static KFPersistenceManager()
 		{
-            writeToLogFile = false; // This makes sure that the logging thread can't start before all of the configuration is read or bad things will happen
-            KFLog = new KFLogUtil(strClassName);
+			writeToLogFile = false; // This makes sure that the logging thread can't start before all of the configuration is read or bad things will happen
+			KFLog = new KFLogUtil(strClassName);
+			KFLogInit = new KFLogUtil();
+            
+			KFLogInit.Log(string.Format("Version: {0}", Version.versionString));
 
 			ReadConfigFile();
-            ReadDustColor();
+			ReadDustColor();
 		}
 		
 		#endregion Initialization
@@ -43,22 +51,20 @@ namespace KerbalFoundries
 		/// <summary>Retrieves the settings which are stored in the configuration file and are auto-loaded by KSP.</summary>
 		static void ReadConfigFile()
 		{
-			// KFGlobals.cfg
-            configFileName = string.Format("{0}GameData/KerbalFoundries/KFGlobals.txt", KSPUtil.ApplicationRootPath);
+			// KFGlobals.txt
+			ConfigNode configFile = ConfigNode.Load(configFileName);
+			if (Equals(configFile, null) || !configFile.HasNode("KFGlobals")) // KFGlobals-node doesn't exist
+			{
+				CreateConfig();
+				configFile = ConfigNode.Load(configFileName);
+			}
 
-            ConfigNode configFile = ConfigNode.Load(configFileName);
-            if (Equals(configFile, null) || !configFile.HasNode("KFGlobals")) // KFGlobals-node doesn't exist
-            {
-                CreateConfig();
-                configFile = ConfigNode.Load(configFileName);
-            }
-
-            ConfigNode configNode = configFile.GetNode("KFGlobals");
-            if (Equals(configNode, null) || Equals(configNode.CountValues, 0)) // KFGlobals-node is empty
-            {
-                CreateConfig();
-                configNode = configFile.GetNode("KFGlobals");
-            }
+			ConfigNode configNode = configFile.GetNode("KFGlobals");
+			if (Equals(configNode, null) || Equals(configNode.CountValues, 0)) // KFGlobals-node is empty
+			{
+				CreateConfig();
+				configNode = configFile.GetNode("KFGlobals");
+			}
 
 			bool _isDustEnabled = false;
 			if (bool.TryParse(configNode.GetValue("isDustEnabled"), out _isDustEnabled))
@@ -76,9 +82,9 @@ namespace KerbalFoundries
 			if (bool.TryParse(configNode.GetValue("isRepLightEnabled"), out _isRepLightEnabled))
 				isRepLightEnabled = _isRepLightEnabled;
 
-            float _dustAmount = 1;
-            if (float.TryParse(configNode.GetValue("dustAmount"), out _dustAmount))
-                dustAmount = _dustAmount;
+			float _dustAmount = 1;
+			if (float.TryParse(configNode.GetValue("dustAmount"), out _dustAmount))
+				dustAmount = _dustAmount;
             
 			float _suspensionIncrement = 5;
 			if (float.TryParse(configNode.GetValue("suspensionIncrement"), out _suspensionIncrement))
@@ -108,7 +114,7 @@ namespace KerbalFoundries
 				cameraFramerate = _cameraFraterate;
 			
 			LogConfigValues();
-        }
+		}
 
 		static void LogConfigValues()
 		{
@@ -128,26 +134,26 @@ namespace KerbalFoundries
 			KFLog.Log(string.Format("  cameraFramerate = {0}", cameraFramerate));
 		}
 		
-        /// <summary>Retrieves the dust colors which are stored in the DustColors-file and are auto-loaded by KSP.</summary>
-        static void ReadDustColor()
-        {
+		/// <summary>Retrieves the dust colors which are stored in the DustColors-file and are auto-loaded by KSP.</summary>
+		static void ReadDustColor()
+		{
 			// DustColors.cfg
-            dustColorsFileName = string.Format("{0}GameData/KerbalFoundries/DustColors.cfg", KSPUtil.ApplicationRootPath);
-            DustColors = new Dictionary<string, Dictionary<string, Color>>();
+			//dustColorsFileName = string.Format("{0}GameData/KerbalFoundries/DustColors.cfg", KSPUtil.ApplicationRootPath);
+			DustColors = new Dictionary<string, Dictionary<string, Color>>();
             
 			ConfigNode configFile = ConfigNode.Load(dustColorsFileName);
-            if (Equals(configFile, null) || !configFile.HasNode("DustColorDefinitions"))  // DustColorDefinitions node doesn't exist.
-            {
-                KFLog.Warning("DustColors.cfg is missing or damaged!");
-                return;
-            }
+			if (Equals(configFile, null) || !configFile.HasNode("DustColorDefinitions"))  // DustColorDefinitions node doesn't exist.
+			{
+				KFLog.Warning("DustColors.cfg is missing or damaged!");
+				return;
+			}
 			
-            ConfigNode configNode = configFile.GetNode("DustColorDefinitions");
-            if (Equals(configNode, null) || Equals(configNode.CountNodes, 0)) // DustColorDefinitions node is empty.
-            {
-                KFLog.Warning("Dust color definitions not found or damaged!");
-                return;
-            }
+			ConfigNode configNode = configFile.GetNode("DustColorDefinitions");
+			if (Equals(configNode, null) || Equals(configNode.CountNodes, 0)) // DustColorDefinitions node is empty.
+			{
+				KFLog.Warning("Dust color definitions not found or damaged!");
+				return;
+			}
 			
 			foreach (ConfigNode celestialNode in configNode.GetNodes()) // For each celestial body do this:
 			{
@@ -177,24 +183,22 @@ namespace KerbalFoundries
 		internal static void SaveConfig()
 		{
 			// KFGlobals.cfg
-            System.IO.File.Delete(configFileName);
+			System.IO.File.Delete(configFileName);
             
-            // Sync debug state with debug options.
-            if (!isDebugEnabled && debugIsWaterColliderVisible)
-            {
+			// Sync debug state with debug options.
+			if (!isDebugEnabled && debugIsWaterColliderVisible)
 				debugIsWaterColliderVisible = false;
-            }
             
 			var configFile = new ConfigNode();
-            configFile.AddNode("KFGlobals");
-            ConfigNode configNode = configFile.GetNode("KFGlobals");
+			configFile.AddNode("KFGlobals");
+			ConfigNode configNode = configFile.GetNode("KFGlobals");
             
 			configNode.SetValue("isDustEnabled", isDustEnabled.ToString(), true);
 			configNode.SetValue("isDustCameraEnabled", isDustCameraEnabled.ToString(), true);
 			configNode.SetValue("isMarkerEnabled", isMarkerEnabled.ToString(), true);
 			configNode.SetValue("isRepLightEnabled", isRepLightEnabled.ToString(), true);
-			configNode.SetValue("dustAmount", Mathf.Clamp(Extensions.RoundToNearestValue(dustAmount, 0.25f), 0f, 3f).ToString(), true);
-			configNode.SetValue("suspensionIncrement", Mathf.Clamp(Extensions.RoundToNearestValue(suspensionIncrement, 5f), 5f, 20f).ToString(), true);
+			configNode.SetValue("dustAmount", Mathf.Clamp(KFExtensions.RoundToNearestValue(dustAmount, 0.25f), 0f, 3f).ToString(), true);
+			configNode.SetValue("suspensionIncrement", Mathf.Clamp(KFExtensions.RoundToNearestValue(suspensionIncrement, 5f), 5f, 20f).ToString(), true);
 			configNode.SetValue("isDebugEnabled", isDebugEnabled.ToString(), true);
 			configNode.SetValue("debugIsWaterColliderVisible", debugIsWaterColliderVisible.ToString(), true);
 			configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
@@ -208,32 +212,32 @@ namespace KerbalFoundries
 			LogConfigValues();
 		}
 
-        /// <summary>Creates configuration file with default values.</summary>
-        static void CreateConfig()
-        {
-            isDustEnabled = true;
-            isDustCameraEnabled = true;
-            isMarkerEnabled = true;
+		/// <summary>Creates configuration file with default values.</summary>
+		static void CreateConfig()
+		{
+			isDustEnabled = true;
+			isDustCameraEnabled = true;
+			isMarkerEnabled = true;
 			isRepLightEnabled = true;
 			
-            dustAmount = 1f;
+			dustAmount = 1f;
 			suspensionIncrement = 5f;
 			
 			isDebugEnabled = false;
 			debugIsWaterColliderVisible = false;
             
 			writeToLogFile = false;
-            logFile = "KF.log";
+			logFile = "KF.log";
             
 			cameraRes = 6;
 			cameraFramerate = 10;
 			
 			KFLog.Log("Default Config Created.");
-            SaveConfig();
-        }
-		#endregion
+			SaveConfig();
+		}
+		#endregion Read & write
 		
-		#region Global configuration properties
+		#region Global Config Properties
 		/// <summary>If dust is displayed.</summary>
 		public static bool isDustEnabled
 		{
@@ -263,32 +267,32 @@ namespace KerbalFoundries
 		}
 
 		/// <summary>The amount of dust to be emitted.</summary>
-        public static float dustAmount
-        {
-            get;
-            set;
-        }
+		public static float dustAmount
+		{
+			get;
+			set;
+		}
 
 		/// <summary>The incremental value to change the ride height by when using action groups.</summary>
 		/// <remarks>Should be rounded to the nearest whole number before the setter is called.</remarks>
-        public static float suspensionIncrement
-        {
-            get;
-            set;
-        }
-        
-        /// <summary>Tracks whether or not the debug options should be made visible or not.</summary>
-        public static bool isDebugEnabled
-        {
+		public static float suspensionIncrement
+		{
 			get;
 			set;
-        }
+		}
         
-        public static bool debugIsWaterColliderVisible
-        {
+		/// <summary>Tracks whether or not the debug options should be made visible or not.</summary>
+		public static bool isDebugEnabled
+		{
 			get;
 			set;
-        }
+		}
+        
+		public static bool debugIsWaterColliderVisible
+		{
+			get;
+			set;
+		}
 
 		/// <summary>If all KF log messages should also be written to a log file.</summary>
 		/// <remarks>logFile must be specified in the global config!</remarks>
@@ -318,7 +322,7 @@ namespace KerbalFoundries
 			get;
 			set;
 		}
-		#endregion
+		#endregion Global Config Properties
 
 		#region DustFX
 		/// <summary>Dust colors for each biome.</summary>
@@ -333,8 +337,8 @@ namespace KerbalFoundries
 		public static readonly Color DefaultDustColor = new Color(0.75f, 0.75f, 0.75f, 0.007f);
 		#endregion DustFX
 
-		#region Part sizes fix
-		void OnDestroy() // last possible point before the loading scene switches to main menu
+		#region Part Icon Fix
+		void OnDestroy() // Last possible point before the loading scene switches to the Main Menu scene.
 		{
 			FindKFPartsToFix().ForEach(FixPartIcon);
 		}
@@ -345,12 +349,14 @@ namespace KerbalFoundries
 		{
 			strClassName += ": Icon Fixer";
 			List<AvailablePart> KFPartsList = PartLoader.LoadedPartsList.FindAll(IsAKFPart);
+			
 			#if DEBUG
 			KFLog.Log("\nAll KF Parts:");
 			KFPartsList.ForEach(part => KFLog.Log(string.Format("  {0}", part.name)));
 			#endif
 
 			List<AvailablePart> KFPartsToFixList = KFPartsList.FindAll(HasIconOverrideModule);
+			
 			#if DEBUG
 			KFLog.Log("\nKF Parts which need an icon fix:");
 			KFPartsToFixList.ForEach(part => KFLog.Log(string.Format("  {0}", part.name)));
@@ -380,11 +386,11 @@ namespace KerbalFoundries
 			strClassName += ": Icon Fixer";
 			KFLog.Log(string.Format("Fixing icon of \"{0}\"", partToFix.name));
 
-			// preparations
+			// Preparations
 			GameObject partToFixIconPrefab = partToFix.iconPrefab;
 			Bounds bounds = CalculateBounds(partToFixIconPrefab);
 
-			// retrieve icon fixes from cfg and calculate max part size
+			// Retrieve icon fixes from cfg and calculate max part size
 			float max = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
 
 			float multiplier = 1f;
@@ -402,13 +408,13 @@ namespace KerbalFoundries
 			if (HasIconOverrideRotation(partToFix))
 				rotation = KSPUtil.ParseVector3(partToFix.partConfig.GetNode("IconOverride").GetValue("Rotation"));
 
-			// apply icon fixes
+			// Apply icon fixes
 			partToFix.iconScale = max; // affects only the meter scale in the tooltip
             
 			partToFixIconPrefab.transform.GetChild(0).localScale *= factor;
 			partToFixIconPrefab.transform.GetChild(0).Rotate(rotation, Space.Self);
 
-			// after applying the fixes the part could be off-center, correct this now
+			// After applying the fixes the part could be off-center, correct this now
 			if (string.IsNullOrEmpty(pivot))
 			{
 				Transform model = partToFixIconPrefab.transform.GetChild(0).Find("model");
@@ -422,42 +428,24 @@ namespace KerbalFoundries
 			else
 				partToFixIconPrefab.transform.GetChild(0).localPosition = Vector3.zero;
 		}
-
+		
 		/// <summary>Checks if a part velongs to Kerbal Foundries.</summary>
 		/// <param name="part">part to check</param>
 		/// <returns>true if the part's name starts with "KF."</returns>
 		/// <remarks>KSP converts underscores in part names to a dot ("_" -> ".").</remarks>
 		static bool IsAKFPart(AvailablePart part)
 		{
-			//KFLog.Log(part.name +
-			//          "  configFileFullName: " + part.configFileFullName +
-			//          "  partPath: " + part.partPath +
-			//          "  partUrl: " + part.partUrl,
-			//          strClassName);
-			//
-			// example output:
-			// [LOG 15:43:15.760] [Kerbal Foundries - KFPersistenceManager()]: KF.TrackLong  configFileFullName: D:\KerbalFoundries\Kerbal Space Program\GameData\KerbalFoundries\Parts\TrackLong.cfg  partPath:   partUrl: KerbalFoundries/Parts/TrackLong/KF_TrackLong
-			// Yes, partPath is empty for all parts. Deprecated attribute?
-
 			return part.name.StartsWith("KF.", System.StringComparison.Ordinal);
 		}
-
+		
 		/// <summary>Checks if a part has an IconOverride node in it's config.</summary>
 		/// <param name="part">part to check</param>
 		/// <returns>true if an IconOverride node is there</returns>
 		static bool HasIconOverrideModule(AvailablePart part)
 		{
-			//string nodes = string.Empty;
-			//foreach(ConfigNode node in part.partConfig.GetNodes())
-			//    nodes += " " + node.name;
-			//KFLog.Log(part.name + "  nodes:" + nodes, strClassName);
-			//
-			// example output:
-			// [LOG 15:59:08.239] [Kerbal Foundries - KFPersistenceManager()]: KF.TrackLong  nodes: MODEL MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE MODULE EFFECTS IconOverride MODULE
-            
 			return part.partConfig.HasNode("IconOverride");
 		}
-
+		
 		/// <summary>Checks if there's a Multiplier node in IconOverride</summary>
 		/// <param name="part">part to check</param>
 		/// <returns>true if IconOverride->Multiplier exists</returns>
@@ -465,7 +453,7 @@ namespace KerbalFoundries
 		{
 			return part.partConfig.GetNode("IconOverride").HasNode("Multiplier");
 		}
-
+		
 		/// <summary>Checks if there's a Pivot node in IconOverride</summary>
 		/// <param name="part">part to check</param>
 		/// <returns>true if IconOverride->Pivot exists</returns>
@@ -473,7 +461,7 @@ namespace KerbalFoundries
 		{
 			return part.partConfig.GetNode("IconOverride").HasNode("Pivot");
 		}
-
+		
 		/// <summary>Checks if there's a Rotation node in IconOverride</summary>
 		/// <param name="part">part to check</param>
 		/// <returns>true if IconOverride->Rotation exists</returns>
@@ -481,7 +469,7 @@ namespace KerbalFoundries
 		{
 			return part.partConfig.GetNode("IconOverride").HasNode("Rotation");
 		}
-
+		
 		/// <summary>Calculates the bounds of a game object.</summary>
 		/// <param name="partGO">part which bounds have to be calculated</param>
 		/// <returns>bounds</returns>
@@ -490,47 +478,47 @@ namespace KerbalFoundries
 		static Bounds CalculateBounds(GameObject partGO)
 		{
 			var renderers = new List<Renderer>(partGO.GetComponentsInChildren<Renderer>(true));
-
+			
 			if (Equals(renderers.Count, 0))
 				return default(Bounds);
-
+			
 			var boundsList = new List<Bounds>();
-
-			renderers.ForEach(r =>
+			
+			renderers.ForEach(thisRenderer =>
 			{
 				// disable once CanBeReplacedWithTryCastAndCheckForNull
-				if (r is SkinnedMeshRenderer)
+				if (thisRenderer is SkinnedMeshRenderer)
 				{
-					var smr = r as SkinnedMeshRenderer;
-					var mesh = new Mesh();
-					smr.BakeMesh(mesh);
+					var skinnedMeshRenderer = thisRenderer as SkinnedMeshRenderer;
+					var thisMesh = new Mesh();
+					skinnedMeshRenderer.BakeMesh(thisMesh);
+					
+					Matrix4x4 m = Matrix4x4.TRS(skinnedMeshRenderer.transform.position, skinnedMeshRenderer.transform.rotation, Vector3.one);
+					var meshVertices = thisMesh.vertices;
+					var skinnedMeshBounds = new Bounds(m.MultiplyPoint3x4(meshVertices[0]), Vector3.zero);
+					
+					for (int i = 1; i < meshVertices.Length; ++i)
+						skinnedMeshBounds.Encapsulate(m.MultiplyPoint3x4(meshVertices[i]));
 
-					Matrix4x4 m = Matrix4x4.TRS(smr.transform.position, smr.transform.rotation, Vector3.one);
-					var vertices = mesh.vertices;
-					var smrBounds = new Bounds(m.MultiplyPoint3x4(vertices[0]), Vector3.zero);
-
-					for (int i = 1; i < vertices.Length; ++i)
-						smrBounds.Encapsulate(m.MultiplyPoint3x4(vertices[i]));
-
-					Destroy(mesh);
-                    if (r.tag == "Icon_Hidden") //KSP ignores Icon_Hidden tag for Skined Mesh renderers. 
-                        Destroy(r);
-					boundsList.Add(smrBounds);
+					Destroy(thisMesh);
+					if (Equals(thisRenderer.tag, "Icon_Hidden"))
+                        Destroy(thisRenderer);
+					boundsList.Add(skinnedMeshBounds);
 				}
-				else if (r is MeshRenderer)
+				else if (thisRenderer is MeshRenderer)
 				{
-					r.gameObject.GetComponent<MeshFilter>().sharedMesh.RecalculateBounds();
-					boundsList.Add(r.bounds);
+					thisRenderer.gameObject.GetComponent<MeshFilter>().sharedMesh.RecalculateBounds();
+					boundsList.Add(thisRenderer.bounds);
 				}
 			});
 
-			Bounds bounds = boundsList[0];
+			Bounds partBounds = boundsList[0];
 			boundsList.RemoveAt(0);
-            // disable ConvertClosureToMethodGroup
-            boundsList.ForEach(b => bounds.Encapsulate(b)); // Do not change that to boundsList.ForEach(bounds.Encapsulate)!
+			// disable ConvertClosureToMethodGroup
+			boundsList.ForEach(b => partBounds.Encapsulate(b)); // Do not change that to boundsList.ForEach(bounds.Encapsulate)!
 
-			return bounds;
+			return partBounds;
 		}
-		#endregion Part sizes fix
+		#endregion Part Icon Fix
 	}
 }

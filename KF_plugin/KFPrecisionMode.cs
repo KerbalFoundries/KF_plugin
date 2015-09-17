@@ -19,9 +19,9 @@ namespace KerbalFoundries
 		
 		// Following not suitable for configs.
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Precision")]
-        public string status = "Off";
+		public string status = "Off";
         
-        [KSPField(isPersistant = false, guiActive = false, guiName = "Smooth Speed", guiFormat = "F1")]
+		[KSPField(isPersistant = false, guiActive = false, guiName = "Smooth Speed", guiFormat = "F1")]
 		public float currentSmoothSpeed;
 		
 		float originalSmoothSpeed;

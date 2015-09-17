@@ -16,13 +16,17 @@ namespace KerbalFoundries
 		[KSPField]
 		public bool activeEditor;
 
+		/// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("KFLookAt");
+		
 		readonly List<Transform> rotators = new List<Transform>();
 		readonly List<Transform> targets = new List<Transform>();
 
 		string[] rotatorList;
 		string[] targetList;
 
-		int objectCount = 0;
+		int objectCount;
 
 		bool countAgrees;
 
@@ -39,18 +43,27 @@ namespace KerbalFoundries
 
 		public void SetupObjects()
 		{
-			//print("setup objects");
+			#if DEBUG
+			KFLog.Log("Setting up objects.");
+			#endif
+			
 			rotators.Clear();
 			targets.Clear();
 			for (int i = 0; i < rotatorList.Count(); i++)
 			{
 				rotators.Add(transform.SearchStartsWith(rotatorList[i]));
-				//print(string.Format("iterated rotators {0}", rotatorList.Count()));
+				
+				#if DEBUG
+				KFLog.Log(string.Format("Iterated rotators: {0}", rotatorList.Count()));
+				#endif
 			}
 			for (int i = 0; i < targetList.Count(); i++)
 			{
 				targets.Add(transform.SearchStartsWith(targetList[i]));
-				//print(string.Format("iterated targets {0}", targetList.Count()));
+				
+				#if DEBUG
+				KFLog.Log(string.Format("Iterated targets: {0}", targetList.Count()));
+				#endif
 			}
 			objectCount = rotators.Count();
 			countAgrees |= Equals(objectCount, targets.Count());
@@ -58,16 +71,11 @@ namespace KerbalFoundries
 
 		IEnumerator Setup()
 		{
-			//Debug.LogWarning(string.Format("Waiting a frame {0}.", Time.frameCount));
 			yield return null;
-			//Wait a frame for GameObjects to be destroyed. This only happens at the end of a frame,
-			//and will be handled by another module - usually KFPartMirror. If we don't wait
-			//we will usually find the LHS objects before they are actually destroyed.
 
 			SetupObjects();
 			if (countAgrees)
 				StartCoroutine(Rotator());
-			
 			yield break;
 		}
 
@@ -82,12 +90,12 @@ namespace KerbalFoundries
 					Vector3 lookAtVector = rotators[i].transform.forward;
 					Vector3 vectorProject = vectorBetween - (rotators[i].transform.right) * Vector3.Dot(vectorBetween, rotators[i].transform.right);
                     
-					float rotateAngle = Mathf.Acos(Vector3.Dot(lookAtVector, vectorProject) / Mathf.Sqrt(Mathf.Pow(lookAtVector.magnitude, 2) * Mathf.Pow(vectorProject.magnitude, 2))) * Mathf.Rad2Deg;
+					float rotateAngle = Mathf.Acos(Vector3.Dot(lookAtVector, vectorProject) / Mathf.Sqrt(Mathf.Pow(lookAtVector.magnitude, 2f) * Mathf.Pow(vectorProject.magnitude, 2f))) * Mathf.Rad2Deg;
 
 					Vector3 normalvectorY = Vector3.Cross(lookAtVector, vectorProject);
 
 					if (Vector3.Dot(rotators[i].transform.up, vectorProject) > 0.0f)
-						rotateAngle *= -1;
+						rotateAngle *= -1f;
 
 					if (!float.IsNaN(rotateAngle))
 						rotators[i].Rotate(Vector3.right, rotateAngle);

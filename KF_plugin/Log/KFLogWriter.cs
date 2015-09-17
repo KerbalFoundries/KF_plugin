@@ -33,7 +33,11 @@ namespace KerbalFoundries.Log
 		/// <remarks>Use RequestStop() to end the thread.</remarks>
 		public void Loop()
 		{
-            System.AppDomain.CurrentDomain.DomainUnload += delegate { CloseFile(); }; // close log file when KSP shuts down            
+			System.AppDomain.CurrentDomain.DomainUnload += delegate
+			{
+				CloseFile();
+			};
+			// close log file when KSP shuts down            
 
 			if (!outStream.CanWrite)
 				return;
@@ -55,8 +59,8 @@ namespace KerbalFoundries.Log
 			{
 				while (queue.Count < 1 || !dontExit) 	// check if there's something to do
                     Monitor.Wait(sync); 				// release the lock, block this thread and
-														// wait until the lock is aquired again
-														// then the while-loop continues to work
+				// wait until the lock is aquired again
+				// then the while-loop continues to work
 
 				if (queue.Count > 0)
 				{
@@ -69,7 +73,7 @@ namespace KerbalFoundries.Log
 				}
 			}
 			Monitor.Exit(sync); // release lock
-            CloseFile();
+			CloseFile();
 		}
 
 		/// <summary>Creates a stream which can write into the specified file.</summary>

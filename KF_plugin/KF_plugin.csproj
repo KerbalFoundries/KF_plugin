@@ -50,8 +50,10 @@
     <Compile Include="APUController.cs" />
     <Compile Include="DustFX\KFDustFX.cs" />
     <Compile Include="DustFX\KFDustFXUtils.cs" />
+    <Compile Include="KFAnimation.cs" />
     <Compile Include="KFPrecisionMode.cs" />
     <Compile Include="KFConstrain.cs" />
+    <Compile Include="KFTextureAnimateGeneric.cs" />
     <Compile Include="Log\KFLog.cs" />
     <Compile Include="Log\KFLogWriter.cs" />
     <Compile Include="KFGUIManager.cs" />

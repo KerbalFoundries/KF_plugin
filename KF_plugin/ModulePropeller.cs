@@ -7,21 +7,23 @@ namespace KerbalFoundries
 	class ModulePropeller : PartModule
 	{
 		KFModuleWheel _KFModuleWheel;
-
+		
 		[KSPField]
 		public float propellerForce = 5f;
-
+		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("ModulePropeller");
 		
 		public override void OnStart(PartModule.StartState state)
 		{
-			if (!HighLogic.LoadedSceneIsFlight)
+			if (!HighLogic.LoadedSceneIsFlight || Equals(vessel.vesselType, VesselType.Debris))
 				return;
+			
 			#if DEBUG
 			KFLog.Log("ModulePropeller called.");
 			#endif
+			
 			_KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
 			base.OnStart(state);
 		}

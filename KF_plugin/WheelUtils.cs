@@ -5,26 +5,26 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>Various extension utilities for use with the wheel modules.</summary>
-    public static class WheelUtils
-    {
+	public static class WheelUtils
+	{
 		static string strClassName = "WheelUtils";
-
-    	/// <summary>Logging utility.</summary>
+		
+		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		static readonly KFLogUtil KFLog = new KFLogUtil(strClassName);
-    	
+		
 		/// <summary>Takes a vector (usually from a parts axis) and a transform, plus an index giving which axis to use for the scalar product of the two.</summary>
 		/// <param name="transformVector">Vector of the transform.</param>
 		/// <param name="referenceVector">Reference vector.</param>
 		/// <param name="directionIndex">Direction index.</param>
 		/// <returns>A value of -1 or 1, depending on whether the product is positive or negative.</returns>
-		public static int GetCorrector(Vector3 transformVector, Transform referenceVector, int directionIndex)    
-		{ 
-            int corrector = 1;
-            float dot = 0;
-
+		public static int GetCorrector(Vector3 transformVector, Transform referenceVector, int directionIndex)
+		{
+			int corrector = 1;
+			float dot = 0;
+			
 			switch (directionIndex)
-            {
+			{
 				case 0:
 					dot = Vector3.Dot(transformVector, referenceVector.right);
 					break;
@@ -34,13 +34,13 @@ namespace KerbalFoundries
 				case 2:
 					dot = Vector3.Dot(transformVector, referenceVector.forward);
 					break;
-            }
-
+			}
+			
 			KFLog.Log(string.Format("{0}", dot));
 			corrector = dot < 0 ? -1 : 1;
-            return corrector;
-        }
-
+			return corrector;
+		}
+		
 		/// <summary>Takes a vector3 derived from the axis of the parts transform (typically), and the transform of the part to compare to (usually the root part).</summary>
 		/// <param name="refDirection">Reference direction.</param>
 		/// <param name="refTransform">Reference transform.</param>
@@ -48,91 +48,87 @@ namespace KerbalFoundries
 		/// <remarks>Uses scalar products to determine which axis is closest to the axis specified in refDirection, return an index value 0 = X, 1 = Y, 2 = Z.</remarks>
 		public static int GetRefAxis(Vector3 refDirection, Transform refTransform)
 		{
-			//orgpos = this.part.orgPos; // Debugguing
-            float dotx = Math.Abs(Vector3.Dot(refDirection, refTransform.right)); // up is forward
-            float doty = Math.Abs(Vector3.Dot(refDirection, refTransform.up));
-            float dotz = Math.Abs(Vector3.Dot(refDirection, refTransform.forward));
+			float dotx = Math.Abs(Vector3.Dot(refDirection, refTransform.right)); // up is forward
+			float doty = Math.Abs(Vector3.Dot(refDirection, refTransform.up));
+			float dotz = Math.Abs(Vector3.Dot(refDirection, refTransform.forward));
 			
 			#if DEBUG
 			KFLog.Log(string.Format("\"dotx\" = {0}", dotx));
 			KFLog.Log(string.Format("\"doty\" = {0}", doty));
 			KFLog.Log(string.Format("\"dotz\" = {0}", dotz));
 			#endif
-
-            int orientationIndex = 0;
-
-            if (dotx > doty && dotx > dotz)
-            {
-            	#if DEBUG
+			
+			int orientationIndex = 0;
+			
+			if (dotx > doty && dotx > dotz)
+			{
+				#if DEBUG
                 KFLog.Log("Root part mounted rightwards.");
-                #endif
-                orientationIndex = 0;
-            }
-            if (doty > dotx && doty > dotz)
-            {
-                #if DEBUG
+				#endif
+				
+				orientationIndex = 0;
+			}
+			if (doty > dotx && doty > dotz)
+			{
+				#if DEBUG
                 KFLog.Log("Root part mounted forwards.");
-                #endif
-                orientationIndex = 1;
-            }
-            if (dotz > doty && dotz > dotx)
-            {
-                #if DEBUG
+				#endif
+				
+				orientationIndex = 1;
+			}
+			if (dotz > doty && dotz > dotx)
+			{
+				#if DEBUG
                 KFLog.Log("Root part mounted upwards.");
-                #endif
-                orientationIndex = 2;
-            }
-            /*
-            if (Equals(referenceDirection, 0))
-                referenceTranformVector.x = Math.Abs(referenceTranformVector.x);
-             */
-            return orientationIndex;
-        }
-
+				#endif
+				
+				orientationIndex = 2;
+			}
+			return orientationIndex;
+		}
+		
 		/// <summary>Determines how much this wheel should be steering according to its position in the craft.</summary>
 		/// <param name="refIndex">Reference index.</param>
 		/// <param name="thisPart">Reference part.</param>
 		/// <param name="thisVessel">Reference vessel.</param>
 		/// <param name="groupNumber">Reference group number.</param>
 		/// <returns>A value of -1 to 1.</returns>
-        public static float SetupRatios(int refIndex, Part thisPart, Vessel thisVessel, float groupNumber)
-        {
+		public static float SetupRatios(int refIndex, Part thisPart, Vessel thisVessel, float groupNumber)
+		{
 			strClassName += ": SetupRatios()";
-            float myPosition = thisPart.orgPos[refIndex];
-            float maxPos = thisPart.orgPos[refIndex];
-            float minPos = thisPart.orgPos[refIndex];
-            float ratio = 1;
-            foreach (KFModuleWheel st in thisVessel.FindPartModulesImplementing<KFModuleWheel>()) //scan vessel to find fore or rearmost wheel. 
-            {
-				if (Equals(st.groupNumber, groupNumber) && !Equals(groupNumber, 0))
-                {
-                    float otherPosition = myPosition;
-                    otherPosition = st.part.orgPos[refIndex];
-
-					if ((otherPosition + 1000) >= (maxPos + 1000)) // Dodgy hack. Make sure all values are positive or we struggle to evaluate < or >
-                        maxPos = otherPosition; // Store transform y value
-
-                    if ((otherPosition + 1000) <= (minPos + 1000))
-						minPos = otherPosition; // Store transform y value
-                }
-            }
-
-            float minToMax = maxPos - minPos;
-            float midPoint = minToMax / 2;
-            float offset = (maxPos + minPos) / 2;
-            float myAdjustedPosition = myPosition - offset;
-
-            ratio = myAdjustedPosition / midPoint;
-
-			if (Equals(ratio, 0) || float.IsNaN(ratio)) // Check is we managed to evaluate to zero or infinity somehow. Happens with less than three wheels, or all wheels mounted at the same position.
-                ratio = 1;
+			float myPosition = thisPart.orgPos[refIndex];
+			float maxPos = thisPart.orgPos[refIndex];
+			float minPos = thisPart.orgPos[refIndex];
+			float ratio = 1f;
+			foreach (KFModuleWheel st in thisVessel.FindPartModulesImplementing<KFModuleWheel>()) 
+			{
+				if (Equals(st.groupNumber, groupNumber) && !Equals(groupNumber, 0f))
+				{
+					float otherPosition = myPosition;
+					otherPosition = st.part.orgPos[refIndex];
+					
+					if ((otherPosition + 1000f) >= (maxPos + 1000f))
+                        maxPos = otherPosition;
+					if ((otherPosition + 1000f) <= (minPos + 1000f))
+						minPos = otherPosition;
+				}
+			}
+			
+			float minToMax = maxPos - minPos;
+			float midPoint = minToMax / 2f;
+			float offset = (maxPos + minPos) / 2f;
+			float myAdjustedPosition = myPosition - offset;
+			
+			ratio = myAdjustedPosition / midPoint;
+			
+			if (Equals(ratio, 0) || float.IsNaN(ratio))
+                ratio = 1f;
 			
 			#if DEBUG
             KFLog.Log(string.Format("\"ratio\" = {0}", ratio));
-            #endif
-            
-            return ratio;
-        }
+			#endif
+			
+			return ratio;
+		}
 	}
-	// End class
 }

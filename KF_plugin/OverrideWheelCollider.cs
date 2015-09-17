@@ -5,76 +5,76 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>Allows the override of a wheel collider already placed on the part when converting non-KF wheels to a KF control system.</summary>
-    public class OverrideWheelCollider : PartModule
-    {
-        [KSPField]
-        public string colliderName = "wheelCollider";
-        [KSPField]
-        public string susTravName = "suspensionTraverse";
-        [KSPField]
+	public class OverrideWheelCollider : PartModule
+	{
+		/// <summary>Name of the wheelCollider object in the model.</summary>
+		[KSPField]
+		public string colliderName = "wheelCollider";
+		
+		/// <summary>Name of the suspensionTraverse object in the model.</summary>
+		[KSPField]
+		public string susTravName = "suspensionTraverse";
+		
+		[KSPField]
 		public float mass;
-        [KSPField]
+		[KSPField]
 		public float radius;
-        [KSPField]
+		[KSPField]
 		public float suspensionDistance;
-        [KSPField]
+		[KSPField]
 		public float spring;
-        [KSPField]
+		[KSPField]
 		public float damper;
-        [KSPField]
+		[KSPField]
 		public float targetPosition;
         
-        [KSPField]
-        public float forExtSlip = 1;
-        [KSPField]
-        public float forExtValue = 120;
-        [KSPField]
-        public float forAsySlip = 2;
-        [KSPField]
-        public float forAsyValue = 80;
-        [KSPField]
-        public float forStiffness = 1;
+		[KSPField]
+		public float forExtSlip = 1;
+		[KSPField]
+		public float forExtValue = 120;
+		[KSPField]
+		public float forAsySlip = 2;
+		[KSPField]
+		public float forAsyValue = 80;
+		[KSPField]
+		public float forStiffness = 1;
+		
+		[KSPField]
+		public float sideExtSlip = 1;
+		[KSPField]
+		public float sideExtValue = 120;
+		[KSPField]
+		public float sideAsySlip = 2;
+		[KSPField]
+		public float sideAsyValue = 80;
+		[KSPField]
+		public float sideStiffness = 1;
+		[KSPField]
+		public bool moveCollider;
+		
+		/// <summary>True if the friction settings should be overridden.</summary>
+		[KSPField]
+		public bool overrideFriction = true;
+		
+		[KSPField]
+		public float moveColliderBy;
+		[KSPField]
+		public int susTravIndex = 1;
 
-        [KSPField]
-        public float sideExtSlip = 1;
-        [KSPField]
-        public float sideExtValue = 120;
-        [KSPField]
-        public float sideAsySlip = 2;
-        [KSPField]
-        public float sideAsyValue = 80;
-        [KSPField]
-        public float sideStiffness = 1;
-        [KSPField]
-        public bool moveCollider;
-        [KSPField]
-        public bool overrideFriction = true;
-        [KSPField]
-        public float moveColliderBy;
-        [KSPField]
-        public int susTravIndex = 1;
+		WheelCollider _wheelCollider;
 
-        WheelCollider _wheelCollider;
-
-        /// <summary>Logging utility.</summary>
+		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("OverrideWheelCollider");
         
-        public override void OnStart(PartModule.StartState state)
-        {
-            GameObject _susTrav = part.FindModelTransform(susTravName).gameObject;
-            foreach (var wc in part.GetComponentsInChildren<WheelCollider>())
-            {
+		public override void OnStart(PartModule.StartState state)
+		{
+			GameObject _susTrav = part.FindModelTransform(susTravName).gameObject;
+			foreach (var wc in part.GetComponentsInChildren<WheelCollider>())
+			{
 				if (wc.name.Equals(colliderName, StringComparison.Ordinal))
 					_wheelCollider = wc;
-				// disable once RedundantIfElseBlock
-				else
-				{
-					#if DEBUG
-					KFLog.Error("Wheel collider not found.");
-					#endif
-				}
-            }
+			}
 
 			if (HighLogic.LoadedSceneIsFlight && moveCollider)
 			{
@@ -85,51 +85,51 @@ namespace KerbalFoundries
 			}
 
 			if (!Equals(_wheelCollider, null))
-            {
+			{
 				if (!Equals(mass, 0))
-                    _wheelCollider.mass = mass;
+					_wheelCollider.mass = mass;
 				if (!Equals(radius, 0))
-                    _wheelCollider.radius = radius;
+					_wheelCollider.radius = radius;
 				if (!Equals(suspensionDistance, 0))
-                    _wheelCollider.suspensionDistance = suspensionDistance;
+					_wheelCollider.suspensionDistance = suspensionDistance;
 				if (!Equals(spring, 0))
-                {
-                    JointSpring js = _wheelCollider.suspensionSpring;
-                    js.spring = spring;
-                    _wheelCollider.suspensionSpring = js;
-                }
+				{
+					JointSpring js = _wheelCollider.suspensionSpring;
+					js.spring = spring;
+					_wheelCollider.suspensionSpring = js;
+				}
 				if (!Equals(damper, 0))
-                {
-                    JointSpring js = _wheelCollider.suspensionSpring;
-                    js.damper = damper;
-                    _wheelCollider.suspensionSpring = js;
-                }
+				{
+					JointSpring js = _wheelCollider.suspensionSpring;
+					js.damper = damper;
+					_wheelCollider.suspensionSpring = js;
+				}
 				if (!Equals(targetPosition, 0))
-                { 
-                    JointSpring js = _wheelCollider.suspensionSpring;
-                    js.targetPosition = targetPosition;
-                    _wheelCollider.suspensionSpring = js;
-                }
-                if (overrideFriction)
-                {
-                    WheelFrictionCurve _forwardFric = _wheelCollider.forwardFriction;
-                    _forwardFric.extremumSlip = forExtSlip;
-                    _forwardFric.extremumValue = forExtValue;
-                    _forwardFric.asymptoteSlip = forAsySlip;
-                    _forwardFric.asymptoteValue = forAsyValue;
-                    _forwardFric.stiffness = forStiffness;
-                    _wheelCollider.forwardFriction = _forwardFric;
-
-                    WheelFrictionCurve _sideFric = _wheelCollider.sidewaysFriction;
-                    _sideFric.extremumSlip = forExtSlip;
-                    _sideFric.extremumValue = forExtValue;
-                    _sideFric.asymptoteSlip = forAsySlip;
-                    _sideFric.asymptoteValue = forAsyValue;
-                    _sideFric.stiffness = forStiffness;
-                    _wheelCollider.sidewaysFriction = _sideFric;
-                }
-            }
-            base.OnStart(state);
-        }
-    }
+				{ 
+					JointSpring js = _wheelCollider.suspensionSpring;
+					js.targetPosition = targetPosition;
+					_wheelCollider.suspensionSpring = js;
+				}
+				if (overrideFriction)
+				{
+					WheelFrictionCurve _forwardFric = _wheelCollider.forwardFriction;
+					_forwardFric.extremumSlip = forExtSlip;
+					_forwardFric.extremumValue = forExtValue;
+					_forwardFric.asymptoteSlip = forAsySlip;
+					_forwardFric.asymptoteValue = forAsyValue;
+					_forwardFric.stiffness = forStiffness;
+					_wheelCollider.forwardFriction = _forwardFric;
+					
+					WheelFrictionCurve _sideFric = _wheelCollider.sidewaysFriction;
+					_sideFric.extremumSlip = forExtSlip;
+					_sideFric.extremumValue = forExtValue;
+					_sideFric.asymptoteSlip = forAsySlip;
+					_sideFric.asymptoteValue = forAsyValue;
+					_sideFric.stiffness = forStiffness;
+					_wheelCollider.sidewaysFriction = _sideFric;
+				}
+			}
+			base.OnStart(state);
+		}
+	}
 }

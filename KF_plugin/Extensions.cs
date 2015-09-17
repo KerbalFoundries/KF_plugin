@@ -6,7 +6,7 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>A set of extension methods used frequently in the rest of the project.</summary>
-	public static class Extensions
+	public static class KFExtensions
 	{
 		// disable EmptyGeneralCatchClause
 		// disable UnusedParameter
@@ -59,7 +59,6 @@ namespace KerbalFoundries
 		/// <remarks>Kinda like splitting hairs... but not really.</remarks>
 		public static String[] SplitString(string ObjectNames)
 		{
-			//rotators.Clear();
 			String[] nameList = ObjectNames.Split(new[] { ',', ' ', '|' }, StringSplitOptions.RemoveEmptyEntries);
 			return nameList;
 		}
@@ -74,6 +73,26 @@ namespace KerbalFoundries
 				var result = Search(target.GetChild(i), name);
 				if (!Equals(result, null))
 					return result;
+			}
+			return null;
+		}
+		
+		public static Transform TexAnimSearch(this Transform target, string name)
+		{
+			Transform result;
+			if (Equals(target.name, name))
+				result = target;
+			else
+			{
+				for (int i = 0; i < target.childCount; i++)
+				{
+					Transform transform = target.GetChild(i).Search(name);
+					if (!Equals(transform, null))
+					{
+						result = transform;
+						return result;
+					}
+				}
 			}
 			return null;
 		}
@@ -92,16 +111,12 @@ namespace KerbalFoundries
 			return null;
 		}
 		
-		//tr.name.StartsWith(rotatorsName, StringComparison.Ordinal
-
 		/// <summary>Gets a battery.  Names it "Jennifer" and gives it a good home.</summary>
 		/// <remarks>My father once played a game where he had to choose a mascot.  He grabbed a dead battery and named it "Jennifer."  That story never gets old. - Gaalidas</remarks>
 		public static float GetBattery(Part part)
 		{
 			PartResourceDefinition resourceDefinitions = PartResourceLibrary.Instance.GetDefinition("ElectricCharge");
 			var resources = new List<PartResource>();
-			
-			//List<PartResource> resources = new List<PartResource>();
 			
 			part.GetConnectedResources(resourceDefinitions.id, resourceDefinitions.resourceFlowMode, resources);
 			var ratio = (float)resources.Sum(r => r.amount) / (float)resources.Sum(r => r.maxAmount);
@@ -149,22 +164,8 @@ namespace KerbalFoundries
 			{
 				foreach (ModuleAnimateGeneric ma in part.FindModulesImplementing<ModuleAnimateGeneric>())
 				{
-					try
-					{
-						ma.Actions["ToggleAction"].active = false;
-					}
-					catch
-					{
-						//do nothing
-					}
-					try
-					{
-						ma.Events["Toggle"].guiActive = false;
-					}
-					catch
-					{
-						//do nothing
-					}
+					ma.Actions["ToggleAction"].active = false;
+					ma.Events["Toggle"].guiActive = false;
 				}
 			}
 		}

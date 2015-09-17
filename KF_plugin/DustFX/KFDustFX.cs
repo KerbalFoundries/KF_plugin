@@ -231,7 +231,7 @@ namespace KerbalFoundries
 			DustParticles(force, hitPoint + (part.rigidbody.velocity * Time.deltaTime), col, normal, direction);
 		}
 		
-		/// <summary>Sets up the repulsor lights.</summary>
+		/// <summary>Sets up and/or updates the repulsor lights.</summary>
 		/// <param name="squish">How squishy are we?</param>
 		public void RepulsorLight(float squish)
 		{

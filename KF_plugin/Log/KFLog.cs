@@ -9,7 +9,8 @@ namespace KerbalFoundries.Log
 	public class KFLog
 	{
 		/// <summary>helper object to synchronize queue access</summary>
-		static object sync; // Initializing as "null" is horribly redundant.
+		static object sync;
+		// Initializing as "null" is horribly redundant.
 		/// <summary>holds all log messages</summary>
 		static Queue<string> queue;
 		/// <summary>instance of the log writer</summary>
@@ -17,7 +18,8 @@ namespace KerbalFoundries.Log
 		/// <summary>the thread the log writer runs in</summary>
 		static Thread thread;
 		/// <summary>Check this to see if logging thread is ready for work.</summary>
-		public static bool Ready; // Initializing as "false" is horribly redundant.
+		public static bool Ready;
+		// Initializing as "false" is horribly redundant.
 
 		/// <summary>Prepares and creates the log writer thread.</summary>
 		public static void StartWriter()
@@ -55,5 +57,5 @@ namespace KerbalFoundries.Log
 				Monitor.Exit(sync); // release lock
 			}
 		}
-    }
+	}
 }

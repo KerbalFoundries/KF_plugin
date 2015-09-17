@@ -42,43 +42,43 @@ namespace KerbalFoundries
 		#region MonoBehavior life cycle events
 		
 		/// <summary>Called when the Behavior wakes up.</summary>
-        /// <remarks>
-        /// The MonoBehavior only wakes up during the loading scene at the start of the game.
-        /// This only happens once per game start.
-        /// </remarks>
+		/// <remarks>
+		/// The MonoBehavior only wakes up during the loading scene at the start of the game.
+		/// This only happens once per game start.
+		/// </remarks>
 		void Awake()
 		{
-            //KFLog.Log("Awake()");
+			DontDestroyOnLoad(this); // makes sure this MonoBehavior doesn't get destroyed on game scene switch.
 			
-            DontDestroyOnLoad(this); // makes sure this MonoBehavior doesn't get destroyed on game scene switch.
-			
-            GameEvents.onGUIApplicationLauncherReady.Add(OnGUIReady);
-            GameEvents.onGUIApplicationLauncherUnreadifying.Add(OnGUIUnready);
+			GameEvents.onGUIApplicationLauncherReady.Add(OnGUIReady);
+			GameEvents.onGUIApplicationLauncherUnreadifying.Add(OnGUIUnready);
 		}
 		
-        /// <summary>
-        /// Called when the ApplicationLauncher is unreadifying, just before a scene switch.
-        /// </summary>
-        /// <param name="data"></param>
-        void OnGUIUnready(GameScenes data)
-        {
-        	#if DEBUG
+		/// <summary>
+		/// Called when the ApplicationLauncher is unreadifying, just before a scene switch.
+		/// </summary>
+		/// <param name="data"></param>
+		void OnGUIUnready(GameScenes data)
+		{
+			#if DEBUG
             KFLog.Log("OnGUIUnready()");
-            #endif
-            DestroyAppButton();
-        }
+			#endif
+			
+			DestroyAppButton();
+		}
 		
-        /// <summary>
-        /// Called when the ApplicationLauncher is ready, just after a scene switch.
-        /// </summary>
-        void OnGUIReady()
-        {
-        	#if DEBUG
+		/// <summary>
+		/// Called when the ApplicationLauncher is ready, just after a scene switch.
+		/// </summary>
+		void OnGUIReady()
+		{
+			#if DEBUG
             KFLog.Log("OnGUIReady()");
 			#endif
-            if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
-                SetupAppButton();
-        }
+			
+			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
+				SetupAppButton();
+		}
 		
 		#endregion MonoBehavior life cycle events
 		
@@ -87,7 +87,7 @@ namespace KerbalFoundries
 		/// <summary>Called when the AppLauncher reports that it is awake.</summary>
 		void SetupAppButton()
 		{
-            // we only need to retrieve the textures once
+			// We only need to retrieve the textures once
 			if (Equals(appTextureGrey, null))
 				appTextureGrey = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconGrey), false);
 
@@ -95,7 +95,6 @@ namespace KerbalFoundries
 				appTextureColor = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconColor), false);
 
 			appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.VAB, appTextureGrey);
-            //KFLog.Log("App button created");
 		}
 		
 		/// <summary>Called when the ApplicationLauncher gets destroyed.</summary>
@@ -103,9 +102,9 @@ namespace KerbalFoundries
 		{
 			if (!Equals(appButton, null))
 			{
-				ApplicationLauncher.Instance.RemoveModApplication(appButton); // removing appButton from toolbar
-				appButton = null; // notifying garbage collector to delete this object
-				isGUIEnabled = false; // close the cfg window if it's still open
+				ApplicationLauncher.Instance.RemoveModApplication(appButton);
+				appButton = null;
+				isGUIEnabled = false;
 				KFPersistenceManager.SaveConfig();
 			}
 		}
@@ -144,10 +143,9 @@ namespace KerbalFoundries
 		/// <summary>Called by Unity when it's time to draw the GUI.</summary>
 		void OnGUI()
 		{
-            //KFLog.Log(string.Format("OnGUI() - \"enabled\" = {0}", this.enabled));
 			if (isGUIEnabled)
 			{
-                /* Depending on the scene the cfg window displays 1, 2 or all 3 toggles.
+				/* Depending on the scene the cfg window displays 1, 2 or all 3 toggles.
                  * Each toggle needs a height of 24 units (= pixels?) and there needs to
                  *  be a space of 8 units between the toogles.
                  * 
@@ -180,19 +178,19 @@ namespace KerbalFoundries
 				 *  added together.
                  */
 				
-                float windowTop = 42f;
-                float windowLeft = -260f;
-                float windowHeight = 240; // assume 1 title, 4 toggles, 2 sliders, 2 labels, 5 spacers, and 1 end.  (ALL ELEMENTS) (Never shown)
+				float windowTop = 42f;
+				float windowLeft = -260f;
+				float windowHeight = 240; // assume 1 title, 4 toggles, 2 sliders, 2 labels, 5 spacers, and 1 end.  (ALL ELEMENTS) (Never shown)
 				
 				if (HighLogic.LoadedSceneIsFlight)
 					windowHeight = 240f; // assume 1 title, 4 toggles, 2 sliders, 2 labels, 5 spacers, and 1 end. (Flight Only - includes debug menu)
 				
-                if (HighLogic.LoadedSceneIsEditor)
-                {
+				if (HighLogic.LoadedSceneIsEditor)
+				{
 					windowHeight = 48f; // assume 1 title, 1 toggle, and 1 end. (Editor Only)
-                    // In the editor the toolbar is at the bottom of the screen, so let's move it down
-                    windowTop = Screen.height - 42f - windowHeight; // 42f is the height of the toolbar buttons + 2 units of space
-                }
+					// In the editor the toolbar is at the bottom of the screen, so let's move it down
+					windowTop = Screen.height - 42f - windowHeight; // 42f is the height of the toolbar buttons + 2 units of space
+				}
                 
 				if (Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
 				{
@@ -202,10 +200,10 @@ namespace KerbalFoundries
 				if (KFPersistenceManager.isDebugEnabled && Equals(HighLogic.LoadedScene, GameScenes.FLIGHT))
 					windowHeight += 32f; // Add a spacerHeight and toggleHeight for every new option available in the debug menu.
 				
-                // shift the window to the left until the left window border has the same x value as the button sprite or at least so far it won't clip out the edge of the monitor
-                windowLeft = Screen.width + Mathf.Min(appButton.sprite.TopLeft.x - 260, windowLeft);
+				// shift the window to the left until the left window border has the same x value as the button sprite or at least so far it won't clip out the edge of the monitor
+				windowLeft = Screen.width + Mathf.Min(appButton.sprite.TopLeft.x - 260, windowLeft);
 				
-                settingsRect = new Rect(windowLeft, windowTop, 256f, windowHeight);
+				settingsRect = new Rect(windowLeft, windowTop, 256f, windowHeight);
 				GUI.Window(GUI_ID, settingsRect, DrawWindow, "Kerbal Foundries Settings");
 			}
 		}
@@ -247,11 +245,11 @@ namespace KerbalFoundries
 				// Non-element spacer (top: 72)
 				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 80f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
 				// Non-element spacer (top: 104)
-				GUI.Label(new Rect(8f, 112f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", Extensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f)));
-				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 136f, 240f, sliderHeight), Extensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f), 0f, 3f);
+				GUI.Label(new Rect(8f, 112f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFExtensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f)));
+				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 136f, 240f, sliderHeight), KFExtensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f), 0f, 3f);
 				// Non-element spacer (top: 152)
-				GUI.Label(new Rect(8f, 160f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f)));
-				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 184f, 240f, sliderHeight), Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f), 5f, 20f);
+				GUI.Label(new Rect(8f, 160f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", KFExtensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f)));
+				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 184f, 240f, sliderHeight), KFExtensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f), 5f, 20f);
 				// Non-element spacer (top: 200)
 				KFPersistenceManager.isDebugEnabled = GUI.Toggle(new Rect(8f, 208f, 240f, toggleHeight), KFPersistenceManager.isDebugEnabled, "Enable Debug Options");
 				// Non-element end (top: 232)
@@ -269,8 +267,8 @@ namespace KerbalFoundries
 				// Non-element spacer (top: 104)
 				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 112f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
 				// Non-element spacer (top: 136)
-				GUI.Label(new Rect(8f, 144f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", Extensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f)));
-				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 168f, 240f, sliderHeight), Extensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f), 0f, 3f);
+				GUI.Label(new Rect(8f, 144f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFExtensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f)));
+				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 168f, 240f, sliderHeight), KFExtensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f), 0f, 3f);
 				// Non-element end (top: 184)
 				endHeight = 192f; // end top height + spacerHeight.
 			}
