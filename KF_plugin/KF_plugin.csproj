@@ -47,18 +47,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="APUController.cs" />
+    <Compile Include="KFAPUController.cs" />
     <Compile Include="DustFX\KFDustFX.cs" />
     <Compile Include="DustFX\KFDustFXUtils.cs" />
     <Compile Include="KFAnimation.cs" />
     <Compile Include="KFPrecisionMode.cs" />
     <Compile Include="KFConstrain.cs" />
-    <Compile Include="KFTextureAnimateGeneric.cs" />
+    <Compile Include="KFTextureAnimator.cs" />
+    <None Include="KFTextureSwapper.cs" />
     <Compile Include="Log\KFLog.cs" />
     <Compile Include="Log\KFLogWriter.cs" />
     <Compile Include="KFGUIManager.cs" />
     <Compile Include="KFPersistenceManager.cs" />
-    <Compile Include="KFLogUtils.cs" />
+    <Compile Include="KFLogUtil.cs" />
     <Compile Include="KFLookAt.cs" />
     <Compile Include="KFModuleMirror.cs" />
     <Compile Include="KFModuleWheel.cs" />
@@ -67,17 +68,17 @@
     <Compile Include="KFSuspension.cs" />
     <Compile Include="KFTrackSurface.cs" />
     <Compile Include="KFWheel.cs" />
-    <Compile Include="ModulePropeller.cs" />
-    <Compile Include="ModuleWaterSlider.cs" />
-    <Compile Include="ObjectDestroy.cs" />
-    <Compile Include="OrientationMarker.cs" />
-    <Compile Include="OverrideWheelCollider.cs" />
+    <Compile Include="KFModulePropeller.cs" />
+    <Compile Include="KFModuleWaterSlider.cs" />
+    <Compile Include="KFObjectDestroy.cs" />
+    <Compile Include="KFOrientationMarker.cs" />
+    <Compile Include="KFOverrideWheelCollider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RepulsorWheel.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Version.cs" />
-    <Compile Include="ModuleCameraShot.cs" />
-    <Compile Include="WheelUtils.cs" />
+    <Compile Include="KFRepulsorWheel.cs" />
+    <Compile Include="KFExtensions.cs" />
+    <Compile Include="KFVersion.cs" />
+    <Compile Include="KFModuleCameraShot.cs" />
+    <Compile Include="KFWheelUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

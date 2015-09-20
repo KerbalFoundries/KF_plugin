@@ -10,7 +10,7 @@ namespace KerbalFoundries
 	{
 		[KSPField(isPersistant = false, guiActive = false, guiName = "Suspension travel")]
 		public float susTravel;
-
+		
 		// Config fields
 		[KSPField]
 		public string wheelName;
@@ -42,6 +42,7 @@ namespace KerbalFoundries
 		/// <summary>Wheel rotation Z axis.</summary>
 		[KSPField]
 		public float wheelRotationZ;
+		
 		/// <summary>Suspension traverse axis.</summary>
 		[KSPField]
 		public string susTravAxis = "Y";
@@ -52,7 +53,7 @@ namespace KerbalFoundries
 		
 		[KSPField(isPersistant = true)]
 		public float lastFrameTraverse;
-
+		
 		// Persistent fields. Not to be used for config
 		[KSPField(isPersistant = true)]
 		public float suspensionDistance;
@@ -62,14 +63,14 @@ namespace KerbalFoundries
 		public float suspensionDamper;
 		[KSPField(isPersistant = true)]
 		public bool isConfigured;
-
+		
 		// Object types
 		WheelCollider _wheelCollider;
 		Transform _susTrav;
 		Transform _wheel;
 		Transform _trackSteering;
 		KFModuleWheel _KFModuleWheel;
-
+		
 		// Gloabl variables
 		Vector3 initialPosition;
 		Vector3 initialSteeringAngles;
@@ -84,7 +85,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Local reference for the tweakScaleCorrector parameter in KFModuleWheel.</summary>
 		public float tweakScaleCorrector;
-
+		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFWheel");
@@ -112,8 +113,8 @@ namespace KerbalFoundries
 					}
 				}
 			}
-
-			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris) && vessel.parts.Count > 1)
+			
+			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris))
 			{
 				GameEvents.onGamePause.Add(new EventVoid.OnEvent(OnPause));
 				GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(OnUnPause));
@@ -134,11 +135,11 @@ namespace KerbalFoundries
 					if (tr.name.StartsWith(sustravName, StringComparison.Ordinal))
 						_susTrav = tr;
 				}
-
+				
 				initialPosition = _susTrav.localPosition;
 				susTravIndex = KFExtensions.SetAxisIndex(susTravAxis);
 				steeringIndex = KFExtensions.SetAxisIndex(steeringAxis); 
-
+				
 				if (_KFModuleWheel.hasSteering)
 				{
 					initialSteeringAngles = _trackSteering.transform.localEulerAngles;
@@ -147,10 +148,10 @@ namespace KerbalFoundries
 					KFLog.Log(string.Format("initial steering angles are \"{0}\"", initialSteeringAngles));
 					#endif
 				}
-
+				
 				directionCorrector = useDirectionCorrector ? _KFModuleWheel.directionCorrector : 1;
 				_wheelRotation = new Vector3(wheelRotationX, wheelRotationY, wheelRotationZ);
-
+				
 				if (Equals(lastFrameTraverse, 0)) //check to see if we have a value in persistance
 				{
 					#if DEBUG
@@ -159,14 +160,15 @@ namespace KerbalFoundries
 					
 					lastFrameTraverse = _wheelCollider.suspensionDistance;
 				}
+				
 				#if DEBUG
 				KFLog.Log(string.Format("Last frame = {0}", lastFrameTraverse));
 				#endif
 				
 				couroutinesActive = true;
-
+				
 				MoveSuspension(susTravIndex, -lastFrameTraverse, _susTrav); //to get the initial stuff correct
-
+				
 				if (_KFModuleWheel.hasSteering)
 				{
 					StartCoroutine("Steering");
@@ -179,7 +181,7 @@ namespace KerbalFoundries
 					StartCoroutine("TrackedWheel");
 				else
 					StartCoroutine("IndividualWheel");
-
+				
 				if (hasSuspension)
 				{
 					KFLog.Warning("KFWheel suspension module is deprecated. Please use KFSuspension.");
@@ -218,11 +220,11 @@ namespace KerbalFoundries
 			while (couroutinesActive)
 			{
 				degreesPerTick = (_wheelCollider.rpm / 60) * Time.deltaTime * 360;
-				_wheel.transform.Rotate(_wheelRotation, degreesPerTick * directionCorrector * rotationCorrection); //rotate wheel
+				_wheel.transform.Rotate(_wheelRotation, degreesPerTick * directionCorrector * rotationCorrection);
 				yield return new WaitForFixedUpdate();
 			}
 		}
-
+		
 		/// <summary>Coroutine for wheels with suspension.</summary>
 		/// <remarks>DEPRECATED!!!!!!!!!!!!!! Use KFSuspension instead!</remarks>
 		IEnumerator Suspension()
@@ -253,12 +255,12 @@ namespace KerbalFoundries
 				yield return null; 
 			}
 		}
-
+		
 		public void OnPause()
 		{
 			couroutinesActive = false;
 		}
-
+		
 		public void OnUnPause()
 		{
 			couroutinesActive = true;
@@ -267,8 +269,8 @@ namespace KerbalFoundries
 			else
 				StartCoroutine("IndividualWheel");
 		}
-
-		public void MoveSuspension(int index, float movement, Transform movedObject) //susTrav Axis, amount to move, named object.
+		
+		public void MoveSuspension(int index, float movement, Transform movedObject)
 		{
 			var tempVector = new Vector3(0, 0, 0);
 			tempVector[index] = movement * tweakScaleCorrector;

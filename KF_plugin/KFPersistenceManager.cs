@@ -39,7 +39,7 @@ namespace KerbalFoundries
 			KFLog = new KFLogUtil(strClassName);
 			KFLogInit = new KFLogUtil();
             
-			KFLogInit.Log(string.Format("Version: {0}", Version.versionString));
+			KFLogInit.Log(string.Format("Version: {0}", KFVersion.versionString));
 
 			ReadConfigFile();
 			ReadDustColor();
@@ -197,8 +197,8 @@ namespace KerbalFoundries
 			configNode.SetValue("isDustCameraEnabled", isDustCameraEnabled.ToString(), true);
 			configNode.SetValue("isMarkerEnabled", isMarkerEnabled.ToString(), true);
 			configNode.SetValue("isRepLightEnabled", isRepLightEnabled.ToString(), true);
-			configNode.SetValue("dustAmount", Mathf.Clamp(KFExtensions.RoundToNearestValue(dustAmount, 0.25f), 0f, 3f).ToString(), true);
-			configNode.SetValue("suspensionIncrement", Mathf.Clamp(KFExtensions.RoundToNearestValue(suspensionIncrement, 5f), 5f, 20f).ToString(), true);
+			configNode.SetValue("dustAmount", Mathf.Clamp(dustAmount.RoundToNearestValue(0.25f), 0f, 3f).ToString(), true);
+			configNode.SetValue("suspensionIncrement", Mathf.Clamp(suspensionIncrement.RoundToNearestValue(5f), 5f, 20f).ToString(), true);
 			configNode.SetValue("isDebugEnabled", isDebugEnabled.ToString(), true);
 			configNode.SetValue("debugIsWaterColliderVisible", debugIsWaterColliderVisible.ToString(), true);
 			configNode.SetValue("writeToLogFile", writeToLogFile.ToString(), true);
@@ -338,13 +338,13 @@ namespace KerbalFoundries
 		#endregion DustFX
 
 		#region Part Icon Fix
-		void OnDestroy() // Last possible point before the loading scene switches to the Main Menu scene.
+		static void OnDestroy() // Last possible point before the loading scene switches to the Main Menu scene.
 		{
 			FindKFPartsToFix().ForEach(FixPartIcon);
 		}
 
 		/// <summary>Finds all KF parts which part icons need to be fixed</summary>
-		/// <returns>List of parts with IconOverride configNode</returns>
+		/// <returns>List of parts with KFIconOverride configNode</returns>
 		static List<AvailablePart> FindKFPartsToFix()
 		{
 			strClassName += ": Icon Fixer";
@@ -355,7 +355,7 @@ namespace KerbalFoundries
 			KFPartsList.ForEach(part => KFLog.Log(string.Format("  {0}", part.name)));
 			#endif
 
-			List<AvailablePart> KFPartsToFixList = KFPartsList.FindAll(HasIconOverrideModule);
+			List<AvailablePart> KFPartsToFixList = KFPartsList.FindAll(HasKFIconOverrideModule);
 			
 			#if DEBUG
 			KFLog.Log("\nKF Parts which need an icon fix:");
@@ -365,18 +365,18 @@ namespace KerbalFoundries
 			return KFPartsToFixList;
 		}
 
-		/// <summary>Fixes incorrect part icon in the editor's parts list panel for every part which has a IconOverride node.
+		/// <summary>Fixes incorrect part icon in the editor's parts list panel for every part which has a KFIconOverride node.
 		/// The node can have several attributes.
 		/// Example:
-		/// IconOverride
+		/// KFIconOverride
 		/// {
 		///     Multiplier = 1.0      // for finetuning icon zoom
 		///     Pivot = transformName // transform to rotate around; rotates around CoM if not specified
 		///     Rotation = vector     // offset to rotation point
 		/// }
-		/// All parameters are optional. The existence of an IconOverride node is enough to fix the icon.
+		/// All parameters are optional. The existence of an KFIconOverride node is enough to fix the icon.
 		/// Example:
-		/// IconOverride {}
+		/// KFIconOverride {}
 		/// </summary>
 		/// <param name="partToFix">part to fix</param>
 		/// <remarks>This method uses code from xEvilReepersx's PartIconFixer.
@@ -394,19 +394,19 @@ namespace KerbalFoundries
 			float max = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
 
 			float multiplier = 1f;
-			if (HasIconOverrideMultiplier(partToFix))
-				float.TryParse(partToFix.partConfig.GetNode("IconOverride").GetValue("Multiplier"), out multiplier);
+			if (HasKFIconOverrideMultiplier(partToFix))
+				float.TryParse(partToFix.partConfig.GetNode("KFIconOverride").GetValue("Multiplier"), out multiplier);
 
 			float factor = 40f / max * multiplier;
 			factor /= 40f;
 
 			string pivot = string.Empty;
-			if (HasIconOverridePivot(partToFix))
-				pivot = partToFix.partConfig.GetNode("IconOverride").GetValue("Pivot");
+			if (HasKFIconOverridePivot(partToFix))
+				pivot = partToFix.partConfig.GetNode("KFIconOverride").GetValue("Pivot");
 
 			Vector3 rotation = Vector3.zero; 
-			if (HasIconOverrideRotation(partToFix))
-				rotation = KSPUtil.ParseVector3(partToFix.partConfig.GetNode("IconOverride").GetValue("Rotation"));
+			if (HasKFIconOverrideRotation(partToFix))
+				rotation = KSPUtil.ParseVector3(partToFix.partConfig.GetNode("KFIconOverride").GetValue("Rotation"));
 
 			// Apply icon fixes
 			partToFix.iconScale = max; // affects only the meter scale in the tooltip
@@ -438,36 +438,36 @@ namespace KerbalFoundries
 			return part.name.StartsWith("KF.", System.StringComparison.Ordinal);
 		}
 		
-		/// <summary>Checks if a part has an IconOverride node in it's config.</summary>
-		/// <param name="part">part to check</param>
-		/// <returns>true if an IconOverride node is there</returns>
-		static bool HasIconOverrideModule(AvailablePart part)
+		/// <summary>Checks if a part has an KFIconOverride node in it's config.</summary>
+		/// <param name="part">Part to check.</param>
+		/// <returns>True if a KFIconOverride node is there.</returns>
+		static bool HasKFIconOverrideModule(AvailablePart part)
 		{
-			return part.partConfig.HasNode("IconOverride");
+			return part.partConfig.HasNode("KFIconOverride");
 		}
 		
-		/// <summary>Checks if there's a Multiplier node in IconOverride</summary>
+		/// <summary>Checks if there's a Multiplier node in KFIconOverride.</summary>
 		/// <param name="part">part to check</param>
-		/// <returns>true if IconOverride->Multiplier exists</returns>
-		static bool HasIconOverrideMultiplier(AvailablePart part)
+		/// <returns>True if IconOverride->Multiplier exists</returns>
+		static bool HasKFIconOverrideMultiplier(AvailablePart part)
 		{
-			return part.partConfig.GetNode("IconOverride").HasNode("Multiplier");
+			return part.partConfig.GetNode("KFIconOverride").HasNode("Multiplier");
 		}
 		
-		/// <summary>Checks if there's a Pivot node in IconOverride</summary>
-		/// <param name="part">part to check</param>
-		/// <returns>true if IconOverride->Pivot exists</returns>
-		static bool HasIconOverridePivot(AvailablePart part)
+		/// <summary>Checks if there's a Pivot node in KFIconOverride.</summary>
+		/// <param name="part">Part to check.</param>
+		/// <returns>True if KFIconOverride->Pivot exists.</returns>
+		static bool HasKFIconOverridePivot(AvailablePart part)
 		{
-			return part.partConfig.GetNode("IconOverride").HasNode("Pivot");
+			return part.partConfig.GetNode("KFIconOverride").HasNode("Pivot");
 		}
 		
-		/// <summary>Checks if there's a Rotation node in IconOverride</summary>
-		/// <param name="part">part to check</param>
-		/// <returns>true if IconOverride->Rotation exists</returns>
-		static bool HasIconOverrideRotation(AvailablePart part)
+		/// <summary>Checks if there's a Rotation node in KFIconOverride.</summary>
+		/// <param name="part">Part to check.</param>
+		/// <returns>True if KFIconOverride->Rotation exists.</returns>
+		static bool HasKFIconOverrideRotation(AvailablePart part)
 		{
-			return part.partConfig.GetNode("IconOverride").HasNode("Rotation");
+			return part.partConfig.GetNode("KFIconOverride").HasNode("Rotation");
 		}
 		
 		/// <summary>Calculates the bounds of a game object.</summary>

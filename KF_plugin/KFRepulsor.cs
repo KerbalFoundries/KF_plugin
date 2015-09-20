@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using KerbalFoundries.DustFX;
 
 namespace KerbalFoundries
 {
@@ -59,7 +60,7 @@ namespace KerbalFoundries
 
 		public List<WheelCollider> wcList = new List<WheelCollider>();
 		public bool deployed;
-		ModuleWaterSlider _waterSlider;
+		KFModuleWaterSlider _waterSlider;
 
 		/// <summary>Defines the rate at which the specified resource is consumed.</summary>
 		/// <remarks>Special Case: set this to 0 to disable resource consumption.</remarks>
@@ -168,10 +169,10 @@ namespace KerbalFoundries
 		/// <summary>Detects the water slider component, or adds it if not found on the vessel.</summary>
 		void SetupWaterSlider()
 		{
-			_waterSlider = vessel.rootPart.GetComponent<ModuleWaterSlider>();
+			_waterSlider = vessel.rootPart.GetComponent<KFModuleWaterSlider>();
 			if (Equals(_waterSlider, null))
 			{
-				_waterSlider = vessel.rootPart.gameObject.AddComponent<ModuleWaterSlider>();
+				_waterSlider = vessel.rootPart.gameObject.AddComponent<KFModuleWaterSlider>();
 				_waterSlider.StartUp();
 			}
 		}

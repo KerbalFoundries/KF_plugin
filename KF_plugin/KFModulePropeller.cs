@@ -4,7 +4,7 @@ using System.Linq;
 namespace KerbalFoundries
 {
 	/// <summary>Controls the ability for certain tracks and the Screw drive to propel the vessel through the water.</summary>
-	class ModulePropeller : PartModule
+	public class KFModulePropeller : PartModule
 	{
 		KFModuleWheel _KFModuleWheel;
 		
@@ -13,11 +13,11 @@ namespace KerbalFoundries
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		readonly KFLogUtil KFLog = new KFLogUtil("ModulePropeller");
+		readonly KFLogUtil KFLog = new KFLogUtil("KFModulePropeller");
 		
 		public override void OnStart(PartModule.StartState state)
 		{
-			if (!HighLogic.LoadedSceneIsFlight || Equals(vessel.vesselType, VesselType.Debris))
+			if (!HighLogic.LoadedSceneIsFlight || (Equals(vessel.vesselType, VesselType.Debris) || Equals(vessel.vesselType, VesselType.EVA)))
 				return;
 			
 			#if DEBUG

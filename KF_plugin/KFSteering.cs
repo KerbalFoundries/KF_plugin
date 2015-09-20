@@ -12,13 +12,13 @@ namespace KerbalFoundries
 		public string steeringObject;
 		[KSPField]
 		public string steeringAxis = "Y";
-
+		
 		int steeringIndex = 1;
 		Transform _steering;
 		Vector3 initialSteeringAngle;
-
+		
 		KFModuleWheel _KFModuleWheel;
-
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris))
@@ -31,7 +31,7 @@ namespace KerbalFoundries
 				StartCoroutine(Steering());
 			}
 		}
-
+		
 		// disable FunctionNeverReturns
 		IEnumerator Steering()
 		{

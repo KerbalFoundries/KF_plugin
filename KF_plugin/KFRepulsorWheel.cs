@@ -12,7 +12,7 @@ namespace KerbalFoundries
 {
 	/// <summary>Control module for the convertible repulsor-wheel system.</summary>
 	/// <remarks>Long overdue for a refactor and revival.</remarks>
-	public class RepulsorWheel : PartModule
+	public class KFRepulsorWheel : PartModule
 	{
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Repulsor Height %"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5)]
 		public float repulsorHeight = 50;
@@ -41,7 +41,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		readonly KFLogUtil KFLog = new KFLogUtil("RepulsorWheel");
+		readonly KFLogUtil KFLog = new KFLogUtil("KFRepulsorWheel");
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -174,7 +174,7 @@ namespace KerbalFoundries
 					mt.currentTravel = repulsorHeight * replusorHeightMultiplier;
 				}
 			}
-			foreach (RepulsorWheel rw in vessel.FindPartModulesImplementing<RepulsorWheel>())
+			foreach (KFRepulsorWheel rw in vessel.FindPartModulesImplementing<KFRepulsorWheel>())
 				rw.repulsorHeight = repulsorHeight;
 		}
 

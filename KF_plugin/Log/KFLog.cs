@@ -20,7 +20,7 @@ namespace KerbalFoundries.Log
 		/// <summary>Check this to see if logging thread is ready for work.</summary>
 		public static bool Ready;
 		// Initializing as "false" is horribly redundant.
-
+		
 		/// <summary>Prepares and creates the log writer thread.</summary>
 		public static void StartWriter()
 		{
@@ -31,7 +31,7 @@ namespace KerbalFoundries.Log
 			thread.Start();
 			Ready = true;
 		}
-
+		
 		/// <summary>Stops the thread.</summary>
 		public static void StopWriter()
 		{
@@ -39,12 +39,12 @@ namespace KerbalFoundries.Log
 			{
 				if (thread.IsAlive)
 					writer.RequestStop(); // tell it to stop
-
+				
 				thread.Join(); // wait until thread terminates
 				Ready = false;
 			}            
 		}
-
+		
 		/// <summary>Writes a message to the log.</summary>
 		/// <param name="message">Message to write.</param>
 		public static void WriteToFile(string message)

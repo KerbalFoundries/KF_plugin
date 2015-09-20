@@ -6,7 +6,7 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>Handles mirroring of compatible parts where the model is not symmetrical.</summary>
-	[KSPModule("ModuleMirror")]
+	[KSPModule("KFModuleMirror")]
 	public class KFModuleMirror : PartModule
 	{
 		public string right = "right";
@@ -180,7 +180,7 @@ namespace KerbalFoundries
 
 		public void FindClone()
 		{
-			foreach (Part potentialMaster in this.part.symmetryCounterparts)
+			foreach (Part potentialMaster in part.symmetryCounterparts)
 			{
 				if (!Equals(potentialMaster, null))
 				{

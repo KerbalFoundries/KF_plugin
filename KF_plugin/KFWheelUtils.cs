@@ -36,7 +36,10 @@ namespace KerbalFoundries
 					break;
 			}
 			
-			KFLog.Log(string.Format("{0}", dot));
+			#if DEBUG
+			KFLog.Log(string.Format("\"dot\" = {0}", dot));
+			#endif
+			
 			corrector = dot < 0 ? -1 : 1;
 			return corrector;
 		}
@@ -121,7 +124,7 @@ namespace KerbalFoundries
 			
 			ratio = myAdjustedPosition / midPoint;
 			
-			if (Equals(ratio, 0) || float.IsNaN(ratio))
+			if (Equals(ratio, 0f) || float.IsNaN(ratio))
                 ratio = 1f;
 			
 			#if DEBUG

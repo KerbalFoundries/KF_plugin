@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KerbalFoundries
+namespace KerbalFoundries.DustFX
 {
 	public static class KFDustFXUtils
 	{
@@ -17,18 +17,15 @@ namespace KerbalFoundries
 			if (!Equals(FlightGlobals.ActiveVessel, null) && IsColliding(col))
 			{
 				Dictionary<string, Color> biomeColors = KFPersistenceManager.DustColors[body.name];
-				if (biomeColors.Count > 0)// Do we have biome color definitions for that body?
+				if (biomeColors.Count > 0)
 				{
 					string biomeName = GetCurrentBiomeName(lat, lon);
-					// get biome name
 					if (string.IsNullOrEmpty(biomeName))
-						// do we have a color for that biome?
 						biomeName = "default";
-					// no -> use default color of body
 					return biomeColors[biomeName];
 				}
 			}
-			return KFPersistenceManager.DefaultDustColor; // no color found or conditions aren't met, use default color
+			return KFPersistenceManager.DefaultDustColor;
 		}
 		
 		/// <summary>Sets whether or not we are colliding with the world.</summary>
@@ -39,8 +36,8 @@ namespace KerbalFoundries
 			if (Equals(col, null))
 				return false;
 			// Test for PQS: Name in the form "Ab0123456789."
-			Int64 n;
-			bool result = Equals(col.name.Length, 12) && Int64.TryParse(col.name.Substring(2, 10), out n);
+			Int64 number;
+			bool result = Equals(col.name.Length, 12) && Int64.TryParse(col.name.Substring(2, 10), out number);
 			return result;
 		}
 		

@@ -13,7 +13,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		static readonly KFLogUtil KFLog = new KFLogUtil("Extensions");
+		static readonly KFLogUtil KFLog = new KFLogUtil("KFExtensions");
 		
 		public static void DebugLine(Vector3 position, Vector3 rotation)
 		{
@@ -29,8 +29,7 @@ namespace KerbalFoundries
 			LineRenderer lineY = lineDebugY.AddComponent<LineRenderer>();
 			LineRenderer lineZ = lineDebugZ.AddComponent<LineRenderer>();
 			
-			//lineX.transform.parent = transform; // ...child to our part...
-			lineX.useWorldSpace = false; // ...and moving along with it (rather 
+			lineX.useWorldSpace = false;
 			lineX.material = new Material(Shader.Find("Particles/Additive"));
 			lineX.SetColors(Color.red, Color.white);
 			lineX.SetWidth(0.1f, 0.1f);
@@ -38,7 +37,7 @@ namespace KerbalFoundries
 			lineX.SetPosition(0, Vector3.zero);
 			lineX.SetPosition(1, Vector3.right * 10);
 
-			lineY.useWorldSpace = false; // ...and moving along with it (rather 
+			lineY.useWorldSpace = false;
 			lineY.material = new Material(Shader.Find("Particles/Additive"));
 			lineY.SetColors(Color.green, Color.white);
 			lineY.SetWidth(0.1f, 0.1f);
@@ -46,7 +45,7 @@ namespace KerbalFoundries
 			lineY.SetPosition(0, Vector3.zero);
 			lineY.SetPosition(1, Vector3.up * 10);
 
-			lineZ.useWorldSpace = false; // ...and moving along with it (rather 
+			lineZ.useWorldSpace = false;
 			lineZ.material = new Material(Shader.Find("Particles/Additive"));
 			lineZ.SetColors(Color.blue, Color.white);
 			lineZ.SetWidth(0.1f, 0.1f);
@@ -56,13 +55,19 @@ namespace KerbalFoundries
 		}
 		
 		/// <summary>Splits strings.</summary>
+		/// <param name="ObjectNames">Names of the objects to split.</param>
 		/// <remarks>Kinda like splitting hairs... but not really.</remarks>
-		public static String[] SplitString(string ObjectNames)
+		/// <returns>The names in a list format.</returns>
+		public static String[] SplitString(this string ObjectNames)
 		{
 			String[] nameList = ObjectNames.Split(new[] { ',', ' ', '|' }, StringSplitOptions.RemoveEmptyEntries);
 			return nameList;
 		}
         
+		/// <summary>Seeks out the names of transforms/objects within the model, under the specified transform, and matches them against a common naming convention.</summary>
+		/// <param name="target">The target transform.</param>
+		/// <param name="name">The name to match other transforms/objects with.</param>
+		/// <returns>The resulting transform/object if found, null otherwise.</returns>
 		public static Transform Search(this Transform target, string name)
 		{
 			if (Equals(target.name, name))
@@ -77,6 +82,10 @@ namespace KerbalFoundries
 			return null;
 		}
 		
+		/// <summary>A transform name search specifically made to use with the Texture Anumation module.</summary>
+		/// <param name="target">A target transform in which to begin the search.</param>
+		/// <param name="name">The name to match to the child objects.</param>
+		/// <returns>The resulting transform/object if found, null otherwise.</returns>
 		public static Transform TexAnimSearch(this Transform target, string name)
 		{
 			Transform result;
@@ -96,7 +105,11 @@ namespace KerbalFoundries
 			}
 			return null;
 		}
-
+		
+		/// <summary>Seeks out the names of transforms/objects within the model, under the specified transform, and matches them against a common naming convention.</summary>
+		/// <param name="target">The target transform.</param>
+		/// <param name="name">The name to match other transforms/objects with.</param>
+		/// <returns>The resulting transform/object if found, null otherwise.</returns>
 		public static Transform SearchStartsWith(this Transform target, string name)
 		{
 			if (target.name.StartsWith(name, StringComparison.Ordinal))
@@ -111,9 +124,8 @@ namespace KerbalFoundries
 			return null;
 		}
 		
-		/// <summary>Gets a battery.  Names it "Jennifer" and gives it a good home.</summary>
-		/// <remarks>My father once played a game where he had to choose a mascot.  He grabbed a dead battery and named it "Jennifer."  That story never gets old. - Gaalidas</remarks>
-		public static float GetBattery(Part part)
+		/// <summary>Gets a battery to check its power supply.</summary>
+		public static float GetBattery(this Part part)
 		{
 			PartResourceDefinition resourceDefinitions = PartResourceLibrary.Instance.GetDefinition("ElectricCharge");
 			var resources = new List<PartResource>();
@@ -147,6 +159,7 @@ namespace KerbalFoundries
 			return index;
 		}
 
+		/*
 		/// <summary>Plays a sound.</summary>
 		/// <param name="thisPart">The part to play from.</param>
 		/// <param name="effectName">The effect name to work out of.</param>
@@ -155,10 +168,11 @@ namespace KerbalFoundries
 		{
 			thisPart.Effect(effectName, effectPower);
 		}
+		 */
 
 		/// <summary>Disables the "animate" button in the part context menu.</summary>
 		/// <param name="part">Part reference to affect.</param>
-		public static void DisableAnimateButton(Part part)
+		public static void DisableAnimateButton(this Part part)
 		{
 			if (HighLogic.LoadedSceneIsEditor)
 			{
@@ -170,16 +184,16 @@ namespace KerbalFoundries
 			}
 		}
 
-		public static string GetLast(this string source, int tail_length)
-		{
-			return tail_length >= source.Length ? source : source.Substring(source.Length - tail_length);
-		}
+		//public static string GetLast(this string source, int tail_length)
+		//{
+		//	return tail_length >= source.Length ? source : source.Substring(source.Length - tail_length);
+		//}
 		
 		/// <summary>Shortcut to rounding a value to the nearest number.</summary>
 		/// <param name="input">Value to be rounded.</param>
 		/// <param name="roundto">Rounds the value to the nearest "roundto".  If value is between 0 and 1 (non-inclusive) then we will round to that decimal, otherwise we round to nearest while interval of "roundto".</param>
 		/// <returns>Nearest "roundto" in relation to "value"</returns>
-		public static float RoundToNearestValue(float input, float roundto)
+		public static float RoundToNearestValue(this float input, float roundto)
 		{
 			float output;
 			if (roundto < 1f && roundto > 0f)

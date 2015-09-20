@@ -14,32 +14,32 @@ namespace KerbalFoundries
 		public string susTravName;
 		[KSPField]
 		public string susTravAxis = "Y";
-
+		
 		List<WheelCollider> colliders = new List<WheelCollider>();
 		Transform susTrav;
-
+		
 		Vector3 initialPosition = new Vector3(0, 0, 0);
-
+		
 		KFModuleWheel _moduleWheel;
-
+		
 		string[] colliderList;
-
+		
 		int objectCount;
 		int susTravIndex = 1;
-
+		
 		// Persistent fields. Not to be used for configs.
 		[KSPField(isPersistant = true)]
 		public float lastFrameTraverse;
 		[KSPField(isPersistant = true)]
 		public float suspensionDistance;
-
+		
 		float tweakScaleCorrector = 1;
 		bool isReady;
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFSuspension");
-
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
@@ -51,8 +51,8 @@ namespace KerbalFoundries
 				if (!Equals(_moduleWheel, null))
 					tweakScaleCorrector = _moduleWheel.tweakScaleCorrector;
 				KFLog.Warning(string.Format("TS Corrector: {0}", tweakScaleCorrector));
-
-				colliderList = KFExtensions.SplitString(colliderNames);
+				
+				colliderList = colliderNames.SplitString();
                 
 				for (int i = 0; i < colliderList.Count(); i++)
 				{
@@ -60,10 +60,10 @@ namespace KerbalFoundries
 					objectCount++;
 				}
 				susTrav = transform.SearchStartsWith(susTravName);
-
+				
 				initialPosition = susTrav.localPosition;
 				susTravIndex = KFExtensions.SetAxisIndex(susTravAxis);
-
+				
 				MoveSuspension(susTravIndex, -lastFrameTraverse, susTrav);
 				if (objectCount > 0)
 					StartCoroutine("WaitAndStart");
@@ -71,7 +71,7 @@ namespace KerbalFoundries
 					KFLog.Error("KFSuspension not configured correctly");
 			}
 		}
-
+		
 		System.Collections.IEnumerator WaitAndStart()
 		{
 			int i = 0;
@@ -82,14 +82,14 @@ namespace KerbalFoundries
 			}
 			isReady = true;
 		}
-
+		
 		public void Update()
 		{
 			if (!isReady)
 				return;
 			float suspensionMovement = 0f;
 			float frameTraverse = lastFrameTraverse;
-
+			
 			for (int i = 0; i < objectCount; i++)
 			{
 				float traverse = 0f;
@@ -106,33 +106,33 @@ namespace KerbalFoundries
 				}
 				else
 					traverse = colliders[i].suspensionDistance * tweakScaleCorrector;
-
+				
 				suspensionMovement += traverse; 
 			}
-
+			
 			frameTraverse = suspensionMovement / objectCount;
 			lastFrameTraverse = frameTraverse;
 			susTrav.localPosition = initialPosition;
 			MoveSuspension(susTravIndex, -frameTraverse, susTrav);
 		}
-
+		
 		public static void MoveSuspension(int index, float movement, Transform _movedObject)
 		{
 			var tempVector = new Vector3(0f, 0f, 0f);
 			tempVector[index] = movement;
 			_movedObject.transform.Translate(tempVector, Space.Self);
 		}
-
+		
 		public void OnPause()
 		{
 			isReady = false;
 		}
-
+		
 		public void OnUnPause()
 		{
 			isReady = true;
 		}
-
+		
 		public void OnDestroy()
 		{
 			GameEvents.onGamePause.Remove(new EventVoid.OnEvent(OnPause));

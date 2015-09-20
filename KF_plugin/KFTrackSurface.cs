@@ -12,20 +12,20 @@ namespace KerbalFoundries
 		SkinnedMeshRenderer _skinnedMeshRenderer;
 		Vector2 textureOffset;
 		Material trackMaterial = new Material(Shader.Find("Diffuse"));
-
+		
 		// Config fields
 		[KSPField]
 		public float trackLength = 10;
-
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
 			print(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-
+			
 			_skinnedMeshRenderer = part.GetComponentInChildren<SkinnedMeshRenderer>();
 			_trackSurface = _skinnedMeshRenderer.gameObject;
 			_moduleWheel = part.GetComponentInChildren<KFModuleWheel>();
-
+			
 			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris))
 			{
 				trackMaterial = _trackSurface.renderer.material;
@@ -35,7 +35,7 @@ namespace KerbalFoundries
 				trackMaterial.SetTextureScale("_BumpMap", trackTiling);
 			}
 		}
-
+		
 		public override void OnUpdate()
 		{
 			base.OnUpdate();

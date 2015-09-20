@@ -21,7 +21,7 @@ using System.Linq;
 using UnityEngine;
 using KerbalFoundries;
 
-namespace KerbalFoundries
+namespace KerbalFoundries.DustFX
 {
 	/// <summary>DustFX class which is based on, but heavily modified from, CollisionFX by pizzaoverload.</summary>
 	public class KFDustFX : PartModule
@@ -35,15 +35,15 @@ namespace KerbalFoundries
 		readonly KFLogUtil KFLog = new KFLogUtil("KFDustFX");
 		
 		/// <summary>The camera object we're using to get color info directly from the terrain.</summary>
-		ModuleCameraShot _ModuleCameraShot;
+		KFModuleCameraShot _ModuleCameraShot;
 		
 		/// <summary>Config field to compensate for part size.</summary>
 		[KSPField]
-		public float partSizeFactor = 1;
-
+		public float partSizeFactor = 1f;
+		
 		/// <summary>Local copy of the tweakScaleCorrector parameter in KFModuleWheel.</summary>
 		/// <remarks>Passed here by the wheel module itself.</remarks>
-		public float tweakScaleFactor = 1;
+		public float tweakScaleFactor = 1f;
 		
 		/// <summary>Specifies if the module is to be used for repulsors.</summary>
 		/// <remarks>Default is "false"</remarks>
@@ -122,7 +122,7 @@ namespace KerbalFoundries
 		
 		bool isColorOverrideActive;
 		float sizeFactor = 1f;
-
+		
 		bool isReady;
 		
 		GameObject _kfRepLight;
@@ -150,10 +150,10 @@ namespace KerbalFoundries
 			
 			if (HighLogic.LoadedSceneIsFlight)
 			{
-				_ModuleCameraShot = vessel.rootPart.gameObject.GetComponent<ModuleCameraShot>();
+				_ModuleCameraShot = vessel.rootPart.gameObject.GetComponent<KFModuleCameraShot>();
 				if (Equals(_ModuleCameraShot, null)) //add if not... sets some defaults.
 				{
-					_ModuleCameraShot = vessel.rootPart.gameObject.AddComponent<ModuleCameraShot>();
+					_ModuleCameraShot = vessel.rootPart.gameObject.AddComponent<KFModuleCameraShot>();
 					_ModuleCameraShot.StartUp();
 				}
 				if (KFPersistenceManager.isDustEnabled)
@@ -164,7 +164,7 @@ namespace KerbalFoundries
 			GameEvents.onGameUnpause.Add(OnUnpause);
 			isReady = true;
 		}
-
+		
 		/// <summary>Updates stuff.</summary>
 		public void Update()
 		{
@@ -176,7 +176,6 @@ namespace KerbalFoundries
 		/// <summary>Defines the particle effects used in this module.</summary>
 		public void SetupParticles(bool repulsor)
 		{
-			// Removed the check for the enabled status.  We'll set the effect up either way, but only show it if the enabler is set to true.
 			kfdustFx = (GameObject)GameObject.Instantiate(Resources.Load(dustEffectObject));
 			kfdustFx.transform.position = part.transform.position;
 			kfdustFx.particleEmitter.localVelocity = Vector3.zero;
@@ -186,7 +185,7 @@ namespace KerbalFoundries
 			kfdustFx.particleEmitter.minEmission = minDustEmission;
 			kfdustFx.particleEmitter.minSize = minDustSize;
 			dustAnimator = kfdustFx.particleEmitter.GetComponent<ParticleAnimator>();
-			if (repulsor) // This needs to be run whether the lights are enabled or not, or the lights wont' work properly if switched on in flight.
+			if (repulsor)
 				SetupRepulsorLights();
 		}
 		
@@ -258,7 +257,7 @@ namespace KerbalFoundries
 				_repLight.color = Color.clear;
 			}
 		}
-
+		
 		/// <summary>This creates and maintains the dust particles and their body/biome specific colors.</summary>
 		/// <param name="speed">Speed of the part which is scraping.</param>
 		/// <param name="contactPoint">The point at which the collider and the scraped surface make contact.</param>
@@ -293,7 +292,7 @@ namespace KerbalFoundries
 			}
 			
 			colorFIFO.Enqueue(colorTemp);
-
+			
 			if (colorFIFO.Count > 100)
 				colorFIFO.Dequeue();
 			

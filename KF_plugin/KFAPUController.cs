@@ -5,15 +5,16 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>Control module for the Auxilary Power Unit.</summary>
-	[KSPModule("APUController")]
-	class APUController : PartModule
+	[KSPModule("KFAPUController")]
+	public class KFAPUController : PartModule
 	{
 		/// <summary>Uses ModuleEnginesFX specifically for the APU.</summary>
-		public ModuleEnginesFX thisEngine;
+		public ModuleEnginesFX _moduleEnginesFX;
 		
 		/// <summary>Current throttle setting.</summary>
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Throttle"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5f)]
-		public float throttleSetting = 50;
+		public float throttleSetting = 50f;
+		
 		/// <summary>Whether or not auto-throttle controls are enabled.</summary>
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Mode"), UI_Toggle(disabledText = "Manual", enabledText = "Auto")]
 		public bool autoThrottle = true;
@@ -25,6 +26,7 @@ namespace KerbalFoundries
 		/// <summary>How fast we react to changes.</summary>
 		[KSPField]
 		public float reactionSpeed = 5f;
+		
 		/// <summary>Percentage of charge we are targetting as our "low threshold" level.</summary>
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Target Charge %"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5f)]
 		public float targetBatteryRatio = 75f;
@@ -32,22 +34,28 @@ namespace KerbalFoundries
 		public float ratioAdjustment;
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Usage Adjustment", guiFormat = "F8")]
 		public float usageAdjustment;
+		
 		/// <summary>Auto-throttle level readout.</summary>
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Auto Throttle", guiFormat = "F8")]
 		public float autoThrottleSetting = .5f;
+		
 		/// <summary>The relative charge in the batteries to keep track of.</summary>
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Battery Ratio", guiFormat = "F8")]
 		public float batteryRatio = .5f;
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		readonly KFLogUtil KFLog = new KFLogUtil("APUController");
+		readonly KFLogUtil KFLog = new KFLogUtil("KFAPUController");
 
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
+			
+			#if DEBUG
 			KFLog.Log(string.Format("{0}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version));
-			FindEngine(); 
+			#endif
+			
+			FindEngine();
 			if (HighLogic.LoadedSceneIsFlight)
 				part.force_activate();
 		}
@@ -57,27 +65,27 @@ namespace KerbalFoundries
 			base.OnFixedUpdate();
 			if (autoThrottle)
 			{
-				batteryRatio = KFExtensions.GetBattery(part);
+				batteryRatio = part.GetBattery();
 				usageAdjustment = (lastRatio - batteryRatio) * reactionSpeed;
 				ratioAdjustment = Mathf.Clamp(((targetBatteryRatio / 100f) - batteryRatio), -0.001f, 0.001f);
 				float tempThrottle = Mathf.Clamp(autoThrottleSetting + ratioAdjustment + usageAdjustment, 0.01f, 1f);
 				autoThrottleSetting = tempThrottle;
-				thisEngine.currentThrottle = autoThrottleSetting;
+				_moduleEnginesFX.currentThrottle = autoThrottleSetting;
 				lastRatio = batteryRatio;
 			}
 			else
-				thisEngine.currentThrottle = Mathf.Lerp((throttleSetting / 100f), thisEngine.currentThrottle, Time.deltaTime * 40f);
+				_moduleEnginesFX.currentThrottle = Mathf.Lerp((throttleSetting / 100f), _moduleEnginesFX.currentThrottle, Time.deltaTime * 40f);
 		}
 
 		public void FindEngine()
 		{
-			foreach (ModuleEnginesFX me in part.GetComponentsInChildren<ModuleEnginesFX>())
+			foreach (ModuleEnginesFX engineFound in part.GetComponentsInChildren<ModuleEnginesFX>())
 			{
 				#if DEBUG
 				KFLog.Log("Found an engine module.");
 				#endif
 				
-				thisEngine = me;
+				_moduleEnginesFX = engineFound;
 			}
 		}
 

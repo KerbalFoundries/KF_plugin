@@ -5,7 +5,7 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>Controls the DustFX camera-based color picker.</summary>
-	public class ModuleCameraShot : PartModule
+	public class KFModuleCameraShot : PartModule
 	{
 		// disable RedundantDefaultFieldInitializer
 		// disable ConvertToConstant.Local
@@ -82,7 +82,7 @@ namespace KerbalFoundries
 			if (frameCount >= frameThreshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCamEnabled && isReady)
 			{
 				frameCount = 0;
-
+				
 				_cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
 				_camera.targetTexture = renderTexture;
 				_camera.enabled = true;
@@ -93,21 +93,22 @@ namespace KerbalFoundries
 				_camera.targetTexture = null;
 				_camera.enabled = false;
 				RenderTexture.active = null;
-
+				
 				Color[] texColors = groundShot.GetPixels();
 				int total = texColors.Length;
-
+				
 				float r = texColors[0].r;
 				float g = texColors[0].g;
 				float b = texColors[0].b;
 				float alpha = 0.014f;
-
+				
 				for (int i = 0; i < total; i++)
 				{
 					r += texColors[i].r;
 					g += texColors[i].g;
 					b += texColors[i].b;
 				}
+				
 				_averageColour = new Color(r / total, g / total, b / total, alpha);
 			}
 			frameCount++;

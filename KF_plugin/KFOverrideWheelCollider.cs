@@ -5,7 +5,7 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>Allows the override of a wheel collider already placed on the part when converting non-KF wheels to a KF control system.</summary>
-	public class OverrideWheelCollider : PartModule
+	public class KFOverrideWheelCollider : PartModule
 	{
 		/// <summary>Name of the wheelCollider object in the model.</summary>
 		[KSPField]
@@ -65,7 +65,7 @@ namespace KerbalFoundries
 
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		readonly KFLogUtil KFLog = new KFLogUtil("OverrideWheelCollider");
+		readonly KFLogUtil KFLog = new KFLogUtil("KFOverrideWheelCollider");
         
 		public override void OnStart(PartModule.StartState state)
 		{

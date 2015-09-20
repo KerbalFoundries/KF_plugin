@@ -2,67 +2,69 @@
 using UnityEngine;
 using KerbalFoundries;
 
-namespace TextureAnimator
+namespace KerbalFoundries.TextureTools
 {
 	public class KFTextureAnimator : PartModule
 	{
 		[KSPField]
 		public string ObjectName;
-
+		
 		[KSPField]
 		public float minSpeedU = 5f;
-
+		
 		[KSPField]
 		public float maxSpeedU = 15f;
-
+		
 		[KSPField]
 		public float minSpeedV;
-
+		
 		[KSPField]
 		public float maxSpeedV = 30f;
-
+		
 		[KSPField]
 		public float smoothSpeed = 10f;
-
+		
 		[KSPField]
 		public float minOffsetU = -0.1f;
-
+		
 		[KSPField]
 		public float maxOffsetU = 0.1f;
-
+		
 		[KSPField]
 		public float minOffsetV = -0.1f;
-
+		
 		[KSPField]
 		public float maxOffsetV = 0.1f;
-
+		
 		[KSPField]
 		public bool additiveMode;
-
+		
 		float timeU;
-
 		float timeV;
-
 		float offsetU;
-
 		float offsetV;
-
 		float smoothedU;
-
 		float smoothedV;
-
+		
 		public bool isReady;
-
+		
 		Transform _mesh;
-
+		
+		/// <summary>Logging utility.</summary>
+		/// <remarks>Call using "KFLog.log_type"</remarks>
+		readonly KFLogUtil KFLog = new KFLogUtil("KFAPUController");
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
 			_mesh = transform.TexAnimSearch(ObjectName);
 			isReady |= HighLogic.LoadedSceneIsFlight;
-			MonoBehaviour.print("starting texture animator");
+			
+			#if DEBUG
+			KFLog.Log("Starting texture animator.");
+			#endif
 		}
-
+		
 		public void Update()
 		{
 			if (isReady)

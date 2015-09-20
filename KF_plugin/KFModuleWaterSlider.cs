@@ -10,7 +10,7 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>Creates a surface that follows the craft several meters below the water level to provide a collidable surface.</summary>
-	public class ModuleWaterSlider : PartModule
+	public class KFModuleWaterSlider : PartModule
 	{
 		// disable ConvertToConstant.Local
 		
@@ -25,7 +25,7 @@ namespace KerbalFoundries
 		bool isReady;
 		
 		/// <summary>Local name of the KFLogUtil class.</summary>
-		readonly KFLogUtil KFLog = new KFLogUtil("ModuleWaterSlider");
+		readonly KFLogUtil KFLog = new KFLogUtil("KFModuleWaterSlider");
 		
 		GameObject waterSliderSurface;
 		
@@ -36,7 +36,7 @@ namespace KerbalFoundries
 			#endif
 			
 			_vessel = GetComponent<Vessel>();
-			_collider = new GameObject("ModuleWaterSlider.Collider");
+			_collider = new GameObject("KFModuleWaterSlider.Collider");
 			
 			waterSliderSurface = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			waterSliderSurface.transform.parent = _collider.transform;

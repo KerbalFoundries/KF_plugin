@@ -5,7 +5,7 @@ namespace KerbalFoundries
 {
 	/// <summary>Sets a string that contains the Mod-name and the version number for use in Logs.</summary>
 	/// <remarks>Rarely actually updated to reflect the mod version.</remarks>
-	public static class Version
+	public static class KFVersion
 	{
 		/// <summary>The release version number.</summary>
 		public static double versionNumber = 1.9;

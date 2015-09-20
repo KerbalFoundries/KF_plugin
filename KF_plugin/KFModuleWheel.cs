@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using KerbalFoundries.DustFX;
 
 namespace KerbalFoundries
 {
@@ -197,7 +198,7 @@ namespace KerbalFoundries
 		List<float> suspensionDistance = new List<float>();
 		ModuleAnimateGeneric retractionAnimation;
 		KFDustFX _dustFX;
-		ModuleWaterSlider _waterSlider;
+		KFModuleWaterSlider _waterSlider;
         
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
@@ -270,7 +271,7 @@ namespace KerbalFoundries
 			if (disableTweakables)
 			{
 				KFLog.Warning("Disabling tweakables.");
-				foreach (BaseField k in this.Fields)
+				foreach (BaseField k in Fields)
 				{
 					#if DEBUG
 					KFLog.Log(string.Format("Found {0}", k.guiName));
@@ -279,7 +280,7 @@ namespace KerbalFoundries
 					k.guiActive = false;
 					k.guiActiveEditor = false;
 				}
-				foreach (BaseAction a in this.Actions)
+				foreach (BaseAction a in Actions)
 				{
 					#if DEBUG
 					KFLog.Log(string.Format("Found {0}", a.guiName));
@@ -287,7 +288,7 @@ namespace KerbalFoundries
 					
 					a.active = false;
 				}
-				foreach (BaseEvent e in this.Events)
+				foreach (BaseEvent e in Events)
 				{
 					#if DEBUG
 					KFLog.Log(string.Format("Found {0}", e.guiName));
@@ -312,7 +313,7 @@ namespace KerbalFoundries
 			// Disable retract tweakables if retract option not specified.
 			if (HighLogic.LoadedSceneIsEditor && !hasRetract)
 			{
-				KFExtensions.DisableAnimateButton(this.part);
+				part.DisableAnimateButton();
 				Actions["AGToggleDeployed"].active = false;
 				Actions["Deploy"].active = false;
 				Actions["Retract"].active = false;
@@ -324,7 +325,7 @@ namespace KerbalFoundries
 				_dustFX = part.gameObject.GetComponent<KFDustFX>();
 				if (Equals(_dustFX, null))
 				{
-					_dustFX = this.part.gameObject.AddComponent<KFDustFX>();
+					_dustFX = part.gameObject.AddComponent<KFDustFX>();
 					_dustFX.OnStart(state);
 					_dustFX.tweakScaleFactor = tweakScaleCorrector;
 				}
@@ -334,7 +335,7 @@ namespace KerbalFoundries
 				maxRPM /= tweakScaleCorrector;
 				startRetracted = false;
 				if (!hasRetract)
-					KFExtensions.DisableAnimateButton(this.part);
+					part.DisableAnimateButton();
 				
 				// Wheel steering ratio setup
 				rootIndexLong = WheelUtils.GetRefAxis(part.transform.forward, vessel.rootPart.transform);
@@ -378,10 +379,10 @@ namespace KerbalFoundries
 		{
 			if (!isFloatingEnabled)
 				return;
-			_waterSlider = vessel.rootPart.GetComponent<ModuleWaterSlider>();
+			_waterSlider = vessel.rootPart.GetComponent<KFModuleWaterSlider>();
 			if (Equals(_waterSlider, null))
 			{
-				_waterSlider = vessel.rootPart.gameObject.AddComponent<ModuleWaterSlider>();
+				_waterSlider = vessel.rootPart.gameObject.AddComponent<KFModuleWaterSlider>();
 				_waterSlider.StartUp();
 			}
 		}
@@ -407,7 +408,7 @@ namespace KerbalFoundries
             
 			#if DEBUG
 			KFLog.Log(string.Format("Part Count: {0}", lastPartCount));
-			KFLog.Log(string.Format("Checking vessel mass.  Mass = {0}", this.vesselMass));
+			KFLog.Log(string.Format("Checking vessel mass.  Mass = {0}", vesselMass));
 			#endif
 			
 			_colliderMass = ChangeColliderMass();
@@ -844,11 +845,11 @@ namespace KerbalFoundries
 		[KSPEvent(guiActive = true, guiName = "Apply Steering Settings", active = true)]
 		public void ApplySteeringSettings()
 		{
-			foreach (KFModuleWheel mt in this.vessel.FindPartModulesImplementing<KFModuleWheel>())
+			foreach (KFModuleWheel mt in vessel.FindPartModulesImplementing<KFModuleWheel>())
 			{
 				if (!Equals(groupNumber, 0f) && Equals(groupNumber, mt.groupNumber))
 				{
-					mt.steeringRatio = WheelUtils.SetupRatios(mt.rootIndexLong, mt.part, this.vessel, groupNumber);
+					mt.steeringRatio = WheelUtils.SetupRatios(mt.rootIndexLong, mt.part, vessel, groupNumber);
 					mt.steeringInvert = steeringInvert;
 				}
 			}

@@ -5,14 +5,14 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>Allows for the desctruction of specific objects within the part/model before the part is used.</summary>
-	public class ObjectDestroy : PartModule
+	public class KFObjectDestroy : PartModule
 	{
 		[KSPField]
 		public string objectName;
 
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		readonly KFLogUtil KFLog = new KFLogUtil("ObjectDestroy");
+		readonly KFLogUtil KFLog = new KFLogUtil("KFObjectDestroy");
         
 		public override void OnStart(PartModule.StartState state)
 		{

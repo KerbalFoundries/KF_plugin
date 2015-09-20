@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using KerbalFoundries;
 
 namespace KerbalFoundries
 {
@@ -245,11 +246,11 @@ namespace KerbalFoundries
 				// Non-element spacer (top: 72)
 				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 80f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
 				// Non-element spacer (top: 104)
-				GUI.Label(new Rect(8f, 112f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFExtensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f)));
-				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 136f, 240f, sliderHeight), KFExtensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f), 0f, 3f);
+				GUI.Label(new Rect(8f, 112f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f)));
+				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 136f, 240f, sliderHeight), KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f), 0f, 3f);
 				// Non-element spacer (top: 152)
-				GUI.Label(new Rect(8f, 160f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", KFExtensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f)));
-				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 184f, 240f, sliderHeight), KFExtensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f), 5f, 20f);
+				GUI.Label(new Rect(8f, 160f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", KFPersistenceManager.suspensionIncrement.RoundToNearestValue(5f)));
+				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 184f, 240f, sliderHeight), KFPersistenceManager.suspensionIncrement.RoundToNearestValue(5f), 5f, 20f);
 				// Non-element spacer (top: 200)
 				KFPersistenceManager.isDebugEnabled = GUI.Toggle(new Rect(8f, 208f, 240f, toggleHeight), KFPersistenceManager.isDebugEnabled, "Enable Debug Options");
 				// Non-element end (top: 232)
@@ -267,8 +268,8 @@ namespace KerbalFoundries
 				// Non-element spacer (top: 104)
 				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 112f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
 				// Non-element spacer (top: 136)
-				GUI.Label(new Rect(8f, 144f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFExtensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f)));
-				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 168f, 240f, sliderHeight), KFExtensions.RoundToNearestValue(KFPersistenceManager.dustAmount, 0.25f), 0f, 3f);
+				GUI.Label(new Rect(8f, 144f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f)));
+				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 168f, 240f, sliderHeight), KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f), 0f, 3f);
 				// Non-element end (top: 184)
 				endHeight = 192f; // end top height + spacerHeight.
 			}

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace KerbalFoundries
 {
 	/// <summary>Controls the orientation marker for the editor scenes which helps reduce reports of non-functional wheels due to user-error.</summary>
-	public class OrientationMarker : PartModule
+	public class KFOrientationMarker : PartModule
 	{
 		[KSPField]
 		public string markerName;
@@ -14,7 +14,7 @@ namespace KerbalFoundries
         
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
-		readonly KFLogUtil KFLog = new KFLogUtil("OrientationMarker");
+		readonly KFLogUtil KFLog = new KFLogUtil("KFOrientationMarker");
 
 		public override void OnStart(PartModule.StartState state)
 		{
