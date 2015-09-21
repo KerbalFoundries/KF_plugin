@@ -10,17 +10,20 @@ namespace KerbalFoundries
 	/// <summary>Control module for the steering and driving force behind the wheel.</summary>
 	public class KFModuleWheel : PartModule
 	{
+		#region SharpDevelop Suppressions
 		// Global SharpDevelop Suppressions
 		// disable UnusedParameter
 		// disable ConvertIfToOrExpression
 		// disable ConvertIfStatementToConditionalTernaryExpression
+		#endregion SharpDevelop Suppressions
 		
-		// Name definitions
+		#region Directional Definitions
 		const string right = "right";
 		const string forward = "forward";
 		const string up = "up";
+		#endregion Directional Definitions
 		
-		// Tweakables
+		#region Tweakables
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Wheel Settings")]
 		public string settings = string.Empty;
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group Number"), UI_FloatRange(minValue = 0f, maxValue = 10f, stepIncrement = 1f)]
@@ -41,8 +44,9 @@ namespace KerbalFoundries
 		public string status = "Nominal";
 		[KSPField(isPersistant = false, guiActive = true, guiName = "RPM", guiFormat = "F1")]
 		public float averageTrackRPM;
+		#endregion Tweakables
         
-		// Config fields
+		#region Config Fields
 		/// <summary>Torque applied to wheel colliders.</summary>
 		[KSPField]
 		public FloatCurve torqueCurve = new FloatCurve();
@@ -120,15 +124,18 @@ namespace KerbalFoundries
 		/// <remarks>Default: ElectricCharge</remarks>
 		[KSPField]
 		public string resourceName = "ElectricCharge";
+		#endregion Config Fields
 		
+		#region Common Strings
 		/// <summary>Status text for the "Low Resource" state.</summary>
 		public string statusLowResource = "Low Charge";
 		/// <summary>Status text for the "all is good" state.</summary>
 		public string statusNominal = "Nominal";
 		/// <summary>Status text for the "retracted" state.</summary>
 		public string statusRetracted = "Retracted";
+		#endregion Common Strings
 		
-		// Persistent fields
+		#region Persistent Fields
 		/// <summary>Will be negative one (-1) if inverted.</summary>
 		[KSPField(isPersistant = true)]
 		public float steeringInvert = 1f;
@@ -144,8 +151,9 @@ namespace KerbalFoundries
 		/// <summary>Is the part meant to simulate floating or not?</summary>
 		[KSPField(isPersistant = true, guiActiveEditor = true, guiName = "Floatation"), UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
 		public bool isFloatingEnabled;
+		#endregion Persistent Fields
 		
-		// Global variables
+		#region Local Variables
 		int rootIndexLong;
 		int rootIndexLat;
 		int rootIndexUp;
@@ -163,12 +171,12 @@ namespace KerbalFoundries
 		float steeringInputSmoothed;
 		float throttleInputSmoothed;
 		float brakeSteeringTorque;
+		#endregion Local Variables
 		
-		// Stuff deliberately made available to other modules:
+		#region Public Variables
 		public float steeringAngle;
 		public float appliedTravel;
 		public int wheelCount;
-        
 		public int directionCorrector = 1;
 		public int steeringCorrector = 1;
 		public float steeringRatio;
@@ -176,8 +184,9 @@ namespace KerbalFoundries
 		public float currentTravel;
 		public float smoothedTravel;
 		public float susInc;
+		#endregion Public Variables
 		
-		// Visible fields (debug)
+		#region Debug Fields
 		[KSPField(isPersistant = true, guiActive = false, guiName = "TS", guiFormat = "F1")] //debug only.
         public float tweakScaleCorrector = 1f;
 		[KSPField(isPersistant = false, guiActive = false, guiName = "Last Vessel Mass", guiFormat = "F1")]
@@ -193,6 +202,7 @@ namespace KerbalFoundries
 		public float colliderLoad = 0f;
 		[KSPField(isPersistant = false, guiActive = false, guiName = "Rolling Friction", guiFormat = "F3")]
 		public float rollingFriction;
+		#endregion Debug Fields
 		
 		public List<WheelCollider> wcList = new List<WheelCollider>();
 		List<float> suspensionDistance = new List<float>();
@@ -266,7 +276,7 @@ namespace KerbalFoundries
 				}
 				SetupAnimation();
 			}
-
+			
 			//disables tweakables if being used on a passive part (mecannum wheel or skid, for example)
 			if (disableTweakables)
 			{
@@ -384,12 +394,13 @@ namespace KerbalFoundries
 			{
 				_waterSlider = vessel.rootPart.gameObject.AddComponent<KFModuleWaterSlider>();
 				_waterSlider.StartUp();
+				_waterSlider.colliderHeight = -0.5f;
 			}
 		}
 		
 		public void UpdateWaterSlider()
 		{
-			_waterSlider.colliderHeight = -1f;
+			_waterSlider.colliderHeight = -0.5f;
 		}
 		
 		/// <summary>Sets off the sound effect.</summary>
