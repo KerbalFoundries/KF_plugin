@@ -150,7 +150,7 @@ namespace KerbalFoundries
 		{
 			DeployEvent();
 		}
-
+		
 		/// <summary>Action-group "Retract"</summary>
 		/// <param name="param">Unused.</param>
 		[KSPAction("Retract")]
@@ -158,7 +158,7 @@ namespace KerbalFoundries
 		{
 			RetractEvent();
 		}
-
+		
 		/// <summary>Action-group "Toggle Deployment"</summary>
 		/// <param name="param">Unused.</param>
 		[KSPAction("Toggle Deployment")]
@@ -171,7 +171,7 @@ namespace KerbalFoundries
 			}
 			DeployEvent();
 		}
-
+		
 		/// <summary>Deployment event.</summary>
 		[KSPEvent(guiName = "Deploy", guiActive = true, guiActiveEditor = true, active = true)]
 		public void DeployEvent()
@@ -184,7 +184,7 @@ namespace KerbalFoundries
 				isDeployed = true;
 			}
 		}
-
+		
 		/// <summary>Retraction event.</summary>
 		[KSPEvent(guiName = "Retract", guiActive = false, guiActiveEditor = false, active = true)]
 		public void RetractEvent()

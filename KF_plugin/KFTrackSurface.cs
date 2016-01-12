@@ -39,9 +39,12 @@ namespace KerbalFoundries
 		public override void OnUpdate()
 		{
 			base.OnUpdate();
-			float distanceTravelled = (float)((_moduleWheel.averageTrackRPM * 2f * Math.PI) / 60f) * Time.deltaTime * _moduleWheel.directionCorrector;
+			
+			float fDistanceTravelled;
+			
+			fDistanceTravelled = (float)((_moduleWheel.fAverageTrackRPM * 2f * Math.PI) / 60f) * Time.deltaTime * _moduleWheel.directionCorrector;
 			textureOffset = trackMaterial.mainTextureOffset;
-			textureOffset = textureOffset + new Vector2(-distanceTravelled / trackLength, 0f);
+			textureOffset = textureOffset + new Vector2(-fDistanceTravelled / trackLength, 0f);
 			trackMaterial.SetTextureOffset("_MainTex", textureOffset);
 			trackMaterial.SetTextureOffset("_BumpMap", textureOffset);
 		}

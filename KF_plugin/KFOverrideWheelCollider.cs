@@ -60,9 +60,9 @@ namespace KerbalFoundries
 		public float moveColliderBy;
 		[KSPField]
 		public int susTravIndex = 1;
-
+		
 		WheelCollider _wheelCollider;
-
+		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFOverrideWheelCollider");
@@ -75,7 +75,7 @@ namespace KerbalFoundries
 				if (wc.name.Equals(colliderName, StringComparison.Ordinal))
 					_wheelCollider = wc;
 			}
-
+			
 			if (HighLogic.LoadedSceneIsFlight && moveCollider)
 			{
 				_wheelCollider.transform.Translate(0, moveColliderBy, 0, Space.Self);
@@ -83,7 +83,7 @@ namespace KerbalFoundries
 				tempVector[susTravIndex] = moveColliderBy;
 				_susTrav.transform.Translate(tempVector, Space.Self);
 			}
-
+			
 			if (!Equals(_wheelCollider, null))
 			{
 				if (!Equals(mass, 0))
@@ -105,7 +105,7 @@ namespace KerbalFoundries
 					_wheelCollider.suspensionSpring = js;
 				}
 				if (!Equals(targetPosition, 0))
-				{ 
+				{
 					JointSpring js = _wheelCollider.suspensionSpring;
 					js.targetPosition = targetPosition;
 					_wheelCollider.suspensionSpring = js;

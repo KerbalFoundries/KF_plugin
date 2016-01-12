@@ -10,12 +10,12 @@ namespace KerbalFoundries
 		// disable RedundantDefaultFieldInitializer
 		// disable ConvertToConstant.Local
 		
-		int resWidth = 6;
-		int resHeight = 6;
-		public Color _averageColour = new Color(1f, 1f, 1f, 1f);
+		float fResWidth = 6f;
+		float fResHeight = 6f;
+		float fFrameCount = 0f;
+		float fFrameThreshHold = 10f;
 		
-		int frameCount = 0;
-		int frameThreshHold = 10;
+		public Color _averageColour = new Color(1f, 1f, 1f, 1f);
 		
 		Vessel _vessel;
 		GameObject _cameraObject;
@@ -23,21 +23,28 @@ namespace KerbalFoundries
 		Texture2D groundShot;
 		RenderTexture renderTexture;
 		
-		bool dustCamEnabled;
+		bool dustCamEnabled, isReady;
 		int kFPartCount;
-		bool isReady;
 		
 		/// <summary>Local definition of the KFLogUtil class.</summary>
 		readonly KFLogUtil KFLog = new KFLogUtil("ModuleCameraShot");
 		
 		/// <summary>The layers that the camera will render.</summary>
-		public int cameraMask;
+		public int cameraMask = 32784;
 		
 		public void StartUp()
 		{
 			#if DEBUG
 			KFLog.Warning("ModuleCamerashot Start");
 			#endif
+			
+			if (!Equals(KFPersistenceManager.cameraRes, null))
+			{
+				fResWidth = KFPersistenceManager.cameraRes;
+				fResHeight = KFPersistenceManager.cameraRes;
+			}
+			if (!Equals(KFPersistenceManager.cameraFramerate, null))
+				fFrameThreshHold = KFPersistenceManager.cameraFramerate;
 			
 			_vessel = GetComponent<Vessel>();
 			foreach (Part PA in _vessel.parts)
@@ -50,7 +57,9 @@ namespace KerbalFoundries
 			}
 			if (kFPartCount > 1)
 			{
-				KFLog.Warning("Starting camera");
+				#if DEBUG
+				KFLog.Log("Starting camera");
+				#endif
 				
 				_cameraObject = new GameObject("ColourCam");
 				_cameraObject.transform.parent = _vessel.transform;
@@ -58,30 +67,22 @@ namespace KerbalFoundries
 				_cameraObject.transform.Translate(new Vector3(0, 0, -10));
 				_camera = _cameraObject.AddComponent<Camera>();
 				_camera.targetTexture = renderTexture;
-				cameraMask = 32784;
 				_camera.cullingMask = cameraMask;
 				
 				_camera.enabled = false;
-				renderTexture = new RenderTexture(resWidth, resHeight, 24);
-				groundShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
+				renderTexture = new RenderTexture(Convert.ToInt32(fResWidth), Convert.ToInt32(fResHeight), 24);
+				groundShot = new Texture2D(Convert.ToInt32(fResWidth), Convert.ToInt32(fResHeight), TextureFormat.RGB24, false);
 				dustCamEnabled = KFPersistenceManager.isDustCameraEnabled;
 				isReady = true;
 			}
-			if (!Equals(KFPersistenceManager.cameraRes, null))
-			{
-				resWidth = KFPersistenceManager.cameraRes;
-				resHeight = KFPersistenceManager.cameraRes;
-			}
-			if (!Equals(KFPersistenceManager.cameraFramerate, null))
-				frameThreshHold = KFPersistenceManager.cameraFramerate;
 		}
 		
 		public void Update()
 		{
 			dustCamEnabled = KFPersistenceManager.isDustCameraEnabled;
-			if (frameCount >= frameThreshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCamEnabled && isReady)
+			if (fFrameCount >= fFrameThreshHold && Equals(_vessel, FlightGlobals.ActiveVessel) && dustCamEnabled && isReady)
 			{
-				frameCount = 0;
+				fFrameCount = 0;
 				
 				_cameraObject.transform.LookAt(_vessel.mainBody.transform.position);
 				_camera.targetTexture = renderTexture;
@@ -89,7 +90,7 @@ namespace KerbalFoundries
                 
 				_camera.Render();
 				RenderTexture.active = renderTexture;
-				groundShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+				groundShot.ReadPixels(new Rect(0, 0, fResWidth, fResHeight), 0, 0);
 				_camera.targetTexture = null;
 				_camera.enabled = false;
 				RenderTexture.active = null;
@@ -111,7 +112,7 @@ namespace KerbalFoundries
 				
 				_averageColour = new Color(r / total, g / total, b / total, alpha);
 			}
-			frameCount++;
+			fFrameCount++;
 		}
 	}
 }

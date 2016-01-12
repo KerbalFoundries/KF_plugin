@@ -30,8 +30,10 @@ namespace KerbalFoundries
 		/// <summary>Percentage of charge we are targetting as our "low threshold" level.</summary>
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Target Charge %"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5f)]
 		public float targetBatteryRatio = 75f;
+		
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Ratio Adjustment", guiFormat = "F8")]
 		public float ratioAdjustment;
+		
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Usage Adjustment", guiFormat = "F8")]
 		public float usageAdjustment;
 		
@@ -46,7 +48,7 @@ namespace KerbalFoundries
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFAPUController");
-
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
@@ -59,24 +61,27 @@ namespace KerbalFoundries
 			if (HighLogic.LoadedSceneIsFlight)
 				part.force_activate();
 		}
-
+		
 		public override void OnFixedUpdate()
 		{ 
 			base.OnFixedUpdate();
+			
+			float fTempThrottle;
+			
 			if (autoThrottle)
 			{
 				batteryRatio = part.GetBattery();
 				usageAdjustment = (lastRatio - batteryRatio) * reactionSpeed;
 				ratioAdjustment = Mathf.Clamp(((targetBatteryRatio / 100f) - batteryRatio), -0.001f, 0.001f);
-				float tempThrottle = Mathf.Clamp(autoThrottleSetting + ratioAdjustment + usageAdjustment, 0.01f, 1f);
-				autoThrottleSetting = tempThrottle;
+				fTempThrottle = Mathf.Clamp(autoThrottleSetting + ratioAdjustment + usageAdjustment, 0.01f, 1f);
+				autoThrottleSetting = fTempThrottle;
 				_moduleEnginesFX.currentThrottle = autoThrottleSetting;
 				lastRatio = batteryRatio;
 			}
 			else
 				_moduleEnginesFX.currentThrottle = Mathf.Lerp((throttleSetting / 100f), _moduleEnginesFX.currentThrottle, Time.deltaTime * 40f);
 		}
-
+		
 		public void FindEngine()
 		{
 			foreach (ModuleEnginesFX engineFound in part.GetComponentsInChildren<ModuleEnginesFX>())
@@ -88,7 +93,7 @@ namespace KerbalFoundries
 				_moduleEnginesFX = engineFound;
 			}
 		}
-
+		
 		[KSPAction("APU + output")]
 		public void IncreaseAPU(KSPActionParam param)
 		{
@@ -101,7 +106,7 @@ namespace KerbalFoundries
 				#endif
 			}
 		}
-
+		
 		[KSPAction("APU - output")]
 		public void DecreaseAPU(KSPActionParam param)
 		{
@@ -114,7 +119,7 @@ namespace KerbalFoundries
 				#endif
 			}
 		}
-
+		
 		[KSPAction("APU Shutdown")]
 		public void ShutdownAPU(KSPActionParam param)
 		{
@@ -124,7 +129,7 @@ namespace KerbalFoundries
 			KFLog.Log("Shutting down APU.");
 			#endif
 		}
-
+		
 		[KSPAction("APU Automatic")]
 		public void AutoAPU(KSPActionParam param)
 		{
@@ -134,7 +139,7 @@ namespace KerbalFoundries
 			KFLog.Log("APU set to Automatic.");
 			#endif
 		}
-
+		
 		[KSPAction("APU Manual")]
 		public void ManualAPU(KSPActionParam param)
 		{

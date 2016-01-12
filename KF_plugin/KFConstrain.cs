@@ -32,7 +32,7 @@ namespace KerbalFoundries
 		Transform _target;
 		string[] moverList;
 		int objectCount = 0;
-
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
@@ -40,7 +40,7 @@ namespace KerbalFoundries
 			if (HighLogic.LoadedSceneIsFlight)
 				StartCoroutine(Setup());
 		}
-
+		
 		public void SetupObjects()
 		{
 			_target = transform.SearchStartsWith(targetName);

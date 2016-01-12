@@ -15,7 +15,7 @@ namespace KerbalFoundries
 		
 		/// <summary>Multiplier applied to the resource consumption rate.</summary>
 		[KSPField]
-		public float ResourceConsumptionMult = 2f;
+		public float resourceConsumptionMult = 2f;
 		
 		// Following not suitable for configs.
 		[KSPField(isPersistant = false, guiActive = true, guiName = "Precision")]
@@ -24,15 +24,11 @@ namespace KerbalFoundries
 		[KSPField(isPersistant = false, guiActive = false, guiName = "Smooth Speed", guiFormat = "F1")]
 		public float currentSmoothSpeed;
 		
-		float originalSmoothSpeed;
-		float appliedSmoothSpeed;
-		float originalResourceConsumption;
-		float appliedResourceConsumption;
-		bool overrideActive;
-		bool doOnce;
+		float originalSmoothSpeed, appliedSmoothSpeed, originalResourceConsumption, appliedResourceConsumption;
+		bool overrideActive, doOnce;
 		
-		public string statusOn = "On";
-		public string statusOff = "Off";
+		const string STATUSON = "On";
+		const string STATUSOFF = "Off";
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
@@ -65,25 +61,14 @@ namespace KerbalFoundries
 			KFLog.Log(string.Format("Boosted Smooth Speed = {0}", (originalSmoothSpeed * smoothSpeedMult)));
 			#endif
 		}
-
+		
 		public override void OnFixedUpdate()
 		{
 			base.OnFixedUpdate();
-			//IsPrecisionModeActive();
 			if (doOnce)
 				ApplyPrecisionMode(bPrecisionModeActive);
-			status = bPrecisionModeActive ? statusOn : statusOff;
+			status = bPrecisionModeActive ? STATUSON : STATUSOFF;
 			currentSmoothSpeed = appliedSmoothSpeed;
-		}
-		
-		/// <summary>Gets the current state of the precision control system.</summary>
-		public void IsPrecisionModeActive() // Needs work, doesn't currently function.
-		{
-			if (GameSettings.PRECISION_CTRL.GetKeyDown() && !overrideActive)
-			{
-				bPrecisionModeActive = !bPrecisionModeActive;
-				doOnce = true;
-			}
 		}
 		
 		/// <summary>Modifies the requisite variables.</summary>
@@ -93,7 +78,7 @@ namespace KerbalFoundries
 			if (isActive)
 			{
 				appliedSmoothSpeed *= smoothSpeedMult;
-				appliedResourceConsumption *= ResourceConsumptionMult; 
+				appliedResourceConsumption *= resourceConsumptionMult; 
 			}
 			else
 			{

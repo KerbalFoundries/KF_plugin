@@ -9,9 +9,9 @@ namespace KerbalFoundries
 	[KSPModule("KFModuleMirror")]
 	public class KFModuleMirror : PartModule
 	{
-		public string right = "right";
-		public string left = "left";
-		public string swap = "swap";
+		const string RIGHT = "right";
+		const string LEFT = "left";
+		const string SWAP = "swap";
 		
 		[KSPField(isPersistant = true)]
 		public string cloneSide;
@@ -23,13 +23,14 @@ namespace KerbalFoundries
 		
 		[KSPField]
 		public string leftObjectName;
+		
 		[KSPField]
 		public string rightObjectName;
 		
 		List<Transform> leftObject = new List<Transform>();
 		List<Transform> rightObject = new List<Transform>();
-		string[] rightList;
-		string[] leftList;
+		string[] rightList, leftList;
+		// string[] leftList;
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
@@ -78,7 +79,7 @@ namespace KerbalFoundries
 				
 				SetSide(clone.cloneSide);
 			}
-
+			
 			if (Equals(flightSide, string.Empty))
 			{
 				#if DEBUG
@@ -102,7 +103,7 @@ namespace KerbalFoundries
 				KFLog.Log("Loaded scene is flight.");
 				#endif
 				
-				if (Equals(flightSide, left))
+				if (Equals(flightSide, LEFT))
 				{
 					for (int i = 0; i < rightObject.Count(); i++)
 					{
@@ -114,7 +115,7 @@ namespace KerbalFoundries
 						UnityEngine.Object.DestroyImmediate(rightObject[i].gameObject);
 					}
 				}
-				if (Equals(flightSide, right))
+				if (Equals(flightSide, RIGHT))
 				{
 					
 					for (int i = 0; i < leftObject.Count(); i++)
@@ -135,9 +136,9 @@ namespace KerbalFoundries
 		public void LeftSide()
 		{
 			FindClone();
-			SetSide(left);
+			SetSide(LEFT);
 			if (clone)
-				clone.SetSide(right);
+				clone.SetSide(RIGHT);
 		}
 		
 		/// <summary>Sets this side to right and clone to left.</summary>
@@ -145,39 +146,39 @@ namespace KerbalFoundries
 		public void RightSide()
 		{
 			FindClone();
-			SetSide(right);
+			SetSide(RIGHT);
 			if (clone)
-				clone.SetSide(left);
+				clone.SetSide(LEFT);
 		}
-
+		
 		public void SetSide(string side)
 		{
-			if (Equals(side, left))
+			if (Equals(side, LEFT))
 			{
 				for (int i = 0; i < leftList.Count(); i++)
 				{
 					rightObject[i].gameObject.SetActive(false);
 					leftObject[i].gameObject.SetActive(true);
 				}
-				cloneSide = right;
+				cloneSide = RIGHT;
 				flightSide = side;
 				Events["LeftSide"].active = false;
 				Events["RightSide"].active = true;
 			}
-			if (Equals(side, right))
+			if (Equals(side, RIGHT))
 			{
 				for (int i = 0; i < leftList.Count(); i++)
 				{
 					rightObject[i].gameObject.SetActive(true);
 					leftObject[i].gameObject.SetActive(false);
 				}
-				cloneSide = left;
+				cloneSide = LEFT;
 				flightSide = side;
 				Events["LeftSide"].active = true;
 				Events["RightSide"].active = false;
 			}
 		}
-
+		
 		public void FindClone()
 		{
 			foreach (Part potentialMaster in part.symmetryCounterparts)

@@ -15,13 +15,13 @@ namespace KerbalFoundries
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFOrientationMarker");
-
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
 			marker = part.transform.Search(markerName);
 			isMarkerEnabled = KFPersistenceManager.isMarkerEnabled;
-
+			
 			if (!Equals(marker, null) && (!isMarkerEnabled || HighLogic.LoadedSceneIsFlight))
 				UnityEngine.Object.Destroy(marker.gameObject);
 		}

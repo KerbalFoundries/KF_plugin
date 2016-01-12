@@ -14,26 +14,34 @@ namespace KerbalFoundries
 		// Config fields
 		[KSPField]
 		public string wheelName;
+		
 		[KSPField]
 		public string colliderName;
+		
 		[KSPField]
 		public string sustravName;
+		
 		[KSPField]
 		public string steeringName;
+		
 		[KSPField]
 		public bool useDirectionCorrector;
+		
 		[KSPField]
 		public bool isSprocket;
+		
 		[KSPField]
 		public bool hasSuspension = true;
+		
 		[KSPField]
-		public float rotationCorrection = 1;
+		public float rotationCorrection = 1f;
+		
 		[KSPField]
 		public bool trackedWheel = true;
 		
 		/// <summary>Wheel rotation X axis.</summary>
 		[KSPField]
-		public float wheelRotationX = 1;
+		public float wheelRotationX = 1f;
 		
 		/// <summary>Wheel rotation Y axis.</summary>
 		[KSPField]
@@ -56,41 +64,40 @@ namespace KerbalFoundries
 		
 		// Persistent fields. Not to be used for config
 		[KSPField(isPersistant = true)]
-		public float suspensionDistance;
+		public float fSuspensionDistance;
+		
 		[KSPField(isPersistant = true)]
-		public float suspensionSpring;
+		public float fSuspensionSpring;
+		
 		[KSPField(isPersistant = true)]
-		public float suspensionDamper;
+		public float fSuspensionDamper;
+		
 		[KSPField(isPersistant = true)]
 		public bool isConfigured;
 		
 		// Object types
 		WheelCollider _wheelCollider;
-		Transform _susTrav;
-		Transform _wheel;
-		Transform _trackSteering;
+		Transform _susTrav, _wheel, _trackSteering;
 		KFModuleWheel _KFModuleWheel;
 		
 		// Gloabl variables
-		Vector3 initialPosition;
-		Vector3 initialSteeringAngles;
-		Vector3 _wheelRotation;
+		Vector3 initialPosition, initialSteeringAngles, _wheelRotation;
         
 		int susTravIndex = 1;
 		int steeringIndex = 1;
 		public int directionCorrector = 1;
         
-		float degreesPerTick;
+		float fDegreesPerTick;
 		bool couroutinesActive;
 		
 		/// <summary>Local reference for the tweakScaleCorrector parameter in KFModuleWheel.</summary>
+		/// <remarks>This is completely unnecessary in this module now.  Will be removed once it's certain to not cause a problem.</remarks>
 		public float tweakScaleCorrector;
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFWheel");
 		
-		//OnStart
 		public override void OnStart(PartModule.StartState state)
 		{
 			_KFModuleWheel = part.GetComponentInChildren<KFModuleWheel>();
@@ -103,7 +110,7 @@ namespace KerbalFoundries
 					if (wc.name.StartsWith(colliderName, StringComparison.Ordinal))
 					{
 						_wheelCollider = wc;
-						suspensionDistance = wc.suspensionDistance;
+						fSuspensionDistance = wc.suspensionDistance;
 						
 						#if DEBUG
 						KFLog.Log(string.Format("SuspensionDistance is: {0}.", suspensionDistance));
@@ -137,8 +144,8 @@ namespace KerbalFoundries
 				}
 				
 				initialPosition = _susTrav.localPosition;
-				susTravIndex = KFExtensions.SetAxisIndex(susTravAxis);
-				steeringIndex = KFExtensions.SetAxisIndex(steeringAxis); 
+				susTravIndex = susTravAxis.SetAxisIndex();
+				steeringIndex = steeringAxis.SetAxisIndex(); 
 				
 				if (_KFModuleWheel.hasSteering)
 				{
@@ -195,10 +202,12 @@ namespace KerbalFoundries
 		// disable FunctionNeverReturns
 		IEnumerator Steering() //Coroutine for steering
 		{
+			Vector3 newSteeringAngle;
+			
 			while (true)
 			{
-				Vector3 newSteeringAngle = initialSteeringAngles;
-				newSteeringAngle[steeringIndex] += _KFModuleWheel.steeringAngle;
+				newSteeringAngle = initialSteeringAngles;
+				newSteeringAngle[steeringIndex] += _KFModuleWheel.fSteeringAngle;
 				_trackSteering.transform.localEulerAngles = newSteeringAngle;
 				yield return null;
 			}
@@ -209,7 +218,7 @@ namespace KerbalFoundries
 		{
 			while (couroutinesActive)
 			{
-				_wheel.transform.Rotate(_wheelRotation, _KFModuleWheel.degreesPerTick * directionCorrector * rotationCorrection); //rotate wheel
+				_wheel.transform.Rotate(_wheelRotation, _KFModuleWheel.fDegreesPerTick * directionCorrector * rotationCorrection); //rotate wheel
 				yield return null;
 			}
 		}
@@ -219,8 +228,8 @@ namespace KerbalFoundries
 		{
 			while (couroutinesActive)
 			{
-				degreesPerTick = (_wheelCollider.rpm / 60) * Time.deltaTime * 360;
-				_wheel.transform.Rotate(_wheelRotation, degreesPerTick * directionCorrector * rotationCorrection);
+				fDegreesPerTick = (_wheelCollider.rpm / 60) * Time.deltaTime * 360;
+				_wheel.transform.Rotate(_wheelRotation, fDegreesPerTick * directionCorrector * rotationCorrection);
 				yield return new WaitForFixedUpdate();
 			}
 		}
@@ -229,29 +238,33 @@ namespace KerbalFoundries
 		/// <remarks>DEPRECATED!!!!!!!!!!!!!! Use KFSuspension instead!</remarks>
 		IEnumerator Suspension()
 		{
+			float fFrameTraverse;
+			bool grounded;
+			
+			WheelHit hit;
+			
 			while (true)
 			{
 				// Suspension movement
-				WheelHit hit;
-				float frameTraverse = 0;
-				bool grounded = _wheelCollider.GetGroundHit(out hit);
+				fFrameTraverse = 0f;
+				grounded = _wheelCollider.GetGroundHit(out hit);
 				if (grounded)
 				{
-					frameTraverse = -_wheelCollider.transform.InverseTransformPoint(hit.point).y + _KFModuleWheel.raycastError - _wheelCollider.radius;
+					fFrameTraverse = -_wheelCollider.transform.InverseTransformPoint(hit.point).y + _KFModuleWheel.raycastError - _wheelCollider.radius;
                     
-					if (frameTraverse > (_wheelCollider.suspensionDistance + _KFModuleWheel.raycastError))
-                        frameTraverse = _wheelCollider.suspensionDistance;
-					else if (frameTraverse < -0.1)
-                        frameTraverse = 0;
+					if (fFrameTraverse > (_wheelCollider.suspensionDistance + _KFModuleWheel.raycastError))
+                        fFrameTraverse = _wheelCollider.suspensionDistance;
+					else if (fFrameTraverse < -0.1f)
+                        fFrameTraverse = 0f;
 					
-					lastFrameTraverse = frameTraverse;
+					lastFrameTraverse = fFrameTraverse;
 				}
 				else
-					frameTraverse = lastFrameTraverse;
+					fFrameTraverse = lastFrameTraverse;
 				
-				susTravel = frameTraverse;
+				susTravel = fFrameTraverse;
 				_susTrav.localPosition = initialPosition;
-				MoveSuspension(susTravIndex, -frameTraverse, _susTrav);
+				MoveSuspension(susTravIndex, -fFrameTraverse, _susTrav);
 				yield return null; 
 			}
 		}

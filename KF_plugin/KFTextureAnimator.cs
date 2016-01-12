@@ -7,7 +7,7 @@ namespace KerbalFoundries.TextureTools
 	public class KFTextureAnimator : PartModule
 	{
 		[KSPField]
-		public string ObjectName;
+		public string objectName;
 		
 		[KSPField]
 		public float minSpeedU = 5f;
@@ -39,12 +39,7 @@ namespace KerbalFoundries.TextureTools
 		[KSPField]
 		public bool additiveMode;
 		
-		float timeU;
-		float timeV;
-		float offsetU;
-		float offsetV;
-		float smoothedU;
-		float smoothedV;
+		float timeU, timeV, offsetU, offsetV, smoothedU, smoothedV;
 		
 		public bool isReady;
 		
@@ -57,7 +52,7 @@ namespace KerbalFoundries.TextureTools
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
-			_mesh = transform.TexAnimSearch(ObjectName);
+			_mesh = transform.TexAnimSearch(objectName);
 			isReady |= HighLogic.LoadedSceneIsFlight;
 			
 			#if DEBUG
@@ -67,6 +62,9 @@ namespace KerbalFoundries.TextureTools
 		
 		public void Update()
 		{
+			Material myMaterial;
+			Vector2 myVector;
+			
 			if (isReady)
 			{
 				if (timeU <= 0f)
@@ -83,15 +81,15 @@ namespace KerbalFoundries.TextureTools
 				timeV--;
 				smoothedU = Mathf.Lerp(smoothedU, offsetU, Time.deltaTime * smoothSpeed);
 				smoothedV = Mathf.Lerp(smoothedV, offsetV, Time.deltaTime * smoothSpeed);
-				Material material = _mesh.renderer.material;
-				Vector2 vector = material.mainTextureOffset;
+				myMaterial = _mesh.renderer.material;
+				myVector = myMaterial.mainTextureOffset;
 				if (additiveMode)
-					vector += new Vector2(smoothedU, smoothedV);
+					myVector += new Vector2(smoothedU, smoothedV);
 				else
-					vector = new Vector2(smoothedU, smoothedV);
-				material.SetTextureOffset("_MainTex", vector);
-				material.SetTextureOffset("_BumpMap", vector);
-				material.SetTextureOffset("_Emissive", vector);
+					myVector = new Vector2(smoothedU, smoothedV);
+				myMaterial.SetTextureOffset("_MainTex", myVector);
+				myMaterial.SetTextureOffset("_BumpMap", myVector);
+				myMaterial.SetTextureOffset("_Emissive", myVector);
 			}
 		}
 	}

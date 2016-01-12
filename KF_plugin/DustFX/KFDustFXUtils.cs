@@ -35,7 +35,7 @@ namespace KerbalFoundries.DustFX
 		{
 			if (Equals(col, null))
 				return false;
-			// Test for PQS: Name in the form "Ab0123456789."
+			// Test for PQS: Name in the form "AB0123456789."
 			Int64 number;
 			bool result = Equals(col.name.Length, 12) && Int64.TryParse(col.name.Substring(2, 10), out number);
 			return result;

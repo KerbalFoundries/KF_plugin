@@ -36,7 +36,7 @@ namespace KerbalFoundries
 			lineX.SetVertexCount(2);
 			lineX.SetPosition(0, Vector3.zero);
 			lineX.SetPosition(1, Vector3.right * 10);
-
+			
 			lineY.useWorldSpace = false;
 			lineY.material = new Material(Shader.Find("Particles/Additive"));
 			lineY.SetColors(Color.green, Color.white);
@@ -44,7 +44,7 @@ namespace KerbalFoundries
 			lineY.SetVertexCount(2);
 			lineY.SetPosition(0, Vector3.zero);
 			lineY.SetPosition(1, Vector3.up * 10);
-
+			
 			lineZ.useWorldSpace = false;
 			lineZ.material = new Material(Shader.Find("Particles/Additive"));
 			lineZ.SetColors(Color.blue, Color.white);
@@ -72,7 +72,7 @@ namespace KerbalFoundries
 		{
 			if (Equals(target.name, name))
 				return target;
-
+			
 			for (int i = 0; i < target.childCount; ++i)
 			{
 				var result = Search(target.GetChild(i), name);
@@ -114,7 +114,7 @@ namespace KerbalFoundries
 		{
 			if (target.name.StartsWith(name, StringComparison.Ordinal))
 				return target;
-
+			
 			for (int i = 0; i < target.childCount; ++i)
 			{
 				var result = SearchStartsWith(target.GetChild(i), name);
@@ -138,38 +138,33 @@ namespace KerbalFoundries
 		/// <summary>Converts the textual axis to an integer index axis.</summary>
 		/// <param name="axisString">Text axis.</param>
 		/// <returns>Integer axis index.</returns>
-		public static int SetAxisIndex(string axisString)
+		public static int SetAxisIndex(this string axisString)
 		{
-			int index = 1;
 			switch (axisString)
 			{
-				case "x":
 				case "X":
-					index = 0;
-					break;
-				case "y": 
+				case "x":
+					return 0;
 				case "Y":
-					index = 1;
-					break;
-				case "z":
+				case "y":
+					return 1;
 				case "Z":
-					index = 2;
-					break;
+				case "z":
+					return 2;
+				default:
+					return 0;
 			}
-			return index;
 		}
-
-		/*
-		/// <summary>Plays a sound.</summary>
-		/// <param name="thisPart">The part to play from.</param>
-		/// <param name="effectName">The effect name to work out of.</param>
-		/// <param name="effectPower">The power factor of the sound.</param>
-		public static void PlaySound(Part thisPart, string effectName, float effectPower)
+		
+		#region Overloads for SetAxisString
+		
+		public static int SetAxisString(this char axisChar)
 		{
-			thisPart.Effect(effectName, effectPower);
+			return axisChar.ToString().SetAxisIndex();
 		}
-		 */
-
+		
+		#endregion
+		
 		/// <summary>Disables the "animate" button in the part context menu.</summary>
 		/// <param name="part">Part reference to affect.</param>
 		public static void DisableAnimateButton(this Part part)
@@ -183,11 +178,6 @@ namespace KerbalFoundries
 				}
 			}
 		}
-
-		//public static string GetLast(this string source, int tail_length)
-		//{
-		//	return tail_length >= source.Length ? source : source.Substring(source.Length - tail_length);
-		//}
 		
 		/// <summary>Shortcut to rounding a value to the nearest number.</summary>
 		/// <param name="input">Value to be rounded.</param>
@@ -210,5 +200,30 @@ namespace KerbalFoundries
 			}
 			return output;
 		}
+		
+		#region Overloads for RoundToNearestValue
+		
+		public static float RoundToNearestValue(this double input, double roundto)
+		{
+			float input2 = (float)input;
+			float roundto2 = (float)roundto;
+			return input2.RoundToNearestValue(roundto2);
+		}
+		
+		public static float RoundToNearestValue(this int input, int roundto)
+		{
+			float input2 = (float)input;
+			float roundto2 = (float)roundto;
+			return input2.RoundToNearestValue(roundto2);
+		}
+		
+		public static float RoundToNearestValue(this decimal input, decimal roundto)
+		{
+			float input2 = (float)input;
+			float roundto2 = (float)roundto;
+			return input2.RoundToNearestValue(roundto2);
+		}
+		
+		#endregion
 	}
 }

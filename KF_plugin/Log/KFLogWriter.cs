@@ -36,37 +36,40 @@ namespace KerbalFoundries.Log
 		/// <remarks>Use RequestStop() to end the thread.</remarks>
 		public void Loop()
 		{
+			string startMessage, queueItem;
+			byte[] buffer;
+			
 			System.AppDomain.CurrentDomain.DomainUnload += delegate
 			{
 				CloseFile();
-			};       
+			};   
 			
 			if (!outStream.CanWrite)
 				return;
 			
-			string startMessage = string.Format("Logging started at {0:hh:mm:ss.fff}\n\nLoaded assemblies:\n", System.DateTime.Now);
+			startMessage = string.Format("Logging started at {0:hh:mm:ss.fff}\n\nLoaded assemblies:\n", System.DateTime.Now);
 			foreach (Assembly assembly in Thread.GetDomain().GetAssemblies())
 				startMessage += string.Format("{0,-15} ({1}) ({2})", assembly.GetName().Name, assembly.GetName().Version, assembly.Location);
 			startMessage += "\n\n------------\n\n";
 			
 			var encoder = new UTF8Encoding(true);
-			byte[] buffer = encoder.GetBytes(startMessage);
+			buffer = encoder.GetBytes(startMessage);
 			outStream.Write(buffer, 0, buffer.Length);
 			outStream.Flush();
 			
 			Monitor.Enter(sync); // block other thread(s) until lock is aquired
 			
 			dontExit = true;
+			
 			while (dontExit) // thread main loop
 			{
 				while (queue.Count < 1 || !dontExit) 	// check if there's something to do
                     Monitor.Wait(sync); 				// release the lock, block this thread and
 														// wait until the lock is aquired again
 														// then the while-loop continues to work
-				
 				if (queue.Count > 0)
 				{
-					string queueItem = string.Format("{0}\n", queue.Dequeue()); // something is in the queue, quickly grab it!
+					queueItem = string.Format("{0}\n", queue.Dequeue()); // something is in the queue, quickly grab it!
 					buffer = encoder.GetBytes(queueItem); // convert string into UTF8 and returns the result as a byte array
 					outStream.Write(buffer, 0, buffer.Length); // write to file
 					outStream.Flush();

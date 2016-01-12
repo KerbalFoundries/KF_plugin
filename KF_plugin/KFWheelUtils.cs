@@ -51,17 +51,18 @@ namespace KerbalFoundries
 		/// <remarks>Uses scalar products to determine which axis is closest to the axis specified in refDirection, return an index value 0 = X, 1 = Y, 2 = Z.</remarks>
 		public static int GetRefAxis(Vector3 refDirection, Transform refTransform)
 		{
-			float dotx = Math.Abs(Vector3.Dot(refDirection, refTransform.right)); // up is forward
-			float doty = Math.Abs(Vector3.Dot(refDirection, refTransform.up));
-			float dotz = Math.Abs(Vector3.Dot(refDirection, refTransform.forward));
+			float dotx, doty, dotz;
+			int orientationIndex = 0;
+			
+			dotx = Math.Abs(Vector3.Dot(refDirection, refTransform.right)); // "Up" = "Forward"
+			doty = Math.Abs(Vector3.Dot(refDirection, refTransform.up));
+			dotz = Math.Abs(Vector3.Dot(refDirection, refTransform.forward));
 			
 			#if DEBUG
 			KFLog.Log(string.Format("\"dotx\" = {0}", dotx));
 			KFLog.Log(string.Format("\"doty\" = {0}", doty));
 			KFLog.Log(string.Format("\"dotz\" = {0}", dotz));
 			#endif
-			
-			int orientationIndex = 0;
 			
 			if (dotx > doty && dotx > dotz)
 			{
@@ -99,15 +100,18 @@ namespace KerbalFoundries
 		public static float SetupRatios(int refIndex, Part thisPart, Vessel thisVessel, float groupNumber)
 		{
 			strClassName += ": SetupRatios()";
-			float myPosition = thisPart.orgPos[refIndex];
-			float maxPos = thisPart.orgPos[refIndex];
-			float minPos = thisPart.orgPos[refIndex];
-			float ratio = 1f;
+			
+			float myPosition, maxPos, minPos, ratio, otherPosition, minToMax, midPoint, offset, myAdjustedPosition;
+			
+			myPosition = thisPart.orgPos[refIndex];
+			maxPos = thisPart.orgPos[refIndex];
+			minPos = thisPart.orgPos[refIndex];
+			ratio = 1f;
 			foreach (KFModuleWheel st in thisVessel.FindPartModulesImplementing<KFModuleWheel>()) 
 			{
-				if (Equals(st.groupNumber, groupNumber) && !Equals(groupNumber, 0f))
+				if (Equals(st.fGroupNumber, groupNumber) && !Equals(groupNumber, 0f))
 				{
-					float otherPosition = myPosition;
+					otherPosition = myPosition;
 					otherPosition = st.part.orgPos[refIndex];
 					
 					if ((otherPosition + 1000f) >= (maxPos + 1000f))
@@ -117,10 +121,10 @@ namespace KerbalFoundries
 				}
 			}
 			
-			float minToMax = maxPos - minPos;
-			float midPoint = minToMax / 2f;
-			float offset = (maxPos + minPos) / 2f;
-			float myAdjustedPosition = myPosition - offset;
+			minToMax = maxPos - minPos;
+			midPoint = minToMax / 2f;
+			offset = (maxPos + minPos) / 2f;
+			myAdjustedPosition = myPosition - offset;
 			
 			ratio = myAdjustedPosition / midPoint;
 			

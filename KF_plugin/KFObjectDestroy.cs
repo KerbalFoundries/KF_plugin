@@ -9,7 +9,7 @@ namespace KerbalFoundries
 	{
 		[KSPField]
 		public string objectName;
-
+		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFObjectDestroy");

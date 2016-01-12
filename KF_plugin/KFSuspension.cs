@@ -10,8 +10,10 @@ namespace KerbalFoundries
 	{
 		[KSPField]
 		public string colliderNames;
+		
 		[KSPField]
 		public string susTravName;
+		
 		[KSPField]
 		public string susTravAxis = "Y";
 		
@@ -29,12 +31,13 @@ namespace KerbalFoundries
 		
 		// Persistent fields. Not to be used for configs.
 		[KSPField(isPersistant = true)]
-		public float lastFrameTraverse;
+		public float fLastFrameTraverse;
+		
 		[KSPField(isPersistant = true)]
-		public float suspensionDistance;
+		public float fSuspensionDistance;
 		
 		float tweakScaleCorrector = 1;
-		bool isReady;
+		bool isReady, isPaused;
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
@@ -45,8 +48,9 @@ namespace KerbalFoundries
 			base.OnStart(state);
 			if (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris))
 			{
-				GameEvents.onGamePause.Add(new EventVoid.OnEvent(OnPause));
-				GameEvents.onGameUnpause.Add(new EventVoid.OnEvent(OnUnPause));
+				GameEvents.onGamePause.Add(OnPause);
+				GameEvents.onGameUnpause.Add(OnUnPause);
+				
 				_moduleWheel = part.GetComponentInChildren<KFModuleWheel>();
 				if (!Equals(_moduleWheel, null))
 					tweakScaleCorrector = _moduleWheel.tweakScaleCorrector;
@@ -62,9 +66,9 @@ namespace KerbalFoundries
 				susTrav = transform.SearchStartsWith(susTravName);
 				
 				initialPosition = susTrav.localPosition;
-				susTravIndex = KFExtensions.SetAxisIndex(susTravAxis);
+				susTravIndex = susTravAxis.SetAxisIndex();
 				
-				MoveSuspension(susTravIndex, -lastFrameTraverse, susTrav);
+				MoveSuspension(susTravIndex, -fLastFrameTraverse, susTrav);
 				if (objectCount > 0)
 					StartCoroutine("WaitAndStart");
 				else
@@ -85,35 +89,39 @@ namespace KerbalFoundries
 		
 		public void Update()
 		{
-			if (!isReady)
+			if (!isReady || isPaused)
 				return;
-			float suspensionMovement = 0f;
-			float frameTraverse = lastFrameTraverse;
+			
+			float fSuspensionMovement = 0f;
+			float fFrameTraverse = fLastFrameTraverse;
+			float fTraverse;
+			
+			bool isGrounded;
 			
 			for (int i = 0; i < objectCount; i++)
 			{
-				float traverse = 0f;
+				fTraverse = 0f;
 				WheelHit hit;
-                
-				bool grounded = colliders[i].GetGroundHit(out hit);
-				if (grounded)
+				
+				isGrounded = colliders[i].GetGroundHit(out hit);
+				if (isGrounded)
 				{
-					traverse = (-colliders[i].transform.InverseTransformPoint(hit.point).y - (colliders[i].radius)) * tweakScaleCorrector;
-					if (traverse > (colliders[i].suspensionDistance * tweakScaleCorrector))
-                        traverse = colliders[i].suspensionDistance * tweakScaleCorrector;
-					else if (traverse < -0.01f)
-                        traverse = 0f;
+					fTraverse = (-colliders[i].transform.InverseTransformPoint(hit.point).y - (colliders[i].radius)) * tweakScaleCorrector;
+					if (fTraverse > (colliders[i].suspensionDistance * tweakScaleCorrector))
+                        fTraverse = colliders[i].suspensionDistance * tweakScaleCorrector;
+					else if (fTraverse < -0.01f)
+                        fTraverse = 0f;
 				}
 				else
-					traverse = colliders[i].suspensionDistance * tweakScaleCorrector;
+					fTraverse = colliders[i].suspensionDistance * tweakScaleCorrector;
 				
-				suspensionMovement += traverse; 
+				fSuspensionMovement += fTraverse; 
 			}
 			
-			frameTraverse = suspensionMovement / objectCount;
-			lastFrameTraverse = frameTraverse;
+			fFrameTraverse = fSuspensionMovement / objectCount;
+			fLastFrameTraverse = fFrameTraverse;
 			susTrav.localPosition = initialPosition;
-			MoveSuspension(susTravIndex, -frameTraverse, susTrav);
+			MoveSuspension(susTravIndex, -fFrameTraverse, susTrav);
 		}
 		
 		public static void MoveSuspension(int index, float movement, Transform _movedObject)
@@ -125,18 +133,21 @@ namespace KerbalFoundries
 		
 		public void OnPause()
 		{
-			isReady = false;
+			if (!isPaused)
+				isPaused = true;
 		}
 		
 		public void OnUnPause()
 		{
-			isReady = true;
+			if (isPaused)
+				isPaused = false;
 		}
 		
 		public void OnDestroy()
 		{
-			GameEvents.onGamePause.Remove(new EventVoid.OnEvent(OnPause));
-			GameEvents.onGameUnpause.Remove(new EventVoid.OnEvent(OnUnPause));
+			isPaused = false;
+			GameEvents.onGamePause.Remove(OnPause);
+			GameEvents.onGameUnpause.Remove(OnUnPause);
 		}
 	}
 }

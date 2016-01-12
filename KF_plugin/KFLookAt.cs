@@ -15,32 +15,31 @@ namespace KerbalFoundries
 		public string rotatorsName;
 		[KSPField]
 		public bool activeEditor;
-
+		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFLookAt");
 		
 		readonly List<Transform> rotators = new List<Transform>();
 		readonly List<Transform> targets = new List<Transform>();
-
-		string[] rotatorList;
-		string[] targetList;
-
+		
+		string[] rotatorList, targetList;
+		// string[] targetList;
+		
 		int objectCount;
-
 		bool countAgrees;
-
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
-
+			
 			rotatorList = rotatorsName.Split(new[] { ',', ' ', '|' }, StringSplitOptions.RemoveEmptyEntries); //Thanks, Mihara!
 			targetList = targetName.Split(new[] { ',', ' ', '|' }, StringSplitOptions.RemoveEmptyEntries);
-
-			if ((HighLogic.LoadedSceneIsEditor && activeEditor) || (HighLogic.LoadedSceneIsFlight && !Equals(vessel.vesselType, VesselType.Debris) && vessel.parts.Count > 1))
+			
+			if ((HighLogic.LoadedSceneIsEditor && activeEditor) || (HighLogic.LoadedSceneIsFlight && (!Equals(vessel.vesselType, VesselType.Debris) || !Equals(vessel.vesselType, VesselType.EVA))))
 				StartCoroutine(Setup());
 		}
-
+		
 		public void SetupObjects()
 		{
 			#if DEBUG
@@ -68,35 +67,39 @@ namespace KerbalFoundries
 			objectCount = rotators.Count();
 			countAgrees |= Equals(objectCount, targets.Count());
 		}
-
+		
 		IEnumerator Setup()
 		{
 			yield return null;
-
+			
 			SetupObjects();
 			if (countAgrees)
 				StartCoroutine(Rotator());
 			yield break;
 		}
-
+		
 		// disable once FunctionNeverReturns
 		IEnumerator Rotator()
 		{
+			Vector3 vectorBetween, lookAtVector, vectorProject, normalvectorY;
+			// Vector3 lookAtVector;
+			// Vector3 vectorProject;
+			// Vector3 normalvectorY;
 			while (true)
 			{
 				for (int i = 0; i < objectCount; i++)
 				{
-					Vector3 vectorBetween = targets[i].position - rotators[i].position;
-					Vector3 lookAtVector = rotators[i].transform.forward;
-					Vector3 vectorProject = vectorBetween - (rotators[i].transform.right) * Vector3.Dot(vectorBetween, rotators[i].transform.right);
+					vectorBetween = targets[i].position - rotators[i].position;
+					lookAtVector = rotators[i].transform.forward;
+					vectorProject = vectorBetween - (rotators[i].transform.right) * Vector3.Dot(vectorBetween, rotators[i].transform.right);
                     
 					float rotateAngle = Mathf.Acos(Vector3.Dot(lookAtVector, vectorProject) / Mathf.Sqrt(Mathf.Pow(lookAtVector.magnitude, 2f) * Mathf.Pow(vectorProject.magnitude, 2f))) * Mathf.Rad2Deg;
-
-					Vector3 normalvectorY = Vector3.Cross(lookAtVector, vectorProject);
-
+					
+					normalvectorY = Vector3.Cross(lookAtVector, vectorProject);
+					
 					if (Vector3.Dot(rotators[i].transform.up, vectorProject) > 0.0f)
 						rotateAngle *= -1f;
-
+					
 					if (!float.IsNaN(rotateAngle))
 						rotators[i].Rotate(Vector3.right, rotateAngle);
 				}

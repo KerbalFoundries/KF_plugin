@@ -14,10 +14,10 @@ namespace KerbalFoundries
 	{
 		// disable ConvertToConstant.Local
 		
-		public float colliderHeight = -2.5f;
+		public float fColliderHeight = -2.5f;
 		GameObject _collider;
 		
-		float triggerDistance = 25f;
+		float fTriggerDistance = 25f;
 		
 		Vessel _vessel;
 		Vector3 boxSize = new Vector3(300f, .5f, 300f);
@@ -41,7 +41,7 @@ namespace KerbalFoundries
 			waterSliderSurface = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			waterSliderSurface.transform.parent = _collider.transform;
 			waterSliderSurface.transform.localScale = boxSize;
-			waterSliderSurface.renderer.enabled = KFPersistenceManager.debugIsWaterColliderVisible;
+			waterSliderSurface.renderer.enabled = KFPersistenceManager.isWaterColliderVisible;
 			
 			var box = (BoxCollider)_collider.AddComponent("BoxCollider");
 			box.size = boxSize;
@@ -57,7 +57,7 @@ namespace KerbalFoundries
 		void UpdatePosition()
 		{
 			Vector3d oceanNormal = _vessel.mainBody.GetSurfaceNVector(_vessel.latitude, _vessel.longitude);
-			Vector3 newPosition = (_vessel.ReferenceTransform.position - oceanNormal * (FlightGlobals.getAltitudeAtPos(_vessel.ReferenceTransform.position) - colliderHeight));
+			Vector3 newPosition = (_vessel.ReferenceTransform.position - oceanNormal * (FlightGlobals.getAltitudeAtPos(_vessel.ReferenceTransform.position) - fColliderHeight));
 			_collider.rigidbody.position = newPosition;
 			_collider.rigidbody.rotation = Quaternion.LookRotation(oceanNormal) * Quaternion.AngleAxis(90f, Vector3.right);
 		}
@@ -66,11 +66,11 @@ namespace KerbalFoundries
 		{
 			if (!isReady)
 				return;
-			if (Vector3.Distance(_collider.transform.position, _vessel.transform.position) > triggerDistance)
+			if (Vector3.Distance(_collider.transform.position, _vessel.transform.position) > fTriggerDistance)
 				UpdatePosition();
 			
-			colliderHeight = Mathf.Clamp((colliderHeight -= 0.1f), -10, 2.5f);
-			waterSliderSurface.renderer.enabled = KFPersistenceManager.debugIsWaterColliderVisible;
+			fColliderHeight = Mathf.Clamp((fColliderHeight -= 0.1f), -10, 2.5f);
+			waterSliderSurface.renderer.enabled = KFPersistenceManager.isWaterColliderVisible;
 		}
 	}
 }

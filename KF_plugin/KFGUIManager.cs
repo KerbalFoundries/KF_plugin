@@ -12,25 +12,25 @@ namespace KerbalFoundries
 		// Found in another mod that making appButton static could keep it
 		//  from loading multiple instances of itself.
 		static ApplicationLauncherButton appButton;
-		static Texture2D appTextureGrey;
-		static Texture2D appTextureColor;
+		static Texture2D appTextureGrey, appTextureColor;
+		// static Texture2D appTextureColor;
 		
 		// Icon Constants
-		const string strIconBasePath = "KerbalFoundries/Assets";
-		const string strIconGrey = "KFIconGrey";
-		const string strIconColor = "KFIconColor";
+		const string ICONBASEPATH = "KerbalFoundries/Assets";
+		const string ICONGREY = "KFIconGrey";
+		const string ICONCOLOR = "KFIconColor";
 		
 		// GUI height constants
-		const float titleHeight = 12f;
-		const float toggleHeight = 24f;
-		const float sliderHeight = 16f;
-		const float spacerHeight = 8f;
-		const float labelHeight = 24f;
-		const float endHeight = 8f;
+		const float TITLEHEIGHT = 12f;
+		const float TOGGLEHEIGHT = 24f;
+		const float SLIDERHEIGHT = 16f;
+		const float SPACERHEIGHT = 8f;
+		const float LABELHEIGHT = 24f;
+		const float ENDHEIGHT = 8f;
 		
 		// GUI Constants
 		public Rect settingsRect;
-		const int GUI_ID = 1200;
+		const int GUI_ID = 1222;
 		
 		// Boolean for the visible state of the settings GUI.
 		public static bool isGUIEnabled;
@@ -49,10 +49,13 @@ namespace KerbalFoundries
 		/// </remarks>
 		void Awake()
 		{
-			DontDestroyOnLoad(this); // makes sure this MonoBehavior doesn't get destroyed on game scene switch.
-			
-			GameEvents.onGUIApplicationLauncherReady.Add(OnGUIReady);
-			GameEvents.onGUIApplicationLauncherUnreadifying.Add(OnGUIUnready);
+			if (KFPersistenceManager.isGUIEnabled)
+			{
+				DontDestroyOnLoad(this); // makes sure this MonoBehavior doesn't get destroyed on game scene switch.
+				
+				GameEvents.onGUIApplicationLauncherReady.Add(OnGUIReady);
+				GameEvents.onGUIApplicationLauncherUnreadifying.Add(OnGUIUnready);
+			}
 		}
 		
 		/// <summary>
@@ -61,11 +64,14 @@ namespace KerbalFoundries
 		/// <param name="data"></param>
 		void OnGUIUnready(GameScenes data)
 		{
-			#if DEBUG
-            KFLog.Log("OnGUIUnready()");
-			#endif
-			
-			DestroyAppButton();
+			if (KFPersistenceManager.isGUIEnabled)
+			{
+				#if DEBUG
+            	KFLog.Log("OnGUIUnready()");
+				#endif
+				
+				DestroyAppButton();
+			}
 		}
 		
 		/// <summary>
@@ -73,12 +79,15 @@ namespace KerbalFoundries
 		/// </summary>
 		void OnGUIReady()
 		{
-			#if DEBUG
-            KFLog.Log("OnGUIReady()");
-			#endif
-			
-			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
-				SetupAppButton();
+			if (KFPersistenceManager.isGUIEnabled)
+			{
+				#if DEBUG
+            	KFLog.Log("OnGUIReady()");
+				#endif
+				
+				if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor || Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
+					SetupAppButton();
+			}
 		}
 		
 		#endregion MonoBehavior life cycle events
@@ -90,11 +99,11 @@ namespace KerbalFoundries
 		{
 			// We only need to retrieve the textures once
 			if (Equals(appTextureGrey, null))
-				appTextureGrey = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconGrey), false);
-
+				appTextureGrey = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", ICONBASEPATH, ICONGREY), false);
+			
 			if (Equals(appTextureColor, null))
-				appTextureColor = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", strIconBasePath, strIconColor), false);
-
+				appTextureColor = GameDatabase.Instance.GetTexture(string.Format("{0}/{1}", ICONBASEPATH, ICONCOLOR), false);
+			
 			appButton = ApplicationLauncher.Instance.AddModApplication(onTrue, onFalse, onHover, onNotHover, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.VAB, appTextureGrey);
 		}
 		
@@ -144,7 +153,7 @@ namespace KerbalFoundries
 		/// <summary>Called by Unity when it's time to draw the GUI.</summary>
 		void OnGUI()
 		{
-			if (isGUIEnabled)
+			if (isGUIEnabled && KFPersistenceManager.isGUIEnabled)
 			{
 				/* Depending on the scene the cfg window displays 1, 2 or all 3 toggles.
                  * Each toggle needs a height of 24 units (= pixels?) and there needs to
@@ -189,19 +198,22 @@ namespace KerbalFoundries
 				if (HighLogic.LoadedSceneIsEditor)
 				{
 					windowHeight = 48f; // assume 1 title, 1 toggle, and 1 end. (Editor Only)
+					
 					// In the editor the toolbar is at the bottom of the screen, so let's move it down
 					windowTop = Screen.height - 42f - windowHeight; // 42f is the height of the toolbar buttons + 2 units of space
 				}
                 
 				if (Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
-				{
 					windowHeight = 192f; // assume 1 top, 4 toggles, 1 slider. 1 label, 4 spacers, and 1 end. (Space Center Only)
-				}
 				
 				if (KFPersistenceManager.isDebugEnabled && Equals(HighLogic.LoadedScene, GameScenes.FLIGHT))
-					windowHeight += 32f; // Add a spacerHeight and toggleHeight for every new option available in the debug menu.
+				{ // Add the height of any additional element you add to the debug menu, plus a spacer height for each element.
+					windowHeight += 32f;
+					if (KFPersistenceManager.isDustEnabled && KFPersistenceManager.isDustCameraEnabled)
+						windowHeight += 48f; // Should be 80f
+				}
 				
-				// shift the window to the left until the left window border has the same x value as the button sprite or at least so far it won't clip out the edge of the monitor
+				// Shift the window to the left until the left window border has the same x value as the button sprite or at least so far it won't clip out the edge of the monitor
 				windowLeft = Screen.width + Mathf.Min(appButton.sprite.TopLeft.x - 260, windowLeft);
 				
 				settingsRect = new Rect(windowLeft, windowTop, 256f, windowHeight);
@@ -215,7 +227,12 @@ namespace KerbalFoundries
 		{
 			GUI.skin = HighLogic.Skin;
 			
-			float endHeight = 240f;
+			float localEndHeight = 240f; // Initial setting only, is overridden for each separate layout.
+			
+			const float LOCALWIDTH = 240f;
+			const float DEBUGWIDTH = 234f;
+			const float LOCALLEFT = 8f;
+			const float DEBUGLEFT = 14f;
 			
 			// Reference:
 			//	titleHeight = 16f;
@@ -229,58 +246,65 @@ namespace KerbalFoundries
 			if (HighLogic.LoadedSceneIsEditor) // No longer combined with space center. Was causing headaches when trying to position the elements for that scene and causing the editor window to be too high.
 			{
 				// Non-element title (top: 0)
-				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 16f, 240f, toggleHeight), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
+				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(LOCALLEFT, 16f, LOCALWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
 				// Non-element spacer (top: 40)
-				//GUI.Label(new Rect(8f, 48f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f)));
-				//KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 72f, 240f, sliderHeight), Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f), 5f, 20f);
+				//GUI.Label(new Rect(localLeft, 48f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f)));
+				//KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(localLeft, 72f, 240f, sliderHeight), Extensions.RoundToNearestValue(KFPersistenceManager.suspensionIncrement, 5f), 5f, 20f);
 				// Non-element end (top: 88)
-				endHeight = 48f; // end top height + spacerHeight.
+				localEndHeight = 48f; // end top height + spacerHeight.
 			}
 			
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				// Non-element title (top: 0)
-				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 16f, 240f, toggleHeight), KFPersistenceManager.isDustEnabled, "Enable DustFX");
+				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(LOCALLEFT, 16f, LOCALWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isDustEnabled, "Enable DustFX");
 				// Non-element spacer (top: 40)
-				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 48f, 240f, toggleHeight), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(LOCALLEFT, 48f, LOCALWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
 				// Non-element spacer (top: 72)
-				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 80f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
+				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(LOCALLEFT, 80f, LOCALWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
 				// Non-element spacer (top: 104)
-				GUI.Label(new Rect(8f, 112f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f)));
-				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 136f, 240f, sliderHeight), KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f), 0f, 3f);
+				GUI.Label(new Rect(LOCALLEFT, 112f, LOCALWIDTH, LABELHEIGHT), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f)));
+				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(LOCALLEFT, 136f, LOCALWIDTH, SLIDERHEIGHT), KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f), 0f, 3f);
 				// Non-element spacer (top: 152)
-				GUI.Label(new Rect(8f, 160f, 240f, labelHeight), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", KFPersistenceManager.suspensionIncrement.RoundToNearestValue(5f)));
-				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(8f, 184f, 240f, sliderHeight), KFPersistenceManager.suspensionIncrement.RoundToNearestValue(5f), 5f, 20f);
+				GUI.Label(new Rect(LOCALLEFT, 160f, LOCALWIDTH, LABELHEIGHT), string.Format("<color=#ffffffff>Suspension Increment:</color> {0}", KFPersistenceManager.suspensionIncrement.RoundToNearestValue(5f)));
+				KFPersistenceManager.suspensionIncrement = GUI.HorizontalSlider(new Rect(LOCALLEFT, 184f, LOCALWIDTH, SLIDERHEIGHT), KFPersistenceManager.suspensionIncrement.RoundToNearestValue(5f), 5f, 20f);
 				// Non-element spacer (top: 200)
-				KFPersistenceManager.isDebugEnabled = GUI.Toggle(new Rect(8f, 208f, 240f, toggleHeight), KFPersistenceManager.isDebugEnabled, "Enable Debug Options");
+				KFPersistenceManager.isDebugEnabled = GUI.Toggle(new Rect(LOCALLEFT, 208f, LOCALWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isDebugEnabled, "Enable Debug Options");
 				// Non-element end (top: 232)
-				endHeight = 240f; // end top height + spacerHeight.
+				localEndHeight = LOCALWIDTH; // end top height + spacerHeight.
 			}
 			
 			if (Equals(HighLogic.LoadedScene, GameScenes.SPACECENTER))
 			{
 				// Non-element title (top: 0)
-				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(8f, 16f, 240f, toggleHeight), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
+				KFPersistenceManager.isMarkerEnabled = GUI.Toggle(new Rect(LOCALLEFT, 16f, LOCALWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isMarkerEnabled, "Enable Orientation Markers");
 				// Non-element spacer (top: 40)
-				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(8f, 48f, 240f, toggleHeight), KFPersistenceManager.isDustEnabled, "Enable DustFX");
+				KFPersistenceManager.isDustEnabled = GUI.Toggle(new Rect(LOCALLEFT, 48f, LOCALWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isDustEnabled, "Enable DustFX");
 				// Non-element spacer (top: 72)
-				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(8f, 80f, 240f, toggleHeight), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
+				KFPersistenceManager.isDustCameraEnabled = GUI.Toggle(new Rect(LOCALLEFT, 80f, LOCALWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isDustCameraEnabled, "Enable DustFX Camera");
 				// Non-element spacer (top: 104)
-				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(8f, 112f, 240f, toggleHeight), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
+				KFPersistenceManager.isRepLightEnabled = GUI.Toggle(new Rect(LOCALLEFT, 112f, LOCALWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isRepLightEnabled, "Enable Repulsor Lights");
 				// Non-element spacer (top: 136)
-				GUI.Label(new Rect(8f, 144f, 240f, labelHeight), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f)));
-				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(8f, 168f, 240f, sliderHeight), KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f), 0f, 3f);
+				GUI.Label(new Rect(LOCALLEFT, 144f, LOCALWIDTH, LABELHEIGHT), string.Format("<color=#ffffffff>Dust Amount:</color> {0}", KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f)));
+				KFPersistenceManager.dustAmount = GUI.HorizontalSlider(new Rect(LOCALLEFT, 168f, LOCALWIDTH, SLIDERHEIGHT), KFPersistenceManager.dustAmount.RoundToNearestValue(0.25f), 0f, 3f);
 				// Non-element end (top: 184)
-				endHeight = 192f; // end top height + spacerHeight.
+				localEndHeight = 192f; // end top height + spacerHeight.
 			}
 			
 			if (KFPersistenceManager.isDebugEnabled && Equals(HighLogic.LoadedScene, GameScenes.FLIGHT)) // Only during flight for now.
 			{
 				// Add debug option here and indent them by 6, while shortening them by 6 as well.
-				KFPersistenceManager.debugIsWaterColliderVisible = GUI.Toggle(new Rect(14f, endHeight, 234f, toggleHeight), KFPersistenceManager.debugIsWaterColliderVisible, "Waterslider Visible");
+				KFPersistenceManager.isWaterColliderVisible = GUI.Toggle(new Rect(DEBUGLEFT, localEndHeight, DEBUGWIDTH, TOGGLEHEIGHT), KFPersistenceManager.isWaterColliderVisible, "Waterslider Visible");
+				if (KFPersistenceManager.isDustEnabled && KFPersistenceManager.isDustCameraEnabled)
+				{
+					GUI.Label(new Rect(DEBUGLEFT, (localEndHeight + SPACERHEIGHT), DEBUGWIDTH, LABELHEIGHT), string.Format("<color=#ffffffff>Camera Resolution:</color> {0}", Mathf.Clamp(KFPersistenceManager.cameraRes, 2f, 10f)));
+					KFPersistenceManager.cameraRes = GUI.HorizontalSlider(new Rect(DEBUGLEFT, (localEndHeight + SPACERHEIGHT + LABELHEIGHT), DEBUGWIDTH, SLIDERHEIGHT), Mathf.Clamp(KFPersistenceManager.cameraRes, 2f, 10f), 2f, 10f);
+					GUI.Label(new Rect(DEBUGLEFT, (localEndHeight + (SPACERHEIGHT * 2f) + LABELHEIGHT + SLIDERHEIGHT), DEBUGWIDTH, LABELHEIGHT), string.Format("<color=#ffffffff>Camera Framerate:</color> {0}", Mathf.Clamp(KFPersistenceManager.cameraFramerate, 5f, 20f)));
+					KFPersistenceManager.cameraFramerate = GUI.HorizontalSlider(new Rect(DEBUGLEFT, (localEndHeight + (SPACERHEIGHT * 2f) + (LABELHEIGHT * 2f) + SLIDERHEIGHT), DEBUGWIDTH, SLIDERHEIGHT), Mathf.Clamp(KFPersistenceManager.cameraFramerate, 5f, 20f), 5f, 20f);
+				}
 			}
-			else if (!KFPersistenceManager.isDebugEnabled) // Add an entry for each debug toggle option so that they will disable themselves when debug mode is disabled.
-				KFPersistenceManager.debugIsWaterColliderVisible = false;
+			else if (!KFPersistenceManager.isDebugEnabled) // Add an entry for each debug toggle option so that they will disable themselves when debug mode is disabled. Sliders do not need to be reset, however.
+				KFPersistenceManager.isWaterColliderVisible = false;
 		}
 		
 		#endregion GUI Setup

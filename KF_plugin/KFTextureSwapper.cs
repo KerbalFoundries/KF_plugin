@@ -91,7 +91,7 @@ namespace KerbalFoundries.TextureTools
 			foreach (Transform current in list)
 				Debug.Log(string.Format("object: {0}", current.name));
 		}
-
+		
 		List<Transform> ListChildren(Transform a)
 		{
 			var list = new List<Transform>();
@@ -102,7 +102,7 @@ namespace KerbalFoundries.TextureTools
 			}
 			return list;
 		}
-
+		
 		[KSPEvent(guiActive = false, guiActiveEditor = true, guiName = "Next Texture")]
 		public void nextTextureEvent()
 		{
@@ -111,7 +111,7 @@ namespace KerbalFoundries.TextureTools
 				selectedTexture = 0;
 			useTextureAll(true);
 		}
-
+		
 		[KSPEvent(guiActive = false, guiActiveEditor = true, guiName = "Previous Texture")]
 		public void previousTextureEvent()
 		{
@@ -120,13 +120,13 @@ namespace KerbalFoundries.TextureTools
 				selectedTexture = Mathf.Max(texList.Count - 1, mapList.Count - 1);
 			useTextureAll(true);
 		}
-
+		
 		[KSPEvent(guiActiveUnfocused = true, unfocusedRange = 5f, guiActive = false, guiActiveEditor = false, guiName = "Repaint")]
 		public void nextTextureEVAEvent()
 		{
 			nextTextureEvent();
 		}
-
+		
 		public void useTextureAll(bool calledByPlayer)
 		{
 			applyTexToPart(calledByPlayer);
@@ -145,7 +145,7 @@ namespace KerbalFoundries.TextureTools
 				}
 			}
 		}
-
+		
 		void applyTexToPart(bool calledByPlayer)
 		{
 			initializeData();
@@ -155,7 +155,7 @@ namespace KerbalFoundries.TextureTools
 					useTextureOrMap(current2);
 			}
 		}
-
+		
 		public void useTextureOrMap(Material targetMat)
 		{
 			if (!Equals(targetMat, null))
@@ -166,7 +166,7 @@ namespace KerbalFoundries.TextureTools
 			}
 			debug.debugMessage("No target material in object.");
 		}
-
+		
 		void useMap(Material targetMat)
 		{
 			debug.debugMessage(string.Concat(new object[] { "maplist count: ", mapList.Count, ", selectedTexture: ", selectedTexture, ", texlist Count: ", texList.Count }));
@@ -199,7 +199,7 @@ namespace KerbalFoundries.TextureTools
 				debug.debugMessage(string.Concat(new object[] { "map ", i, ": ", mapList[i] }));
 			return;
 		}
-
+		
 		void useTexture(Material targetMat)
 		{
 			if (texList.Count <= selectedTexture)
@@ -219,7 +219,7 @@ namespace KerbalFoundries.TextureTools
 			}
 			currentTextureName = textureDisplayList[selectedTexture];
 		}
-
+		
 		public override string GetInfo()
 		{
 			if (showInfo)
@@ -243,7 +243,7 @@ namespace KerbalFoundries.TextureTools
 			}
 			return string.Empty;
 		}
-
+		
 		string getTextureDisplayName(string longName)
 		{
 			string[] array = longName.Split(new char[]
@@ -252,7 +252,7 @@ namespace KerbalFoundries.TextureTools
 			});
 			return array[array.Length - 1];
 		}
-
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			initializeData();
@@ -270,7 +270,7 @@ namespace KerbalFoundries.TextureTools
 			Events["previousTextureEvent"].guiName = prevButtonText;
 			Fields["currentTextureName"].guiName = statusText;
 		}
-
+		
 		void initializeData()
 		{
 			if (initialized)

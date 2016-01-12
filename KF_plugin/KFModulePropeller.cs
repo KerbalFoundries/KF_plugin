@@ -33,9 +33,9 @@ namespace KerbalFoundries
 			base.OnUpdate();
 			if (part.Splashed)
 			{
-				float forwardPropellorForce = _KFModuleWheel.directionCorrector * propellerForce * vessel.ctrlState.wheelThrottle;
-				float turningPropellorForce = (propellerForce / 3f) * vessel.ctrlState.wheelSteer;
-				part.rigidbody.AddForce(part.GetReferenceTransform().forward * (forwardPropellorForce - turningPropellorForce));
+				float fForwardPropellorForce = _KFModuleWheel.directionCorrector * propellerForce * vessel.ctrlState.wheelThrottle;
+				float fTurningPropellorForce = (propellerForce / 3f) * vessel.ctrlState.wheelSteer;
+				part.rigidbody.AddForce(part.GetReferenceTransform().forward * (fForwardPropellorForce - fTurningPropellorForce));
 			}
 		}
 	}

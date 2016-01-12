@@ -47,13 +47,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExtensionClasses\KFExtensions.cs" />
     <Compile Include="KFAPUController.cs" />
     <Compile Include="DustFX\KFDustFX.cs" />
     <Compile Include="DustFX\KFDustFXUtils.cs" />
     <Compile Include="KFAnimation.cs" />
+    <Compile Include="KFIconFix.cs" />
+    <Compile Include="KFAttractor.cs" />
     <Compile Include="KFPrecisionMode.cs" />
     <Compile Include="KFConstrain.cs" />
     <Compile Include="KFTextureAnimator.cs" />
+    <Compile Include="Rework\KFFunction.cs" />
+    <Compile Include="Rework\KFModule.cs" />
     <None Include="KFTextureSwapper.cs" />
     <Compile Include="Log\KFLog.cs" />
     <Compile Include="Log\KFLogWriter.cs" />
@@ -75,10 +80,13 @@
     <Compile Include="KFOverrideWheelCollider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="KFRepulsorWheel.cs" />
-    <Compile Include="KFExtensions.cs" />
     <Compile Include="KFVersion.cs" />
     <Compile Include="KFModuleCameraShot.cs" />
     <Compile Include="KFWheelUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ExtensionClasses" />
+    <Folder Include="Rework" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

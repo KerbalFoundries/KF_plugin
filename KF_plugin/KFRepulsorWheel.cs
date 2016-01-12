@@ -15,34 +15,33 @@ namespace KerbalFoundries
 	public class KFRepulsorWheel : PartModule
 	{
 		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Repulsor Height %"), UI_FloatRange(minValue = 0, maxValue = 100, stepIncrement = 5)]
-		public float repulsorHeight = 50;
-
-		const float replusorHeightMultiplier = 5f;
-
+		public float fRepulsorHeight = 50;
+		
+		const float REPULSORHEIGHTMULT = 5f;
+		
 		[KSPField(isPersistant = true)]
 		public bool repulsorMode;
 		
 		[KSPField]
 		public string resourceName = "ElectricCharge";
+		
 		[KSPField]
 		public float resourceConsumptionRate = 1f;
-
-		float effectPower;
-		float effectPowerMax;
+		
+		float effectPower, effectPowerMax;
 		bool lowResource;
-
+		
 		List<WheelCollider> wcList = new List<WheelCollider>();
 		List<float> wfForwardList = new List<float>();
 		List<float> susDistList = new List<float>();
 		List<float> wfSideList = new List<float>();
-
-		//ModuleWaterSlider mws;
+		
 		KFModuleWheel _moduleWheel;
 		
 		/// <summary>Logging utility.</summary>
 		/// <remarks>Call using "KFLog.log_type"</remarks>
 		readonly KFLogUtil KFLog = new KFLogUtil("KFRepulsorWheel");
-
+		
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
@@ -56,27 +55,29 @@ namespace KerbalFoundries
 					ma.Events["Toggle"].guiActiveEditor = false;
 				}
 			}
-
+			
 			if (HighLogic.LoadedSceneIsFlight)
 			{
+				#if DEBUG
 				KFLog.Log("Repulsor Wheel started");
-
+				#endif
+				
 				foreach (ModuleAnimateGeneric ma in part.FindModulesImplementing<ModuleAnimateGeneric>())
 					ma.Events["Toggle"].guiActive = false;
-
+				
 				_moduleWheel = part.GetComponentInChildren<KFModuleWheel>();
 				_moduleWheel.Events["ApplySettings"].guiActive = false;
                 
 				foreach (WheelCollider wc in part.GetComponentsInChildren<WheelCollider>())
 					wcList.Add(wc);
-
+				
 				for (int i = 0; i < wcList.Count(); i++)
 				{
 					wfForwardList.Add(wcList[i].forwardFriction.stiffness);
 					wfSideList.Add(wcList[i].sidewaysFriction.stiffness);
 					susDistList.Add(wcList[i].suspensionDistance);
 				}
-
+				
 				if (repulsorMode)
                     UpdateColliders("repulsor");
 				if (!repulsorMode)
@@ -85,25 +86,28 @@ namespace KerbalFoundries
 				KFLog.Log(string.Format("\"effectPowerMax\" = {0}", effectPowerMax));
 			}
 		}
-
+		
 		public override void OnUpdate()
 		{
 			base.OnUpdate();
+			
+			float fResourceConsumption, fRequestedResource;
+			
 			if (repulsorMode)
 			{
-				float resourceConsumption = (repulsorHeight / 2) * (1 + _moduleWheel.springRate) * Time.deltaTime * resourceConsumptionRate;
-				effectPower = resourceConsumption / effectPowerMax;
+				fResourceConsumption = (fRepulsorHeight / 2) * (1 + _moduleWheel.fSpringRate) * Time.deltaTime * resourceConsumptionRate;
+				effectPower = fResourceConsumption / effectPowerMax;
 				KFLog.Log(string.Format("\"effectPower\" = {0}", effectPower));
-
-				float requestedResource = part.RequestResource(resourceName, resourceConsumption);
-				if (requestedResource < (resourceConsumption * 0.9f))
+				
+				fRequestedResource = part.RequestResource(resourceName, fResourceConsumption);
+				if (fRequestedResource < (fResourceConsumption * 0.9f))
 				{
 					#if DEBUG
 					KFLog.Warning(string.Format("Retracting due to low \"{0}.\"", resourceName));
 					#endif
 					
 					lowResource = true;
-					repulsorHeight = 0;
+					fRepulsorHeight = 0;
 					UpdateColliders("wheel");
 					_moduleWheel.status = Equals(resourceName, "ElectricCharge") ? "Low Charge" : _moduleWheel.statusLowResource;
 				}
@@ -119,12 +123,12 @@ namespace KerbalFoundries
 			RepulsorSound();
 			effectPower = 0;
 		}
-
+		
 		public void RepulsorSound()
 		{
 			part.Effect("RepulsorEffect", effectPower);
 		}
-
+		
 		public void UpdateColliders(string mode)
 		{
 			switch (mode)
@@ -133,7 +137,7 @@ namespace KerbalFoundries
 					if (lowResource)
 						return;
 					_moduleWheel.RetractDeploy("retract");
-					_moduleWheel.currentTravel = repulsorHeight * replusorHeightMultiplier;
+					_moduleWheel.fCurrentTravel = fRepulsorHeight * REPULSORHEIGHTMULT;
 					repulsorMode = true;
 					for (int i = 0; i < wcList.Count(); i++)
 					{
@@ -146,8 +150,8 @@ namespace KerbalFoundries
 					}
 					break;
 				case "wheel":
-					_moduleWheel.currentTravel = _moduleWheel.rideHeight;
-					_moduleWheel.smoothedTravel = _moduleWheel.currentTravel;
+					_moduleWheel.fCurrentTravel = _moduleWheel.fRideHeight;
+					_moduleWheel.fSmoothedTravel = _moduleWheel.fCurrentTravel;
 					_moduleWheel.RetractDeploy("deploy");
 					repulsorMode = false;
 					for (int i = 0; i < wcList.Count(); i++)
@@ -162,22 +166,22 @@ namespace KerbalFoundries
 					break;
 			}
 		}
-
+		
 		[KSPEvent(guiActive = true, guiName = "Apply Repulsor Settings", active = true)]
 		public void ApplySettings()
 		{
 			foreach (KFModuleWheel mt in vessel.FindPartModulesImplementing<KFModuleWheel>())
 			{
-				if (!Equals(_moduleWheel.groupNumber, 0) && Equals(_moduleWheel.groupNumber, mt.groupNumber) && repulsorMode)
+				if (!Equals(_moduleWheel.fGroupNumber, 0) && Equals(_moduleWheel.fGroupNumber, mt.fGroupNumber) && repulsorMode)
 				{
-					_moduleWheel.currentTravel = repulsorHeight * replusorHeightMultiplier;
-					mt.currentTravel = repulsorHeight * replusorHeightMultiplier;
+					_moduleWheel.fCurrentTravel = fRepulsorHeight * REPULSORHEIGHTMULT;
+					mt.fCurrentTravel = fRepulsorHeight * REPULSORHEIGHTMULT;
 				}
 			}
 			foreach (KFRepulsorWheel rw in vessel.FindPartModulesImplementing<KFRepulsorWheel>())
-				rw.repulsorHeight = repulsorHeight;
+				rw.fRepulsorHeight = fRepulsorHeight;
 		}
-
+		
 		[KSPAction("Toggle Modes")]
 		public void AGToggleDeployed(KSPActionParam param)
 		{
@@ -186,7 +190,7 @@ namespace KerbalFoundries
 			else
 				toRepulsor(param);
 		}
-       
+		
 		public void PlayAnimation()
 		{
 			ModuleAnimateGeneric myAnimation = part.FindModulesImplementing<ModuleAnimateGeneric>().SingleOrDefault();
